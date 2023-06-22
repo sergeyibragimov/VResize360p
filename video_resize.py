@@ -5624,7 +5624,10 @@ async def process_move(file1: str = "", file2: str = "", is_copy: bool = False, 
 
 		elif all((file1.split("\\")[-1] == file2.split("\\")[-1], any((file1[0] < file2[0], file2[0] >= file1[0])), file1 != file2, is_copy == False)) and equal_fsize == True:
 			os.remove(file1)
-			write_log("debug need_delete[equal]", ";".join([file1, file2, str(equal_fsize)]))
+			write_log("debug need_delete[equal][move]", ";".join([file1, file2, str(equal_fsize), str(is_copy)])) # %s/%s/%s/%s
+
+		elif all((file1.split("\\")[-1] == file2.split("\\")[-1], any((file1[0] < file2[0], file2[0] >= file1[0])), file1 != file2, is_copy == True)) and equal_fsize == True:
+			write_log("debug need_delete[equal][copy]", ";".join([file1, file2, str(equal_fsize), str(is_copy)])) # %s/%s/%s/%s
 
 		'''
 		else:
