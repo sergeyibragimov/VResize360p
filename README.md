@@ -1,1 +1,1 @@
-"# My script to convert 360p video if big by size for slow pc or hardware" 
+"# My video tools (Resize any big video to 360p / Trim video script need debug )"
