@@ -352,16 +352,8 @@ async def dict_filter(dct: dict = {}, sort_index: int = -1) -> dict: # 1
 		raise err
 		return []
 
-	# if not dct:
-		# return [] # return_null_if_dict_null
-
 	dct_new: dict = {}
 	lst_new: list = [] # default_list
-
-	# for k, v in dct.items():
-		# if all((os.path.exists(k), k.split(".")[-1])): # exists / +extension
-			# tup = (k, v) # fullfilename / some_data
-			# lst_new.append(tup)
 
 	lst_new = [(k, v) for k, v in dct.items() if all((os.path.exists(k), k.split(".")[-1]))]
 
@@ -396,12 +388,6 @@ async def compare_list(lst: list = [], is_le: bool = False, is_ge: bool = False,
 		logging.warning("Пустой список и другой формат списка @compare_list/lst")
 		raise err
 		return False
-
-	# try:
-		# if any((not lst, not isinstance(lst, list))):
-			# return False # False(if_null)
-	# except:
-		# return False # if_error
 
 	if is_le:
 		return len(set(lst)) <= len(lst) # True(if_less_or_equal) # LE
@@ -490,9 +476,6 @@ async def month_to_seasdays(month: int = 0, year: int = 0) -> tuple:
 		logging.warning("Ошибка индекса месяца @month_to_seasdays/month")
 		raise err
 		return ("", 0)
-
-	# if any((month < 0, month > 12)):
-		# return ("", 0) # month_name, days_in_month
 
 	seas: str = ""
 	days: int = 0
@@ -614,10 +597,7 @@ def ff_to_days(ff: str = "", period: int = 30, is_dir: bool = False, is_less: bo
 	except AssertionError: # as err: # stay_or_hide
 		logging.warning("Файл не существует @ff_to_days/ff")
 		# raise err
-		return ("", -1, None)
-
-	# if not ff or not os.path.exists(ff):
-		# return ("", -1, None) # null_filename / bad_status / unknown_type
+		return ("", -1, None) # null_filename / bad_status / unknown_type
 
 	if is_any:
 		is_less = False
@@ -900,9 +880,6 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 								raise err
 								return no_prot_ext
 
-							# if not line:
-								# return no_prot_ext
-
 							parse_regex = re.compile(r"http(.*)\.mp4", re.I)
 
 							filename = line # "http://data11-cdn.datalock.ru/fi2lm/7d2b2f94011f33cd73b7dbf603374c89/7f_The.Hundred.S07E11.720p.rus.LostFilm.TV.a1.14.08.20.mp4"
@@ -1061,10 +1038,6 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 								fbsf.writelines("%s\n" % t.strip() for t in filter(lambda x: any((x[0] == x[0].upper(), x[0].isnumeric())), tuple(tmp)))
 
 						# '''
-
-						# if all((fsf, fsf[-1])):
-							# print(Style.BRIGHT + Fore.WHITE + "Описание и файлы найдены в папке", Style.BRIGHT + Fore.CYAN + "%s" % fsf, end = "\n") # is_color's
-							# write_log("debug fsf[is_found][ok]", "%s" % fsf) # is_found
 
 					if is_not_found: # desc(0), files(0) # create_null(any_time)
 						try:
@@ -1297,8 +1270,6 @@ if all((filter_top_list, len(somebase_dict) >= 0)):
 		with open(files_base["backup"], "w", encoding="utf-8") as bjf: # try_save_new_backup
 			bjf.writelines("%s\n" % ffnb.strip() for ffnb in filter(lambda x: x, tuple(filter_for_new_backup))) # not_null(current_jobs)
 
-# if all((rus_list, eng_list, all_list)): # hide_counters
-	# print("%d russian" % len(rus_list), "%d english" % len(eng_list), "%d total" % len(all_list)) # is_color
 
 async def memory_usage_psutil(proc_id) -> any:
 	# return the memory usage in percentage like top
@@ -1405,9 +1376,6 @@ def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging:
 		# raise err # have_null
 		return
 
-	# if any((not desc, not txt)):
-		# return
-
 	global log_dict
 
 	try:
@@ -1457,9 +1425,6 @@ def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging:
 				raise err
 				continue
 
-			# if len(lp.strip()) == 0:
-				# continue
-
 			if not lp in check_log:
 				check_log.add(lp)
 
@@ -1491,9 +1456,6 @@ async def mp4_to_m3u8(filename: str = "", is_run: bool = False, is_stay: bool = 
 		logging.warning("Файл отсутствует @mp4_to_m3u8/%s" % filename)
 		raise err
 		return (False, "", "no_run")
-
-	# if not filename or not os.path.exists(filename):
-		# return (False, "", "no_run")
 
 	try:
 		folder = "\\".join(filename.split("\\")[0:-1]).strip()
@@ -1678,7 +1640,7 @@ async def ip_to_mac(ip: str = "") -> tuple: # single_by_async
 	try:
 		# eth_mac = get_mac_address(interface="eth0")
 		# win_mac = get_mac_address(interface="Ethernet 3")
-		ip_mac = get_mac_address(ip=ip) # "192.168.0.1" # default
+		ip_mac = get_mac_address(ip=ip, network_request=True) # "192.168.0.1" # default
 		# ip6_mac = get_mac_address(ip6="::1")
 		# host_mac = get_mac_address(hostname="localhost") # is_need
 		# updated_mac = get_mac_address(ip="10.0.0.1", network_request=True)
@@ -1730,15 +1692,9 @@ async def hostname_and_ip() -> tuple: # get_hostname_and_ip
 		raise err
 		return ("", "")
 
-	# if any((not hostname, not IPAddr)):
-		# return ("", "")
-
 	write_log("debug hostname_and_ip", ";".join([hostname, IPAddr, str(datetime.now())])) # positive
 
 	return (hostname, IPAddr) #('SergeyPC', '192.168.1.109')
-
-	# print("Your Computer Name is:"+hostname)
-	# print("Your Computer IP Address is:"+IPAddr)
 
 
 async def current_ip() -> tuple: # get_ip_by_current_lan
@@ -1835,32 +1791,6 @@ async def ip_config():
 
 	await task # old
 
-"""
-import scapy.all as scapy # pip install -U scapy # WARNING: No libpcap provider available ! pcap won't be used
-
-def scan(ip)
-	scapy.arping(ip)
-
-scan(10.0.2.1/24)
-"""
-
-'''
-ip_str = "127.0.0.1"
-
-try:
-	ip, host = asyncio.run(current_ip()) # ip_str = ".".join(ip.split(".")[0:3]) + ".1"
-except:
-	ip = host = ""
-else:
-	if len(ip.split(".")) >= 3:
-		ip_str = ".".join(ip.split(".")[0:3]) + ".1"
-
-
-async def arp_by_ip(ip_router="/".join([ip_str, "24"])): # 192.168.1.1/24
-	# RuntimeError: Sniffing and sending packets is not available at layer 2: "winpcap" is not installed. You may use conf.L3socket orconf.L3socket6 to access layer 3
-	pass # scapy.arping(ip_router)
-'''
-
 
 def time_to_ms() -> int: # unixtime -> ms
 
@@ -1898,9 +1828,6 @@ def count_level_from_full(filename) -> int:
 		logging.warning("Файл отсуствует @count_level_from_full/%s" % filename)
 		raise err
 		return 0
-
-	# if not filename or not os.path.exists(filename):
-		# return 0
 
 	try:
 		level_count: int = len(filename.split("\\")) if filename else 0
@@ -2213,9 +2140,6 @@ def mdate_by_days(filename, period: int = 30, is_select: bool = False, is_dir: b
 		raise err
 		return None
 
-	# if not os.path.exists(filename): # not filename
-		# return None
-
 	# debug_for_folder
 	today = datetime.today()  # datetime
 	fdate = os.path.getmtime(filename)  # unixdate(file/folder)
@@ -2332,9 +2256,6 @@ async def days_by_list(lst: list = [], is_avg: bool = False): #8
 		raise err
 		return None
 
-	# if any((not lst, not isinstance(lst, list))):
-		# return None
-
 	avg_list: list = []
 	sum_days: int = 0
 	len_days: int = 0
@@ -2403,9 +2324,6 @@ def fspace(src: str = "", dst: str = "", is_Log: bool = False) -> bool: #11
 		# raise err
 		return False
 
-	# if not os.path.exists(src): # not src
-		# return False  # if_not_exists(file/folder)
-
 	try:
 		fsize: int = os.path.getsize(src)
 		dsize: int = disk_usage(dst[0] + ":\\").free
@@ -2436,9 +2354,6 @@ def split_filename(filename) -> tuple: #19
 		logging.warning("Файл отсутствует @split_filename/%s" % filename)
 		raise err
 		return ("", "")
-
-	# if not os.path.exists(filename):
-		# return ("", "")
 
 	try:
 		file_path, file_name = os.path.split(filename)
@@ -2484,16 +2399,12 @@ def MyNotify(txt: str = "", icon: str = "", sec: int = 10): #13
 		logging.warning("Файл отсутствует @MyNotify/%s" % icon)
 		raise err
 
-	# if not os.path.exists(icon):
-		# error = True
-
 	# ---- init(show) notify ----
 	try:
 		# отобразить_оповещение_в_трее
 		toaster = ToastNotifier()
 	except:
 		error = True
-	# pass
 	finally:
 		if error == False:
 			if all((txt, icon, sec)):
@@ -2677,9 +2588,6 @@ async def avg_lst(lst: list = []) -> int:  # default_list / in_arg_is_filesizes_
 		return 0
 	'''
 
-	#if any((not lst, not isinstance(lst, list))):
-		#return 0
-
 	sum_lst: int = (reduce(lambda x, y: x + y, lst))  # sum_lst = sum(lst)
 	len_lst: int = len(lst)
 
@@ -2768,9 +2676,6 @@ class Get_AR:
 			raise err
 			return (0, 0, 0)
 
-		# if any((not width, not height)):
-			# return (0, 0, 0)
-
 		"""Specify the Width To Retain the Aspect Ratio"""
 
 		if width > owidth and owidth:  # if_need_optimal_ar
@@ -2819,7 +2724,7 @@ class Get_AR:
 			return (int(owidth), int(second), round(int(owidth) / int(second), 2))  # 640, 360, 640/360
 
 		# elif width <= owidth and width:  # if_optimal_ar
-		# return (width, height, 0))
+			# return (width, height, 0))
 		else:
 			return (0, 0, 0)
 
@@ -2832,9 +2737,6 @@ class Get_AR:
 			logging.warning("Высота пустая @height_to_ar/%d/%d" % (width, height))
 			raise err
 			return (0, 0, 0)
-
-		# if any((not width, not height)):
-			# return (0, 0, 0)
 
 		"""Specify the Height To Retain the Aspect Ratio"""
 
@@ -2884,7 +2786,7 @@ class Get_AR:
 
 			return (int(second), int(oheight), round(int(second) / int(oheight), 2))  # 640, 360, 640/360
 		# elif height <= oheight and height:
-		# return (width, height, 0))
+			# return (width, height, 0))
 		else:
 			return (0, 0, 0)
 
@@ -2898,9 +2800,6 @@ class Get_AR:
 			logging.warning("Файл отствует, высота или ширина пустые @spd_ar/%s" % self.filename)
 			raise err
 			return ("", "", "")
-
-		# if not os.path.exists(self.filename) or any((not width, not height)): # not filename
-			# return ("", "", "")
 
 		# aspect ratio list(display/scale/pixel)
 
@@ -3058,7 +2957,7 @@ class Get_AR:
 				dar = str("4:3")
 
 			"""
-			if filename:  # only_with_filename
+			if filename:  # only_with_filename(ar)
 				print(f"The file %s is %sx%s with SAR = %s , PAR = %s , DAR = %s (G-spot)" % (filename, width, height, sar, par, dar))
 				write_log("debug spd[ar]", "%s [%s]" % (filename, ";".join(["sar=" % sar,"par=" % par, "dar=" % dar])))
 			"""
@@ -3088,9 +2987,6 @@ class MyMeta:
 			raise err
 			return False
 
-		# if not filename or not os.path.exists(self.filename):
-			# return False
-
 		metacmd = path_for_queue + "ffprobe.exe -v quiet -print_format json -show_format -show_streams %s > %s" % (
 			self.filename, unique_base)
 
@@ -3116,9 +3012,6 @@ class MyMeta:
 			logging.warning("Выбран другой формат @get_mkv_audio/%s" % self.filename)
 			raise err
 			return []
-
-		# if not self.filename.split(".").lower() == "mkv": # not filename
-			# return []
 
 		lst: list = []
 
@@ -3166,9 +3059,6 @@ class MyMeta:
 			logging.warning("Файл отсутствует @get_codecs/%s" % self.filename)
 			raise err
 			return lst
-
-		# if not os.path.exists(self.filename): # not filename
-			# return lst
 
 		# ffprobe -v error -show_entries stream=codec_name -of csv=p=0:s=x input.m4v
 		cmd: list = [path_for_queue + "ffprobe.exe", "-v", "error", "-show_entries", "stream=codec_name", "-of",
@@ -3225,10 +3115,7 @@ class MyMeta:
 			raise err
 			return (0, 0, False)
 
-		# if not filename or not os.path.exists(self.filename):
-			# return (0, 0, False)
-
-		# is_owidth = 0 # is_change = False
+		# is_owidth, is_change = 0, False
 
 		# ffprobe -v error -show_entries stream=width,height -of csv=p=0:s=x input.m4v
 		cmd_wh: list = [path_for_queue + "ffprobe.exe", "-v", "error", "-show_entries", "stream=width,height", "-of",
@@ -3374,9 +3261,6 @@ class MyMeta:
 			raise err
 			return duration_null
 
-		# if not filename or not os.path.exists(self.filename):
-			# return duration_null
-
 		cmd_fd: list = [path_for_queue + "ffprobe.exe", "-v", "error", "-show_entries", "format=duration", "-of",
 						"compact=p=0:nk=1", self.filename]  # output_format
 		fdi: str = "".join([path_for_queue, "duration.nfo"])
@@ -3413,9 +3297,6 @@ class MyMeta:
 			logging.warning("Файл отсутствует @get_profile_and_level/%s" % self.filename)
 			raise err
 			return ("", "")
-
-		# if not filename or not os.path.exists(self.filename):
-			# return ("", "")
 
 		cmd_pl: list = [path_for_queue + "ffprobe.exe", "-v", "error", "-show_entries", "stream=profile,level", "-of",
 						"default=noprint_wrappers=1", self.filename]  # output_format
@@ -3460,9 +3341,6 @@ class MyMeta:
 			logging.warning("Файл отсутствует @get_fps/%s" % self.filename)
 			raise err
 			return 0
-
-		# if not self.filename or not os.path.exists(self.filename):
-			# return 0
 
 		fps_list: list = []
 
@@ -3875,9 +3753,6 @@ class MyMeta:
 			raise err
 			return 0
 
-		# if not os.path.exists(self.filename): # not filename
-			# return 0
-
 		try:
 			if not self.fps:
 				self.fps = self.get_fps(filename=self.filename, is_log=True)
@@ -3915,9 +3790,6 @@ class MyMeta:
 			logging.warning("Файл отсутствует @calc_cbr/%s" % self.filename)
 			raise err
 			return 0
-
-		# if not os.path.exists(self.filename): # not filename
-			# return 0
 
 		if not abitrate:
 			abitrate = 128
@@ -4016,9 +3888,6 @@ class MyMeta:
 			raise err
 			return 0
 
-		# if not filename or not os.path.exists(self.filename):
-			# return 0
-
 		# abitrate # channels
 		if audio_format.lower() in ["opus"]:
 			abitrate: int = 64
@@ -4050,9 +3919,6 @@ class MyMeta:
 			logging.warning("Файл отсутствует @get_channels/%s" % self.filename)
 			raise err
 			return 0
-
-		# if not os.path.exists(self.filename): # not filename
-			# return 0
 
 		clcmd: list = [path_for_queue + "ffprobe.exe", "-v", "error", "-show_entries", "stream=channels", "-of",
 					   "default=noprint_wrappers=1", "%s" % self.filename]
@@ -4656,9 +4522,6 @@ class MyTime:
 			raise err
 			return (0, 0, 0, 0)
 
-		# if not seconds:
-			# return (0, 0, 0, 0)
-
 		"""
 		# totalseconds_unpack(hours/minutes/seconds)
 
@@ -4895,9 +4758,6 @@ def clear_null_data_list(lst: list = []) -> list:
 		raise err
 		return temp
 
-	# if not lst:
-		# return temp
-
 	try:
 		lst = list(filter(len, lst))
 	except:
@@ -5023,11 +4883,6 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 
 				if not full_folder2:  # no_data
 					break
-
-				# try:
-					# fname = ff2.split("\\")[-1].strip()
-				# except:
-					# fname = ""
 
 				if os.path.exists(ff2):
 					try:
@@ -5537,13 +5392,8 @@ async def process_move(file1: str = "", file2: str = "", is_copy: bool = False, 
 		raise err
 		return
 
-	# if any((not file1, not file2)) or not os.path.exists(file1):
-		# return
-
 	if os.path.exists(file1):
 		move_files_list.append((file1, file2, is_copy, is_eq, avg_size))
-
-	# normal_fname = False
 
 	try:
 		normal_fname: bool = (file1.split("\\")[-1] == file2.split("\\")[-1])
@@ -5624,23 +5474,11 @@ async def process_move(file1: str = "", file2: str = "", is_copy: bool = False, 
 
 		elif all((file1.split("\\")[-1] == file2.split("\\")[-1], any((file1[0] < file2[0], file2[0] >= file1[0])), file1 != file2, is_copy == False)) and equal_fsize == True:
 			os.remove(file1)
-			write_log("debug need_delete[equal][move]", ";".join([file1, file2, str(equal_fsize), str(is_copy)])) # %s/%s/%s/%s
+			write_log("debug need_delete[equal][move]", ";".join([file1.title(), file2.title(), str(equal_fsize), str(is_copy)])) # %s/%s/%s/%s
 
 		elif all((file1.split("\\")[-1] == file2.split("\\")[-1], any((file1[0] < file2[0], file2[0] >= file1[0])), file1 != file2, is_copy == True)) and equal_fsize == True:
-			write_log("debug need_delete[equal][copy]", ";".join([file1, file2, str(equal_fsize), str(is_copy)])) # %s/%s/%s/%s
+			write_log("debug need_delete[equal][copy]", ";".join([file1.title(), file2.title(), str(equal_fsize), str(is_copy)])) # %s/%s/%s/%s
 
-		'''
-		else:
-			status = any((is_new, is_update))
-
-			if all((file1, file2)):
-				print("Файл(ы): %s. Статус: %s. Имя файла верно: %s. Диск: %s" % (
-					"|".join([file1, file2]), str(status), str(normal_fname), str(file2[0]))) # Место для обработки: %s. # str(fspace(file1, file2))
-
-				write_log("debug readyfile[unknown]",
-						  "Файл(ы): %s. Статус: %s. Имя файла верно: %s. Диск: %s" % (
-							  "|".join([file1, file2]), str(status), str(normal_fname), str(file2[0]))) # Место для обработки: %s. # str(fspace(file1, file2))
-		'''
 	except BaseException as e:
 		if str(e): # not fspace(file1, file2) # skip_if_fspace_bad
 			print(Style.BRIGHT + Fore.RED + "Ошибка обработки файла %s или нет места на %s [%s]" % (file1, file2[0], str(e)))
@@ -5719,9 +5557,6 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 		logging.warning("Файл отсутствует @seasonvar_parse/%s" % filename)
 		raise err
 		return None
-
-	# if not os.path.exists(filename): # not filename
-		# return None # str -> None
 
 	# temp: list = []
 
@@ -9640,17 +9475,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			raise err
 			return
 
-		# if not os.path.exists(folder):  # not folder
-			# return
-
 		write_log("debug start[true_project_rename]", "%s" % str(datetime.now()))
 
 		# lfiles_filter: list = []
 
 		"""
-			@video_resize.dir @vr_folder
-			{"d:\\multimedia\\video\\serials_conv\\13_Ghosts_of_Scooby_Doo": "13_Ghosts_of_Scooby_Doo"}
-			"""
+		@video_resize.dir @vr_folder
+		{"d:\\multimedia\\video\\serials_conv\\13_Ghosts_of_Scooby_Doo": "13_Ghosts_of_Scooby_Doo"}
+		"""
 
 		# need_convert_current_dict_to_registry_dict
 		try:
@@ -10659,9 +10491,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				cnt += 1
 
-				# if not lfiles:  # skip_if_nulllist
-					# break
-
 				date2 = datetime.now()
 
 				hour = divmod(int(abs(date1 - date2).total_seconds()), 60)  # 60(min) -> 3600(hours)
@@ -10836,9 +10665,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				cnt += 1
 
-				# if not lfiles:  # skip_if_nulllist
-					# break
-
 				date2 = datetime.now()
 
 				hour = divmod(int(abs(date1 - date2).total_seconds()), 60)  # 60(min) -> 3600(hours)
@@ -10966,7 +10792,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					a = 0
 
 				# move_downloads_to_project
-				# """
 				for k, v in lfiles_move.items():
 
 					if all((fspace(k, v), os.path.getsize(k))):
@@ -11028,7 +10853,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				# print(full_to_short(k), os.path.exists(k), full_to_short(v), os.path.exists(v), Style.BRIGHT + Fore.WHITE + "%s -> %s" % (k, v), end="\n")
 				# write_log("debug lfiles_move", "%s" % ";".join([k, str(os.path.exists(k)), v, str(os.path.exists(v)), "%s -> %s" % (k, v)] ))
-				# """
 
 	# debug
 	# exit()
@@ -11318,28 +11142,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
 	lfiles = sorted(tmp2, reverse=False)
 
-	# if_skip_limit
-	"""
-	try:
-		fsizes = list(set([os.path.getsize(lf) for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]))
-	except:
-		fsizes = []
-	else:
-		fsizes.sort(reverse=False)
-
-	try:
-		tmp = list(set([lf.strip() for fs in fsizes for lf in lfiles if os.path.exists(lf) and os.path.getsize(lf) == fs]))
-	except:
-		tmp = []
-	else:
-		tmp.sort(reverse=False)
-
-	# lfiles = tmp[0:1000] if len(tmp) > 1000 else tmp
-
-	# if len(tmp) > 1000:  # limit_1000_jobs
-		# lfiles = tmp[0:1000]
-	"""
-
 	cnt: int = 0
 
 	MT = MyTime(seconds=2)
@@ -11357,9 +11159,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			cnt += 1
 
-			# if not lfiles:  # skip_if_nulllist
-				# break
-
 			hour = divmod(int(abs(date1 - date2).total_seconds()), 60)  # 60(min) -> 3600(hours)
 
 			try:
@@ -11374,14 +11173,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				write_log("debug hour[count][3]", "%d" % (hour[0] // 60)) # is_index #3
 				hour = hour[0] // 60
 
-			# '''
 			try:
 				assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[3]" # 3
 			except AssertionError: # as err:
 				logging.warning("Меньше установленого лимита по времени hour[3]")
 				hour = 2 # limit_hour
 				# raise err
-			# '''
 
 			# time_is_limit_1hour_50min # all((h >= 0, m, hh >=h, mm >= m)) # all((hh > hour, mm >= m))
 			if all((hh > hour, hour)): # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -12245,28 +12042,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
 		lfiles = sorted(tmp2, reverse=False)
 
-		# if_skip_limit
-		"""
-		try:
-			fsizes = list(set([os.path.getsize(lf) for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]))
-		except:
-			fsizes = []
-		else:
-			fsizes.sort(reverse=False)
-
-		try:
-			tmp = list(set([lf.strip() for fs in fsizes for lf in lfiles if os.path.exists(lf) and os.path.getsize(lf) == fs]))
-		except:
-			tmp = []
-		else:
-			tmp.sort(reverse=False)
-
-		# lfiles = tmp[0:1000] if len(tmp) > 1000 else tmp
-
-		# if len(tmp) > 1000:  # limit_1000_jobs
-			# lfiles = tmp[0:1000]
-		"""
-
 		cnt: int = 0
 
 		MT = MyTime(seconds=2)
@@ -12348,7 +12123,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		lfiles = sorted(list(set(temp)), reverse=False)
 
 		# with open(files_base["backup"], "w", encoding="utf-8") as bjf:
-		# bjf.writelines("%s\n" % cmd.strip() for cmd in lfiles) # save_for(short_filenames) # save_jobs
+			# bjf.writelines("%s\n" % cmd.strip() for cmd in tuple(lfiles)) # save_for(short_filenames) # save_jobs
 
 		if not lfiles:  # exit_if_not_found_some_files
 			exit()
@@ -12431,9 +12206,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			break
 
 		cnt += 1
-
-		# if not lfiles:  # skip_if_nulllist
-			# break
 
 		try:
 			fp, fn = split_filename(lf)
@@ -12853,9 +12625,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			elif cl == 5 and abr < 512:  # 5.1(<512)
 				temp_abr = 512
-
-			# elif all((cl, 128 <= abr <= 512)):
-			# temp_abr = abr
 
 			if all((abr != temp_abr, abr, temp_abr)):
 				write_log("debug lossy_audio[change]",
