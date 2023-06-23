@@ -861,8 +861,6 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 						# folder_desc_files # parse_soundtracks_from_filename
 
-						# @is_debug
-						# '''
 						desc_list: list = []
 						parse_list: list = []
 						# parse_filename: list = []
@@ -1036,8 +1034,6 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 							with open(files_base["soundtrack"], "a", encoding="utf-8") as fbsf:
 								fbsf.writelines("%s\n" % t.strip() for t in filter(lambda x: any((x[0] == x[0].upper(), x[0].isnumeric())), tuple(tmp)))
-
-						# '''
 
 					if is_not_found: # desc(0), files(0) # create_null(any_time)
 						try:
@@ -2078,8 +2074,6 @@ async def my_args() -> list: #2
 	# abc_or_num_regex = re.compile(r"^[A-Z0-9].*", re.I)
 
 	# old_command_line_arguments
-	# """
-	# if is_error:
 	try:
 		tmp = [str(sys.argv[i]) for i in range(0, len(sys.argv))]  # old(no_gen) #
 	except:
@@ -2102,7 +2096,6 @@ async def my_args() -> list: #2
 
 		print(Style.BRIGHT + Fore.CYAN + "Найдено %d аргументов [%s]" % (len(tmp), str(datetime.now())))  # is_color
 		write_log("debug sys[args]", "Найдено %d аргументов [%s]" % (len(tmp), str(datetime.now())))
-	# """
 
 	return tmp  # some_list
 
@@ -2579,15 +2572,6 @@ def hms(seconds: int = 0): #37
 # @log_error
 async def avg_lst(lst: list = []) -> int:  # default_list / in_arg_is_filesizes_list #4
 
-	'''
-	try:
-		assert lst and isinstance(lst, list), "Пустой список или другой формат списка @avg_lst/lst" # is_assert(debug)
-	except AssertionError: # as err:
-		logging.warning("Пустой список или другой формат списка @avg_lst/lst")
-		# raise err
-		return 0
-	'''
-
 	sum_lst: int = (reduce(lambda x, y: x + y, lst))  # sum_lst = sum(lst)
 	len_lst: int = len(lst)
 
@@ -2643,19 +2627,6 @@ class FileInfo:
 finfo = FileInfo("somefilename", 0)
 print(finfo.filename, finfo.filesize, sep = ": ") # somefilename: 0
 # finfo.printinfo() # ?
-"""
-
-"""
-from dataclass import dataclass # pip install -U dataclass
-
-@dataclass
-class Book:
-	title: str = ""
-	author: str = ""
-
-book = Book("Fahrenheit 451", "Bradbury")
-
-print(book) # Book(title="Fahrenheit 451", author="Bradbury")
 """
 
 # 2
@@ -2723,8 +2694,6 @@ class Get_AR:
 
 			return (int(owidth), int(second), round(int(owidth) / int(second), 2))  # 640, 360, 640/360
 
-		# elif width <= owidth and width:  # if_optimal_ar
-			# return (width, height, 0))
 		else:
 			return (0, 0, 0)
 
@@ -4671,8 +4640,6 @@ class MyString:
 
 			with open(padeji_base, "w", encoding="utf-8") as jf:
 				json.dump(def_dict, jf, ensure_ascii=False, indent=4)
-		# else:
-		# print(Fore.WHITE + "Справочник падежей успешно загружен")
 
 		# save_data
 		if not def_dict:
@@ -4915,7 +4882,6 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 						json.dump(ff_last, vff, ensure_ascii=False, indent=2, sort_keys=True)
 
 				# current_jobs(list)
-				# ff_dict = {} # debug/test
 
 				try:
 					ff_dict = {f.strip(): os.path.getsize(f) for f in filter(lambda x: os.path.exists(x), tuple(files))
@@ -4948,8 +4914,6 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 		# if is_Rus:
 			# pass # trouble_rus_rename(project_name = r"C:\Downloads\new\13_klinicheskaya_01s01e.mp4", dest_folder = r"D:\Multimedia\Video\Serials_Europe\13_Klinicheskaya_Rus")
 
-		# hidden
-		# """
 		try:
 			# full_folder2 = list(folder_gen21()) # new(yes_gen) # is_all_folders(with/without)_files_for_descriptions
 			full_folder2: list = ["\\".join(f.split("\\")[0:-1]).strip() for f in filter(lambda x: os.path.exists("\\".join(x.split("\\")[0:-1])), tuple(files)) if all((len(os.listdir("\\".join(f.split("\\")[0:-1]))) >= 0, f))]
@@ -5088,7 +5052,6 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 		else:
 			if is_log:
 				write_log("debug vr_folder", "ok [%s]" % str(datetime.now()))
-	# """
 
 	# need_check_full_folder_by_short(re.compile)
 	folders_to_move: list = []
@@ -5508,9 +5471,6 @@ async def process_delete(file1: str = ""): #17
 		logging.warning("Файл отсутствует @process_delete/%s" % file1)
 		raise err
 		return
-
-	# if not os.path.exists(file1): # not file1
-		# return
 
 	try:
 		fname = file1.split("\\")[-1].strip()
@@ -7398,8 +7358,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		# return
 
-		# move_last_files(if_have)
-		# datelist = datelist2 = [] # date_of_change(modify)_files # last_files
+		# move_last_files(if_have) # date_of_change(modify)_files # last_files
 
 		# file_time = {} # time_to_delete(min/max)_time
 
@@ -7414,7 +7373,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
 
 		# filter_current_jobs(is_update)
-		# fcmd: dict = {}
 
 		# @load_current_jobs
 		try:
@@ -7484,10 +7442,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			# @video_resize.lst
 
-			# mntime: int = 0
-			# mxtime: int = 0
-
-			# renamed_list = []
 			try:
 				# tmp = list(pf_gen()) # new(yes_gen)
 				tmp: list = [pf.strip() for pf in filter(lambda x: os.path.exists(x), tuple(proj_files))]
@@ -7808,12 +7762,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			print(Style.BRIGHT + Fore.YELLOW + "Ищу временные файлы для переноса и удаления...")
 			print("Найдено [%d] файлов для переноса и удаления" % len(datelist))
 
-			# processes_ram: list = []
-			# processes_ram2: list = []
-
 			fsizes_list: list = []
-
-			# sum_value = avg_value = len_value = 0
 
 			skip_file = set()
 
@@ -7904,9 +7853,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						write_log("debug fullname2[fname2]", "%s" % fname2)
 
 					# try:
-					# filetime = dl["file"][1]
+						# filetime = dl["file"][1]
 					# except:
-					# filetime = 999
+						# filetime = 999
 
 					gl1: int = 0
 
@@ -8102,12 +8051,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 									if not fullname in processes_ram2:
 										processes_ram2.append(fullname)
 
-									'''
-									if not p in processes_ram2 and os.path.exists(fullname):
-										p.start()
-										processes_ram2.append(p)
-									'''
-
 									# os.remove(fullname)
 
 									if os.path.exists(fullname):
@@ -8222,9 +8165,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			raise err
 			return (0, 0, 0, False)
 
-		# if not length:
-			# return (0, 0, 0, False) # if_no_data
-
 		try:
 			val1 = length // 3600 # >>> 2914 // 3600 # 0 # hh
 		except:
@@ -8254,8 +8194,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		path1: str = copy_src
 		path2: str = copy_src2
 		path3: str = path_for_folder1
-
-		# return
 
 		# hidden(skip_check_exist_folder)
 		if not os.path.exists(path1) or not os.path.exists(path2) or not os.path.exists(path3):
@@ -8301,8 +8239,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		finally:
 			write_log("debug copy_src_list1", ";".join([*tmp_dict]))  # copy_src_list1
 
-		# skip_file1: list = []  # skip_files2
-
 		# a = "a.b.c.d"; ".".join(a.split(".")[0:-2]) # a.b.c # with_sep # "".join(a.split(".")[0:-2]) # abc # no_sep
 		# ".".join(fl.split(".")[0:-1]).strip()
 		try:
@@ -8314,7 +8250,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			skip_file1 = []
 
 		list1: list = []
-		# lst1: list = [] # is_debug
 
 		try:
 			for fl in os.listdir(path1):
@@ -8516,9 +8451,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			list_total = sorted(tmp2, reverse=False)
 
 			for lt in list_total:  # filter(lambda x: os.path.exists(x), tuple(list_total)):  # new(yes_gen)
-
-				# if not list_total:  # no_data
-					# break
 
 				try:
 					fname = lt.split("\\")[-1].strip()
@@ -8724,8 +8656,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		fsizes_list: list = []
 
-		# sum_value = avg_value = len_value = 0
-
 		skip_file = set()
 
 		for ffj in files2:  # is_dict
@@ -8837,8 +8767,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								print(Style.BRIGHT + Fore.GREEN + "Добавление в очередь файла",
 									  Style.BRIGHT + Fore.WHITE + "%s" % ffj)  # add_to_all(process_move)
 
-								# p = multiprocessing.Process(target=process_move, args=(ffj, files2[ffj], False, True, avg_size))  # avg_value
-
 								try:
 									await process_move(ffj, files2[ffj], False, True, avg_size) # no_asyncio.run # async_if_small #3
 								except BaseException as e:
@@ -8848,12 +8776,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 								if not ffj in processes_ram:
 									processes_ram.append(ffj)
-
-								'''
-								if not p in processes_ram:
-									p.start()
-									processes_ram.append(p)
-								'''
 
 							elif all((os.path.getsize(ffj) > avg_size, avg_size)) or not avg_size:
 								move(ffj, files2[ffj]) # no_async_if_big
@@ -8883,18 +8805,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							# print(Style.BRIGHT + Fore.BLUE + "Было удалено", Style.BRIGHT + Fore.WHITE + "%s" % dfile1)
 							# write_log("debug deletefile[update]", "Было удалено %s" % dfile1)
 
-							# p = multiprocessing.Process(target=process_delete, args=(ffj,))
-
 							await process_delete(ffj) # async_if_delete
 
 							if not ffj in processes_ram2:
 								processes_ram2.append(ffj)
-
-							'''
-							if not p in processes_ram2:
-								p.start()
-								processes_ram2.append(p)
-							'''
 
 						# os.remove(ffj["file"])
 				except BaseException as e:
@@ -8934,9 +8848,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			logging.warning("Пустой список @filter_from_list/lst")
 			raise err
 			return temp
-
-		# if not lst:
-			# return temp
 
 		# load_meta_jobs(filter) #4
 		try:
@@ -8997,8 +8908,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	async def update_bigcinema():
 
 		write_log("debug start[update_bigcinema]", "%s" % str(datetime.now()))
-
-		# return
 
 		# pass_1_of_2 # update_exists_files # ok
 
@@ -9316,7 +9225,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		# pass_2_of_2 # new_file_for_move_by_year # debug/test
 
 		# move_big_films(lfiles) # need_code # move_folder1_to_bigfilms # src_to_dst
-		# """
 		try:
 			list1 = os.listdir(path_for_folder1)
 		except:
@@ -9438,7 +9346,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 									MyNotify(txt="-(%s[2])-" % full_to_short(l1), icon=icons["error"])
 
 									delete_count += 1
-		# """
 
 		print()
 
@@ -9971,8 +9878,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		# if filter5:
 			# filter_list += filter4  # ? # is_sort_by_key(5)
 
-		# is_debug
-		# '''
 		true_sym = re.compile(r"([^A-ZА-Я\d\-\_])", re.I) # 2_Broke_Girls # 9-1-1_Lone_Star
 		new_filter_set = set()
 		new_filter: list = []
@@ -9997,7 +9902,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			print("%s" % ";".join(list(set(filter_list)))) # upgrade(filter_list)
 			write_log("debug new_filter", "%s [%s]" % (";".join(list(set(filter_list))), str(datetime.now()))) # logging_for_debug
-		# '''
 
 		if filter_list:
 			temp_list = sorted(filter_list, reverse=False) # abc # type1
@@ -10011,7 +9915,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		filter_list = tmp if tmp else []
 
 		# slice_by_short_names # @filter_list # combine_jobs_filter_by_short_names
-		# '''
 		# tmp = ["Hello", "World", "9-1-1", "test", "Test_world"] # ["Hello", "World", "9-1-1", "Test"]
 
 		# shorts_in_list(upgrade)
@@ -10022,7 +9925,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			filter_list = sorted(temp2, reverse=False) # list_by_abc
 			# filter_list = sorted(temp2, key=len, reverse=False) # list_by_key
 
-		# '''
 		fl_count = str(len(filter_list)) if filter_list else "All"
 
 		if filter_list:
@@ -10076,8 +9978,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				nlf2 = e.submit(sub_folder, "d:\\multimedia\\video\\serials_europe\\",
 								video_regex)  # nlocal # serialy_rus
 				nlf3 = e.submit(sub_folder, "d:\\multimedia\\video\\big_films\\", video_regex)  # nlocal # filmy
-			# nlf4 = e.submit(one_folder, "d:\\multimedia\\video\\cartoons_europe\\", video_regex) # nlocal
-			# nlf4 = e.submit(sub_folder, "d:\\multimedia\\video\\", temp_regex) # temporary_files
+				# nlf4 = e.submit(one_folder, "d:\\multimedia\\video\\cartoons_europe\\", video_regex) # nlocal
+				# nlf4 = e.submit(sub_folder, "d:\\multimedia\\video\\", temp_regex) # temporary_files
 
 			lfiles = lf.result()
 			lfiles += nlf.result()
@@ -10229,8 +10131,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				nlf2 = e.submit(sub_folder, "d:\\multimedia\\video\\serials_europe\\",
 								video_regex)  # nlocal # serialy_rus
 				nlf3 = e.submit(sub_folder, "d:\\multimedia\\video\\big_films\\", video_regex)  # nlocal # filmy
-			# nlf4 = e.submit(one_folder, "d:\\multimedia\\video\\cartoons_europe\\", video_regex) # nlocal
-			# nlf4 = e.submit(one_folder, "d:\\multimedia\\video\\", temp_regex) # temporary_files # sub_folder -> one_folder
+				# nlf4 = e.submit(one_folder, "d:\\multimedia\\video\\cartoons_europe\\", video_regex) # nlocal
+				# nlf4 = e.submit(one_folder, "d:\\multimedia\\video\\", temp_regex) # temporary_files # sub_folder -> one_folder
 
 			lfiles = lf.result()
 			lfiles += nlf.result()
@@ -10507,14 +10409,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					write_log("debug hour[count][1]", "%d" % (hour[0] // 60)) # is_index #1
 					hour = hour[0] // 60
 
-				# '''
 				try:
 					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[1]" # 1
 				except AssertionError: # as err:
 					logging.warning("Меньше установленого лимита по времени hour[1]")
 					hour = 2 # limit_hour
 					# raise err
-				# '''
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # all((mm >= l_avg, l_avg >= 30)): # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -10611,8 +10511,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				nlf2 = e.submit(sub_folder, "d:\\multimedia\\video\\serials_europe\\",
 								video_regex)  # nlocal # serialy_rus
 				nlf3 = e.submit(sub_folder, "d:\\multimedia\\video\\big_films\\", video_regex)  # nlocal # filmy
-			# nlf4 = e.submit(one_folder, "d:\\multimedia\\video\\cartoons_europe\\", video_regex) # nlocal
-			# nlf4 = e.submit(sub_folder, "d:\\multimedia\\video\\", temp_regex) # temporary_files
+				# nlf4 = e.submit(one_folder, "d:\\multimedia\\video\\cartoons_europe\\", video_regex) # nlocal
+				# nlf4 = e.submit(sub_folder, "d:\\multimedia\\video\\", temp_regex) # temporary_files
 
 			lfiles = lf.result()
 			lfiles += nlf.result()
@@ -10803,8 +10703,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							print(Style.BRIGHT + Fore.GREEN + "Добавление в очередь файла",
 								  Style.BRIGHT + Fore.WHITE + "%s" % k)  # add_to_all(process_move)
 
-							# p = multiprocessing.Process(target=process_move, args=(k, v, False, True, a))  # avg_value
-
 							try:
 								asyncio.run(process_move(k, v, False, True, a)) # no_await # async_if_small #5
 							except BaseException as e:
@@ -10814,12 +10712,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 							if not k in processes_ram:
 								processes_ram.append(k)
-
-							'''
-							if not p in processes_ram:
-								p.start()
-								processes_ram.append(p)
-							'''
 
 						elif all((os.path.getsize(k) > a, a)):  # more_avg
 
@@ -10949,21 +10841,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		else:
 			fsizes_list.sort(reverse=False)
 
-		# hidden # debug
-		'''
-		try:
-			gcd_list = asyncio.run(gcd_from_numbers(fsizes_list)) # equal_mod_filesizes
-		except:
-			gcd_list = []
-		finally:
-			if gcd_list:
-				print("equal_mod_filesizes (current_move_files)", "found %d files" % len(gcd_list))
-				write_log("debug gcd_from_numbers[current_move_files]", "equal_mod_filesizes: found %d files" % len(gcd_list))
-			elif not gcd_list:
-				print("equal_mod_filesizes (current_move_files)", "not found files")
-				write_log("debug gcd_from_numbers[current_move_files][null]", "equal_mod_filesizes: not found files")
-		'''
-
 		try:
 			avg_size = asyncio.run(avg_lst(list(set(fsizes_list)))) # avg_value
 		except:
@@ -11028,8 +10905,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								print(Style.BRIGHT + Fore.GREEN + "Добавление в очередь файла",
 									Style.BRIGHT + Fore.WHITE + "%s" % file1)  # add_to_all(process_move)
 
-								# p = multiprocessing.Process(target=process_move, args=(file1, file2, False, True, avg_size))  # avg_value
-
 								try:
 									asyncio.run(process_move(file1, file2, False, True, avg_size)) # no_await # async_if_small #6
 								except BaseException as e:
@@ -11039,12 +10914,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 								if not file1 in processes_ram:
 									processes_ram.append(file1)
-
-								'''
-								if not p in processes_ram:
-									p.start()
-									processes_ram.append(p)
-								'''
 
 							elif all((os.path.getsize(file1) > avg_size,
 									avg_size)) or not avg_size:  # if_fspace_more_avg_or_null_then_default_move
@@ -11069,18 +10938,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 						elif all((fsize >= 0, dsize, int(fsize // (dsize / 100)) > 100)) or not dsize: # fspace(bad) # dspace(bad)
 
-							# p = multiprocessing.Process(target=process_delete, args=(file1,))
-
-							# asyncio.run(process_delete(file1)) # async_if_delete # is_debug
-
 							if not file1 in processes_ram2:
 								processes_ram2.append(file1)
-
-							'''
-							if not p in processes_ram2:
-								p.start()
-								processes_ram2.append(p)
-							'''
 
 							print(Style.BRIGHT + Fore.RED + "move[need] \'Нет хватает места для переноса файла %s\'" % full_to_short(file1))
 							write_log("debug move[need]", "Нет хватает места для переноса файла %s" % file1)
@@ -11502,14 +11361,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					write_log("debug hour[count][4]", "%d" % (hour[0] // 60)) # is_index #4
 					hour = hour[0] // 60
 
-				# '''
 				try:
 					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[4]" # 4
 				except AssertionError: # as err:
 					logging.warning("Меньше установленого лимита по времени hour[4]")
 					hour = 2 # limit_hour
 					# raise err
-				# '''
 
 				# # time_is_limit_1hour_or_30min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)): # stop_if_more_30min # mm[0] // 60 >= limit_hour:  # stop_if_more_"2"hour
@@ -11594,18 +11451,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							print(Style.BRIGHT + Fore.GREEN + "Добавление в очередь файла",
 								  Style.BRIGHT + Fore.WHITE + "%s" % fname2)  # add_to_all(process_move)
 
-							# p = multiprocessing.Process(target=process_move, args=(fname2, fname1, False, True, avg_size))  # avg_value
-
 							asyncio.run((fname2, fname1, False, True, avg_size)) # async_if_small
 
 							if not fname2 in processes_ram:
 								processes_ram.append(fname2)
-
-							'''
-							if not p in processes_ram:
-								p.start()
-								processes_ram.append(p)
-							'''
 
 							filecmdbase_copy = {k2: v2 for k2, v2 in filecmdbase_copy.items() if
 												k2 != k}  # clear_for_skip_run(is_ready_ok_by_length)
@@ -11654,18 +11503,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					if os.path.exists(fname2):  # delete_not_ready_project_by_length # project
 						# os.remove(fname2) # remove -> process_delete
 
-						# p = multiprocessing.Process(target=process_delete, args=(fname2,))  # avg_value
-
 						asyncio.run(process_delete(fname2)) # async_if_delete
 
 						if not fname2 in processes_ram2:
 							processes_ram2.append(fname2)
-
-						'''
-						if not p in processes_ram2:
-							p.start()
-							processes_ram2.append(p)
-						'''
 
 					# run_no_complete_file_from_[fcd.json] # debug/test
 
@@ -11890,14 +11731,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					write_log("debug hour[count][5]", "%d" % (hour[0] // 60)) # is_index #5
 					hour = hour[0] // 60
 
-				# '''
 				try:
 					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[5]" # 5
 				except AssertionError: # as err:
 					logging.warning("Меньше установленого лимита по времени hour[5]")
 					hour = 2 # limit_hour
 					# raise err
-				# '''
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)): # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -12092,14 +11931,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					write_log("debug hour[count][6]", "%d" % (hour[0] // 60)) # is_index #6
 					hour = hour[0] // 60
 
-				# '''
 				try:
 					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[6]" # 6
 				except AssertionError: # as err:
 					logging.warning("Меньше установленого лимита по времени hour[6]")
 					hour = 2 # limit_hour
 					# raise err
-				# '''
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -12237,14 +12074,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			write_log("debug hour[count][7]", "%d" % (hour[0] // 60)) # is_index #7
 			hour = hour[0] // 60
 
-		# '''
 		try:
 			assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[7]" # 7
 		except AssertionError: # as err:
 			logging.warning("Меньше установленого лимита по времени hour[7]")
 			hour = 2 # limit_hour
 			# raise err
-		# '''
 
 		# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 		if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -13452,7 +13287,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			# @another_list # @last.xml @src=k/len=length(k)/dst=v.split(" ")[-1] # move_dst_to_src
 
 			# xml(job(src=k/len=length(k)/dst=v.split(" ")[-1])) # save_job_to_xml(mp4)
-			# '''
+
 			# @log_error
 			async def save_job_to_xml(src: str = "", dst: str = ""): # save_last_job # need_multiple_record
 
@@ -13512,9 +13347,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					tree.write('output.xml')
 					'''
 
-			# '''
-
-			# '''
 			# @optimial_job_for_jobs_by_xml(load)
 			async def load_job_from_xml() -> list: # load_last_job # dict_in_list
 				jobs = []
@@ -13542,7 +13374,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					return jobs # [{"src": "d:\\multimedia\\video\\serials_europe\\Nelichnaya_zhizn_Rus\\Nelichnaya_zhizn_01s04e.mp4", "leng": 5000, "dst": "c:\\downloads\\Nelichnaya_zhizn_01s04e.mp4"}]
 
 			# 5000(src_length) ~ (5000//3600) = 1 hh, (5000//60)%60 = int((mm(1.38)-hh)*100) ~ 38 # sample_calc
-			# '''
 
 			MM = MyMeta() #9
 
@@ -13552,7 +13383,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			# seasyear_count: dict = {}
 
 			# combine_job_filter # convert_combine_jobs_to_current_jobs # calc_avg_time_by_combine_jobs
-			# '''
+
 			# load_meta_jobs(filter) #10
 			try:
 				with open(some_base, encoding="utf-8") as sbf:
@@ -13631,7 +13462,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					json.dump(cbf_dict, cbf, ensure_ascii=False, indent=2, sort_keys=False) #3-save_combine_jobs(update)
 
 			# sorted_current_jobs # type1
-			# '''
 			MM = MyMeta()
 
 			fcbd: list = []
@@ -13725,7 +13555,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							os.path.exists(k) and fs[0].strip() == k.strip()} # for_any_sort_types
 
 			del MM
-			# '''
 
 			with open(filecmd_base, "w", encoding="utf-8") as fbf:
 				json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=2, sort_keys=False) # save_current_jobs
@@ -13741,7 +13570,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			'''
 
 			# @connect_to_database(start)
-			# '''
 			conn = sql.connect("".join([script_path, '\\video_resize.db'])) # conn = sql.connect(":memory:")
 			'''
 			# conn.row_factory = sqlite3.Row # dict # fields_to_dict_keys
@@ -13968,19 +13796,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 
 			# @delete_table
-			# '''
 			if not somebase_dict:
 				with conn:
 					cur.execute("DROP TABLE IF EXISTS filebase")
-			# '''
 
 			# @disconnect_from_database(end)
-			# '''
 			cur.close() # cursor_stop
 			conn.close() # sqlite_stop # if conn: conn.close()
-			# '''
 
-			# '''
 			if all((filecmdbase_dict, len(somebase_dict) >= 0)):
 
 				try:
@@ -14024,7 +13847,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					# json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=2, sort_keys=False)
 
 			del MM
-			# '''
 
 			fcmd_hours: list = []
 			fcmd_minutes: list = []
@@ -14307,7 +14129,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						break
 
 				# if all((fname in skip_file, fname, skip_file)) or all((jobs_dict_index, jobs_dict_index[fname] > 1)):  # fname_count_filter(list/dict)
-				# continue
+					# continue
 
 				if not os.path.exists(k):
 					continue
@@ -14480,14 +14302,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					write_log("debug hour[count][8]", "%d" % (hour[0] // 60)) # is_index #8
 					hour = hour[0] // 60
 
-				# '''
 				try:
 					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[8]" # 8
 				except AssertionError: # as err:
 					logging.warning("Меньше установленого лимита по времени hour[8]")
 					hour = 2 # limit_hour
 					# raise err
-				# '''
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 2:  # stop_if_more_2hour
@@ -14578,14 +14398,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					write_log("debug hour[count][9]", "%d" % (hour[0] // 60)) # is_index #9
 					hour = hour[0] // 60
 
-				# '''
 				try:
 					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[9]" # 9
 				except AssertionError: # as err:
 					logging.warning("Меньше установленого лимита по времени hour[9]")
 					hour = 2 # limit_hour
 					# raise err
-				# '''
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # prc >= 75 # stop_by_progress(1/3) ~ 75% (debug)
