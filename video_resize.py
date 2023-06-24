@@ -62,7 +62,6 @@ logging.info(f"debug start {str(datetime.now())}")
 
 mytime: dict = {"jobtime": [9, 18, 4], "dinnertime": [12, 13], "sleeptime": [0, 7], "anytime": [True]}
 
-# '''
 # 640x360 -> 1280x720 -> 1920x1080 # 16/9(hd)
 
 # @16/9(hd) # 8/16
@@ -107,7 +106,6 @@ async def sd_generate(from_w: int = 640, from_h: int = 480, to_max: int = 2500, 
 # 640x480, 704x528, 768x576, 832x624, 896x672, 960x720, 1024x768, 1088x816, 1152x864, 1216x912, 1280x960, 1344x1008
 # 1408x1056, 1472x1104, 1536x1152, 1600x1200, 1664x1248, 1728x1296, 1792x1344, 1856x1392, 1920x1440, 1984x1488
 # 2048x1536, 2112x1584, 2176x1632, 2240x1680, 2304x1728, 2368x1776, 2432x1824, 2496x1872
-# '''
 
 # ffmpeg -y -i input -c:v libx264 -vf scale=640:-1 -c:a aac -af dynaudnorm output # stay_profile_high # stay_metadata
 # use_by_default_manual(height % 2 == 0) # "720" >= 640
@@ -3191,8 +3189,7 @@ class MyMeta:
 
 			assert w and h and ar, "Ошибка высоты, ширины и маштаба видео @get_width_height/w/h/ar" # is_assert(debug)
 		except AssertionError: # as err:
-			w = h = ar = 0
-			logging.warning("Ошибка высоты, ширины и маштаба видео @get_width_height/%s" % self.filename)
+			logging.warning("Ошибка высоты, ширины и маштаба видео @get_width_height/%s/%s" % (self.filename, "x".join([str(w), str(h), str(ar)])))
 			# raise err
 		else:
 			if all((w >= h, w, h, ar, is_calc)):  # need_resize(rescale) # 1:1_by_stream_scale
@@ -3239,7 +3236,7 @@ class MyMeta:
 		try:
 			assert is_nwidth and is_nheight and width, "Нет данных для обновления маштаба @get_width_height/is_nwidth/is_nheight/width" # is_calc(T/F) # is_assert(debug)
 		except AssertionError: # as err:
-			logging.warning("Нет данных для обновления маштаба @get_width_height/%s" % self.filename)
+			logging.warning("Нет данных для обновления маштаба @get_width_height/%s/%s" % (self.filename, "x".join([str(is_nwidth), str(is_nheight), str(width)])))
 			# raise err
 			return (int(width), int(height), False)  # logic2 # owidth/oheight/error(no_calc)
 		else:
@@ -10532,9 +10529,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				try:
 					assert os.path.exists(lf), "Нет файла lf"
-				except AssertionError as err:
+				except AssertionError: # as err:
 					logging.warning("Нет файла %s" % lf)
-					raise err
+					# raise err
 					continue
 
 				try:
@@ -10718,9 +10715,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				try:
 					assert os.path.exists(lf), "Нет файла lf"
-				except AssertionError as err:
+				except AssertionError: # as err:
 					logging.warning("Нет файла %s" % lf)
-					raise err
+					# raise err
 					continue
 
 				try:
@@ -11191,9 +11188,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			try:
 				assert os.path.exists(lf), "Нет файла lf"
-			except AssertionError as err:
+			except AssertionError: # as err:
 				logging.warning("Нет файла %s" % lf)
-				raise err
+				# raise err
 				continue
 
 			try:
@@ -11909,9 +11906,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				try:
 					assert os.path.exists(lf), "Нет файла lf"
-				except AssertionError as err:
+				except AssertionError: # as err:
 					logging.warning("Нет файла %s" % lf)
-					raise err
+					# raise err
 					continue
 
 				try:
@@ -12257,9 +12254,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		try:
 			assert os.path.exists(lf), "Нет файла lf"
-		except AssertionError as err:
+		except AssertionError: # as err:
 			logging.warning("Нет файла %s" % lf)
-			raise err
+			# raise err
 			continue
 
 		if not lf in job_set:
