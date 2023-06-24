@@ -7334,7 +7334,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		timing = []
 
 		try:
-			tree = xml.parse(files_base["timing"]) # xml.ElementTree(file=files_base["timing"])
+			tree = xml.parse(files_base["timing"]) # tree = xml.parse(file=files_base["timing"]) # is_error
 
 			root = tree.getroot()
 
@@ -13572,7 +13572,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				jobs = []
 
 				try:
-					tree = xml.parse(file=files_base["lastjob"]) # xml.ElementTree(file=files_base["lastjob"])
+					tree = xml.parse(files_base["lastjob"]) # tree = xml.parse(file=files_base["lastjob"]) # is_error
 
 					root = tree.getroot()
 
