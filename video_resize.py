@@ -10521,7 +10521,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					mm //= 60
 					# mm %= 60 # sec
 
-				if hour:
+				if hour[0]:
 					write_log("debug hour[count][1]", "%d" % (hour[0] // 60)) # is_index #1
 					hour = hour[0] // 60
 
@@ -10707,7 +10707,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					mm //= 60
 					#mm %= 60 # sec
 
-				if hour:
+				if hour[0]:
 					write_log("debug hour[count][2]", "%d" % (hour[0] // 60)) # is_index #2
 					hour = hour[0] // 60
 
@@ -11180,7 +11180,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				mm //= 60
 				# mm %= 60 # sec
 
-			if hour:
+			if hour[0]:
 				write_log("debug hour[count][3]", "%d" % (hour[0] // 60)) # is_index #3
 				hour = hour[0] // 60
 
@@ -11517,7 +11517,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					mm //= 60
 					#mm %= 60 # sec
 
-				if hour > 0:
+				if hour[0] > 0:
 					write_log("debug hour[count][4]", "%d" % (hour[0] // 60)) # is_index #4
 					hour = hour[0] // 60
 
@@ -11898,7 +11898,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					mm //= 60
 					# mm %= 60 # sec
 
-				if hour:
+				if hour[0]:
 					write_log("debug hour[count][5]", "%d" % (hour[0] // 60)) # is_index #5
 					hour = hour[0] // 60
 
@@ -12106,7 +12106,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					mm //= 60
 					# mm %= 60 # sec
 
-				if hour:
+				if hour[0]:
 					write_log("debug hour[count][6]", "%d" % (hour[0] // 60)) # is_index #6
 					hour = hour[0] // 60
 
@@ -14587,7 +14587,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					mm //= 60
 					# mm %= 60 # sec
 
-				if hour:
+				if hour[0]:
 					write_log("debug hour[count][8]", "%d" % (hour[0] // 60)) # is_index #8
 					hour = hour[0] // 60
 
@@ -14683,7 +14683,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					mm //= 60
 					# mm %= 60 # sec
 
-				if hour:
+				if hour[0]:
 					write_log("debug hour[count][9]", "%d" % (hour[0] // 60)) # is_index #9
 					hour = hour[0] // 60
 
@@ -15057,7 +15057,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					mm //= 60
 					# mm %= 60 # sec
 
-				if hour > 0:
+				if hour[0]:
 					write_log("debug hour[count][10]", "%d" % (hour[0] // 60)) # is_index #10
 					hour = hour[0] // 60
 
@@ -15227,7 +15227,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							mm //= 60
 							# mm %= 60 # sec
 
-						if hour > 0:
+						if hour[0]:
 							write_log("debug hour[count][11]", "%d" % (hour[0] // 60)) # is_index #11
 							hour = hour[0] // 60
 
