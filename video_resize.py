@@ -11157,7 +11157,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 	try:
 		# tmp = list(lf_gen()) # new(yes_gen)
-		tmp: list = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) and lf]))
+		tmp: list = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))
 	except:
 		tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
 
@@ -11176,7 +11176,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		h, m = 0, 0
 
 	with unique_semaphore:
-		for lf in filter(lambda x: x, tuple(lfiles)):  # filter(lambda x: os.path.exists(x), tuple(lfiles)):
+		for lf in lfiles:  # filter(lambda x: os.path.exists(x), tuple(lfiles)):
 
 			try:
 				assert lfiles, "Пустой список или нет файлов lfiles" # is_assert(debug)
@@ -11303,7 +11303,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			write_log("debug files", "Video dublicate found")
 
 	# --- update_files ---
-
 	try:
 		temp = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]
 	except:
@@ -11312,8 +11311,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	if temp:
 		lfiles = sorted(temp, reverse=False)
 
-	# --- Frequency files by filter or all files ---
-
+	# --- Frequency files by filter or all files / temporary hidden (is_debug) ---
+	'''
 	fsizes_freq = fnames_freq = []  # sizes/filenames # fnames_freq_copy
 
 	if lfiles:
@@ -11336,9 +11335,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		if all((mf != None, fsizes_freq)):
 			try:
-				fext_freq = [l.split(".")[-1].lower().strip() for l in
+				fext_freq = list(set([l.split(".")[-1].lower().strip() for l in
 							 filter(lambda x: os.path.exists(x), tuple(lfiles)) if
-							 os.path.getsize(l) == mf and all((mf, l))]
+							 os.path.getsize(l) == mf and all((mf, l))]))
 			except:
 				fext_freq = []
 
@@ -11385,6 +11384,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		# debug
 		# exit()
+	'''
 
 	filecmdbase_copy: dict = {}
 
