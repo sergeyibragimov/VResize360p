@@ -10195,7 +10195,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						tmp: list = []  # old(no_gen) # sf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) for sf in tuple(short_files) if all((lf, sf, lf.split("\\")[-1].startswith(sf)))
 
 					# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
-					short_files = sorted(tmp, reverse=False) if tmp2 else []  # re_sorted_before_save(by_string)
+					short_files = sorted(tmp, reverse=False) if tmp else []  # re_sorted_before_save(by_string)
 					# short_files = sorted(tmp2, key=len, reverse=False) if tmp2 else []  # re_sorted_before_save(by_length)
 
 				if short_files:  # save_if_some_list
@@ -11341,6 +11341,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							 os.path.getsize(l) == mf and all((mf, l))]
 			except:
 				fext_freq = []
+
 			try:
 				# fnames_freq = list(fnames_freq_gen()) # new(yes_gen)
 				fnames_freq: list = list(set([l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lfiles)) if
@@ -11348,8 +11349,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			except:
 				fnames_freq: list = []  # old(no_gen) # l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lfiles)) if os.path.getsize(l) == mf and all((mf, l))
 
-			tmp = list(set([ff.strip() for ff in filter(lambda x: x, tuple(fnames_freq))]))
-			fnames_freq = sorted(tmp, reverse=False)
+			# tmp = list(set([ff.strip() for ff in filter(lambda x: x, tuple(fnames_freq))])) # if_yes_gen
+			
+			fnames_freq = sorted(fnames_freq, reverse=False) # re_sort_before(by_string)
+			# fnames_freq = sorted(fnames_freq, key=len, reverse=False) # re_sort_before(by_length)
 
 			if fnames_freq and all((fext_freq, fext_freq.count(fext_freq[-1]) >= 1)):  # min(2)
 				print(Style.BRIGHT + Fore.WHITE + "Найдено %d уникальных файлов" % len(fnames_freq))
@@ -12317,9 +12320,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		fext = lf.split(".")[-1].lower().strip() if os.path.exists(lf) else ""  # extention
 
 		try:
-			assert os.path.exists(lf) and fname and fext # is_assert(debug) # is_no_except(no_logging)
-		except AssertionError as err:
-			raise err
+			assert os.path.exists(lf) and fname and fext, "" # is_assert(debug) # is_no_except(no_logging)
+		except AssertionError: # as err:
+			# raise err
 			continue
 
 		ofilename = newfilename = ""
