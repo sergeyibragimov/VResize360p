@@ -1455,6 +1455,12 @@ def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging:
 		for lp in filter(lambda x: x, tuple(lprint)):
 
 			try:
+				assert lprint, "" # is_assert(debug)
+			except AssertionError as err:
+				raise err
+				break			
+
+			try:
 				assert len(lp.strip()) > 0 # is_assert(debug)
 			except AssertionError as err:
 				raise err
@@ -1845,13 +1851,21 @@ def time_to_ms() -> int: # unixtime -> ms
 
 # change_full_to_short(if_need_or_test_by_logging) # temporary_not_use
 def full_to_short(filename) -> str:
+
 	try:
-		short_filename = "".join([filename[0], ":\\...\\", filename.split("\\")[-1]]).strip()  # is_ok
+		assert os.path.exists(filename), "Файл отсутствует @full_to_short/filename" # is_assert(debug)
+	except AssertionError: # as err:
+		logging.warning("Файл отсутствует @full_to_short/%s" % filename)
+		# raise err
+		# return filename # skip_result
+
+	try:
+		short_filename: str = "".join([filename[0], ":\\...\\", filename.split("\\")[-1]]).strip() # is_ok
 	except:
 		try:
-			short_filename = filename.split("\\")[-1].strip()  # default_short_without_drive
+			short_filename: str = filename.split("\\")[-1].strip() # default_short_without_drive
 		except:
-			short_filename = filename.strip()  # if_error_stay_old_filename
+			short_filename: str = filename.strip() # if_error_stay_old_filename	
 
 	return short_filename
 
