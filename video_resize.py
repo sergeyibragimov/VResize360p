@@ -806,7 +806,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 												is_eq = (desc_check != None and desc_dict[desc.split(";")[0].strip()] == desc_check)
 												is_new = (desc_check == None)
 
-												assert any((is_upd, is_eq, is_new)), ""
+												assert any((is_upd, is_eq, is_new)), "" # is_assert(debug)
 											except AssertionError as err:
 												is_skip = True
 												raise err
@@ -873,7 +873,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 				for k, v in fad_dict.items():
 
 					try:
-						assert fad_dict, "Пустой словарь или нет отсортированных папок @folders_from_path/fad_dict"
+						assert fad_dict, "Пустой словарь или нет отсортированных папок @folders_from_path/fad_dict" # is_assert(debug)
 					except AssertionError as err:
 						logging.warning("Пустой словарь или нет отсортированных папок @folders_from_path/fad_dict")
 						raise err
@@ -915,7 +915,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 							no_prot_ext: str = ""
 
 							try:
-								assert line, "Пустая строка @http_trace_to_soundtrack_parse/line"
+								assert line, "Пустая строка @http_trace_to_soundtrack_parse/line" # is_assert(debug)
 							except AssertionError as err:
 								logging.warning("Пустая строка @http_trace_to_soundtrack_parse/line")
 								raise err
@@ -956,10 +956,10 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 							try:
 								tmp = ["\\".join(["c:\\downloads\\combine\\original\\tvseries", ".".join([http_trace_to_soundtrack_parse(pl), "mp4"])]) for pl in filter(lambda x: x, tuple(parse_list)) if http_trace_to_soundtrack_parse(pl)] # http(s)...mp4
 
-								assert tmp, "Пустой список файлов @folders_from_path/tmp" # is_assert(debug)
+								assert tmp, "Пустой список файлов @folders_from_path/tmp/#notvseries" # is_assert(debug)
 							except AssertionError: # as err:
 								tmp = []
-								logging.warning("Пустой список файлов @folders_from_path/tmp")
+								logging.warning("Пустой список файлов @folders_from_path/tmp/#notvseries/%s" % str(datetime.now())) # when_null_folder
 								# raise err
 							finally:
 								if tmp:
@@ -1196,7 +1196,7 @@ all_list_status = "Общий список в %d папках" % len(all_list) i
 print(Style.BRIGHT + Fore.YELLOW + "%d" % len(all_list), Style.BRIGHT + Fore.WHITE + "%s" % all_list_status)
 
 try:
-	assert all_list, "Пустой список all_list"
+	assert all_list, "Пустой список all_list" # is_assert(debug)
 except AssertionError as err:
 	logging.warning("Пустой список all_list")
 	raise err
@@ -1455,7 +1455,7 @@ def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging:
 		for lp in filter(lambda x: x, tuple(lprint)):
 
 			try:
-				assert len(lp.strip()) > 0
+				assert len(lp.strip()) > 0 # is_assert(debug)
 			except AssertionError as err:
 				raise err
 				continue
@@ -2298,28 +2298,19 @@ async def days_by_list(lst: list = [], is_avg: bool = False): #8
 	today = datetime.today()  # datetime
 	try:
 		# lst = list(days_by_list_gen()) # new(yes_gen)
-		lst: list = [l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lst))]
+		lst: list = sorted([l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lst)) and l], reverse=False)
 	except:
 		lst: list = []  # old(no_gen) # l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lst))
 
-	tmp = list(set([l.strip() for l in filter(lambda x: x, tuple(lst))]))
-	lst = sorted(tmp, reverse=False)
-
 	with unique_semaphore:
-		for l in filter(lambda x: x, tuple(lst)):
+		for l in lst:
 
 			try:
-				assert lst, "Пустой список или нет файлов @days_by_list/lst"
+				assert lst, "Пустой список или нет файлов @days_by_list/lst" # is_assert(debug)
 			except AssertionError as err:
 				logging.warning("Пустой список или нет файлов @days_by_list/lst")
 				raise err
 				break
-
-			try:
-				assert l
-			except AssertionError as err:
-				raise err
-				continue
 
 			try:
 				fdate = os.path.getmtime(l)  # unixdate
@@ -4917,14 +4908,14 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 			for ff2 in full_folder2:
 
 				try:
-					assert full_folder2, "Пустой список или нет списка папок @folders_filter/full_folder2"
+					assert full_folder2, "Пустой список или нет списка папок @folders_filter/full_folder2" # is_assert(debug)
 				except AssertionError as err:
 					logging.warning("Пустой список или нет списка папок @folders_filter/full_folder2")
 					raise err
 					break
 
 				try:
-					assert ff2
+					assert ff2 # is_assert(debug) # assert os.path.exists(ff2)
 				except AssertionError as err:
 					raise err
 					continue
@@ -5028,16 +5019,16 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 						for cf in check_folders:
 
 							try:
-								assert check_folders, "Пустой список или нет списка папок @folders_filter/check_folders"
+								assert check_folders, "Пустой список или нет списка папок @folders_filter/check_folders" # is_assert(debug)
 							except AssertionError as err:
 								logging.warning("Пустой список или нет списка папок @folders_filter/check_folders")
 								raise err
 								break
 
 							try:
-								assert cf and os.path.exists(cf), "Пустое имя папки или папка не существует @folders_filter/cf"
+								assert os.path.exists(cf), "Папка не существует @folders_filter/cf" # is_assert(debug)
 							except AssertionError as err:
-								logging.warning("Пустое имя папки или папка не существует @folders_filter/%s" % cf)
+								logging.warning("Папка не существует @folders_filter/%s" % cf)
 								raise err
 								continue
 
@@ -7562,7 +7553,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		for pf in proj_files:
 
 			try:
-				assert proj_files, "Пустой список или нет файлов @project_done/proj_files"
+				assert proj_files, "Пустой список или нет файлов @project_done/proj_files" # is_assert(debug)
 			except AssertionError as err:
 				logging.warning("Пустой список или нет файлов @project_done/proj_files")
 				raise err
@@ -7589,7 +7580,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		for k, v in fcmd.items():
 
 			try:
-				assert fcmd, "Пустой словарь или нет задач @project_done/fcmd"
+				assert fcmd, "Пустой словарь или нет задач @project_done/fcmd" # is_assert(debug)
 			except AssertionError as err:
 				logging.warning("Пустой словарь или нет задач @project_done/fcmd")
 				raise err
@@ -7831,7 +7822,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					fname = ""
 
 				try:
-					assert last_file, "Нет выбранного файла @project_done/last_file"
+					assert last_file, "Нет выбранного файла @project_done/last_file" # is_assert(debug)
 				except AssertionError as err:
 					logging.warning("Нет выбранного файла @project_done/last_file")
 					raise err
@@ -7873,7 +7864,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				for dl in datelist:
 
 					try:
-						assert datelist, "Пустой список или нет файлов для справнения @project_done/datelist"
+						assert datelist, "Пустой список или нет файлов для справнения @project_done/datelist" # is_assert(debug)
 					except AssertionError as err:
 						logging.warning("Пустой список или нет файлов для сравнения @project_done/datelist")
 						raise err
@@ -7927,7 +7918,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					# print(dl["file"], "1", end="\n")
 
 					try:
-						assert datelist, "Пустой список или нет файлов для сравнения @project_done/datelist"
+						assert datelist, "Пустой список или нет файлов для сравнения @project_done/datelist" # is_assert(debug)
 					except AssertionError as err:
 						logging.warning("Пустой список или нет файлов для сравнения @project_done/datelist")
 						raise err
@@ -8197,17 +8188,17 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					  "Осталось %d задач(и), которые надо очистить" % temp.count(True))
 
 					with unique_semaphore:
-						for pf in proj_files:  # filter(lambda x: x, tuple(temp2))
+						for pf in proj_files:
 
 							try:
-								assert proj_files, "Пустой список или нет файлов @project_done/proj_files"
+								assert proj_files, "Пустой список или нет файлов @project_done/proj_files" # is_assert(debug)
 							except AssertionError as err:
 								logging.warning("Пустой список или нет файлов @project_done/proj_files")
 								raise err
 								break
 
 							try:
-								assert pf
+								assert pf # is_assert(debug) # assert os.path.exists(pf)
 							except AssertionError as err:
 								raise err
 								continue
@@ -8677,14 +8668,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				for fl in copy_src_list3:  # new_files(project) # dont_check_exists
 
 					try:
-						assert copy_src_list3, "Пустой список или нет файлов @project_update/copy_src_list3"
+						assert copy_src_list3, "Пустой список или нет файлов @project_update/copy_src_list3" # is_assert(debug)
 					except AssertionError as err:
 						logging.warning("Пустой список или нет файлов @project_update/copy_src_list3")
 						raise err
 						break
 
 					try:
-						assert fl
+						assert fl # is_assert(debug) # assert os.path.exists(fl)
 					except AssertionError as err:
 						raise err
 						continue
@@ -8712,14 +8703,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				for fl in copy_src_list3:  # dont_check_exists
 
 					try:
-						assert copy_src_list3, "Пустой список или нет файлов @project_update/copy_src_list3"
+						assert copy_src_list3, "Пустой список или нет файлов @project_update/copy_src_list3" # is_assert(debug)
 					except AssertionError as err:
 						logging.warning("Пустой список или нет файлов @project_update/copy_src_list3")
 						raise err
 						break
 
 					try:
-						assert fl
+						assert fl # is_assert(debug) # assert os.path.exists(fl)
 					except AssertionError as err:
 						raise err
 						continue
@@ -8773,14 +8764,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		for ffj in files2:  # is_dict
 
 			try:
-				assert files2, "Пустой список или нет файлов files2"
+				assert files2, "Пустой список или нет файлов files2" # is_assert(debug)
 			except AssertionError as err:
 				logging.warning("Пустой список или нет файлов files2")
 				raise err
 				break
 
 			try:
-				assert ffj
+				assert ffj # is_assert(debug) # assert os.path.exists(ffj)
 			except AssertionError as err:
 				raise err
 				continue
@@ -9163,7 +9154,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for k, v in move_dict.items():
 
 				try:
-					assert move_dict or big_cinema, "Нет файлов для переноса @update_bigcinema/move_dict/big_cinema"
+					assert move_dict or big_cinema, "Нет файлов для переноса @update_bigcinema/move_dict/big_cinema" # is_assert(debug)
 				except AssertionError as err:
 					logging.warning("Нет файлов для переноса @update_bigcinema/move_dict/big_cinema")
 					raise err
@@ -9394,19 +9385,23 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					for l1 in list1:
 
 						try:
-							assert list1, "Пустой список list1"
+							assert list1, "Пустой список list1" # is_assert(debug)
 						except AssertionError as err:
 							logging.warning("Пустой список list1")
 							raise err
 							break
-						else:
-							if not l1:
-								continue
+
+						try:
+							assert l1, "" # is_assert(debug) # assert os.path.exists(l1)
+						except AssertionError as err:
+							raise err
+							continue
 
 						try:
 							fname = l1.split("\\")[-1].strip()
 						except:
 							fname = ""
+							continue
 
 						try:
 							year_path = "".join([file_cinema, video_big_regex.findall(fname)[0].replace("(", "").replace(")", "")])
@@ -9605,7 +9600,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					for k, v in filter_dict2.items():
 
 						try:
-							assert filter_dict2, "Пустой словарь filter_dict2"
+							assert filter_dict2, "Пустой словарь filter_dict2" # is_assert(debug)
 						except AssertionError as err:
 							logging.warning("Пустой словарь filter_dict2")
 							raise err
@@ -9661,7 +9656,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					for k, v in filter_dict2.items():
 
 						try:
-							assert filter_dict2, "Пустой словарь filter_dict2"
+							assert filter_dict2, "Пустой словарь filter_dict2" # is_assert(debug)
 						except AssertionError as err:
 							logging.warning("Пустой словарь filter_dict2")
 							raise err
@@ -10136,8 +10131,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		else:
 			if short_files:
 
-				tmp = list(set([sf.strip() for sf in filter(lambda x: x, tuple(short_files))]))
-				short_files = sorted(tmp, reverse=False)
+				# tmp = list(set([sf.strip() for sf in filter(lambda x: x, tuple(short_files))])) # if_yes_gen
+				short_files = sorted(short_files, reverse=False) # re_sorted_before_save
 
 				# a = ["11", "222", "3", "44"]
 
@@ -10185,10 +10180,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					except:
 						tmp: list = []  # old(no_gen) # sf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) for sf in tuple(short_files) if all((lf, sf, lf.split("\\")[-1].startswith(sf)))
 
-					tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
-
-					short_files = sorted(tmp2, reverse=False) if tmp2 else []  # if_some_file_add_else_null_list_by_set(sort_by_length)
-					# short_files = sorted(tmp2, key=len, reverse=False) if tmp2 else []  # if_some_file_add_else_null_list_by_set(sort_by_length)
+					# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
+					short_files = sorted(tmp, reverse=False) if tmp2 else []  # re_sorted_before_save(by_string)
+					# short_files = sorted(tmp2, key=len, reverse=False) if tmp2 else []  # re_sorted_before_save(by_length)
 
 				if short_files:  # save_if_some_list
 					with open(short_folders, "w", encoding="utf-8") as sff:
@@ -10283,22 +10277,17 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		try:
 			# short_list = list(short_list_gen()) # new(yes_gen)
-			short_list = [crop_filename_regex.sub("", lf.split("\\")[-1]).strip() for lf in
+			short_list = list(set([crop_filename_regex.sub("", lf.split("\\")[-1]).strip() for lf in
 						  filter(lambda x: os.path.exists(x), tuple(lfiles)) if
-						  all((lf, lf.count(".") == 1, video_regex.findall(lf.split("\\")[-1])))]
+						  all((lf, lf.count(".") == 1, video_regex.findall(lf.split("\\")[-1])))]))
 		except:
 			short_list = []  # old(no_gen) # crop_filename_regex.sub("", lf.split("\\")[-1]).strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if all((lf, lf.count(".") == 1, video_regex.findall(lf.split("\\")[-1])))
-		else:
-			if short_list:
-				tmp: list = []
 
-				tmp = list(set([sl.strip() for sl in short_list if len(sl) >= 2]))
-				short_list = sorted(tmp, reverse=False)
+		# tmp: list = []
+		# tmp = list(set([sl.strip() for sl in short_list if len(sl) >= 2])) # if_yes_gen(is_debug)
 
-		tmp = list(set([sl.strip() for sl in filter(lambda x: x, tuple(short_list))]))
-
-		short_list = sorted(tmp, reverse=False)
-		# short_list = sorted(tmp, key=len, reverse=False)
+		short_list = sorted(short_list, reverse=False) # re_sort_before_save(by_string)
+		# short_list = sorted(tmp, key=len, reverse=False) # re_sort_before_save(by_length)
 
 		short_string = "|".join(short_list) if len(short_list) > 1 else short_list[0]
 
@@ -10519,11 +10508,18 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for lf in filter(lambda x: x, tuple(lfiles)):  # filter(lambda x: os.path.exists(x), tuple(lfiles)):  # new(yes_gen)
 
 				try:
-					assert lfiles, "Пустой список или нет файлов lfiles"
+					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert(debug)
 				except AssertionError as err:
 					logging.warning("Пустой список или нет файлов lfiles")
 					raise err
 					break
+
+				try:
+					assert os.path.exists(lf), "Файл отсутствует lf" # is_assert(debug)
+				except AssertionError: # as err:
+					logging.warning("Файл отсутствует %s" % lf)
+					# raise err
+					continue				
 
 				cnt += 1
 
@@ -10544,7 +10540,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[1]" # 1
+					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[1]" # 1 # is_assert(debug)
 				except AssertionError: # as err:
 					logging.warning("Меньше установленого лимита по времени hour[1]")
 					hour = 2 # limit_hour
@@ -10556,16 +10552,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					break
 
 				try:
-					assert os.path.exists(lf), "Файл отсутствует lf"
-				except AssertionError: # as err:
-					logging.warning("Файл отсутствует %s" % lf)
-					# raise err
-					continue
-
-				try:
 					fname = lf.split("\\")[-1].strip()
 				except:
 					fname = ""
+					continue
 
 				if all((not fname in unique, fname)) and os.path.exists(lf):
 					unique.add(fname)  # short_file(first)_by_set
@@ -10677,12 +10667,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		# no_backup(lfiles)
 		unique = full_list = set()
 		try:
-			tmp: list = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]
+			tmp: list = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]
 		except:
 			tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
 
-		tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
-		lfiles = sorted(tmp2, reverse=False)
+		# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
+
+		lfiles = sorted(tmp, reverse=False) # re_sort_before(by_string)
+		# lfiles = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
 
 		cnt: int = 0
 
@@ -10699,11 +10691,18 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for lf in filter(lambda x: x, tuple(lfiles)):  # filter(lambda x: os.path.exists(x), tuple(lfiles)):  # new(yes_gen)
 
 				try:
-					assert lfiles, "Пустой список или нет файлов lfiles"
+					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert(debug)
 				except AssertionError as err:
 					logging.warning("Пустой список или нет файлов lfiles")
 					raise err
 					break
+
+				try:
+					assert os.path.exists(lf), "Файл отсутствует lf"
+				except AssertionError: # as err:
+					logging.warning("Файл отсутствует %s" % lf)
+					# raise err
+					continue				
 
 				cnt += 1
 
@@ -10736,16 +10735,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					break
 
 				try:
-					assert os.path.exists(lf), "Файл отсутствует lf"
-				except AssertionError: # as err:
-					logging.warning("Файл отсутствует %s" % lf)
-					# raise err
-					continue
-
-				try:
 					fname = lf.split("\\")[-1].strip()
 				except:
 					fname = ""
+					continue
 
 				if all((not fname in unique, fname)):
 					unique.add(fname)  # short_file(first)_by_set
@@ -10895,15 +10888,17 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 	# add_or_update_projects(tv_series/big_cinema)
 	try:
-		lfiles_total: list = ["".join([path_for_folder1, lf.strip()]).strip() for lf in os.listdir(path_for_folder1) if
-							os.path.exists("".join([path_for_folder1, lf.strip()]))]  # old(no_gen)
+		lfiles_total: list = list(set(["".join([path_for_folder1, lf.strip()]).strip() for lf in os.listdir(path_for_folder1) if
+							os.path.exists("".join([path_for_folder1, lf.strip()])) and lf]))  # old(no_gen)
 	except:
 		lfiles_total: list = []
 
 	if lfiles_total:
 
-		tmp = list(set([lt.strip() for lt in filter(lambda x: x, tuple(lfiles_total))]))
-		lfiles_total = sorted(tmp, reverse=False)
+		# tmp = list(set([lt.strip() for lt in filter(lambda x: x, tuple(lfiles_total))])) # if_yes_gen
+
+		lfiles_total = sorted(lfiles_total, reverse=False) # re_sort_before(by_string)
+		# lfiles_total = sorted(lfiles_total, key=len, reverse=False) # re_sort_before(by_length)
 
 		try:
 			tmp: list = [crop_filename_regex.sub("", lf.split("\\")[-1].strip()) for lf in
@@ -10997,14 +10992,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for f in ff:
 
 				try:
-					assert ff, "Пустой список или нет файлов ff"
+					assert ff, "Пустой список или нет файлов ff" # is_assert(debug)
 				except AssertionError as err:
 					logging.warning("Пустой список или нет файлов ff")
 					raise err
 					break
 
 				try:
-					assert f
+					assert f # is_assert(debug) # assert os.path.exists(f)
 				except AssertionError as err:
 					raise err
 					continue
@@ -11148,12 +11143,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 	try:
 		# tmp = list(lf_gen()) # new(yes_gen)
-		tmp: list = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]
+		tmp: list = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) and lf]))
 	except:
 		tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
 
-	tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
-	lfiles = sorted(tmp2, reverse=False)
+	# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
+	
+	lfiles = sorted(tmp, reverse=False) # re_sort_before(by_string)
+	# lfiles = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
 
 	cnt: int = 0
 
@@ -11168,11 +11165,18 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		for lf in filter(lambda x: x, tuple(lfiles)):  # filter(lambda x: os.path.exists(x), tuple(lfiles)):
 
 			try:
-				assert lfiles, "Пустой список или нет файлов lfiles"
+				assert lfiles, "Пустой список или нет файлов lfiles" # is_assert(debug)
 			except AssertionError as err:
 				logging.warning("Пустой список или нет файлов lfiles")
 				raise err
 				break
+
+			try:
+				assert os.path.exists(lf), "Файл отсутствует lf" # is_assert(debug)
+			except AssertionError: # as err:
+				logging.warning("Файл отсутствует %s" % lf)
+				# raise err
+				continue			
 
 			cnt += 1
 
@@ -11191,7 +11195,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				hour = hour[0] // 60
 
 			try:
-				assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[3]" # 3
+				assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[3]" # 3 # is_assert(debug)
 			except AssertionError: # as err:
 				logging.warning("Меньше установленого лимита по времени hour[3]")
 				hour = 2 # limit_hour
@@ -11202,17 +11206,13 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				write_log("debug stop_job[lfiles]", "Stop: at %s [%d]" % (lf, cnt))
 				break
 
-			try:
-				assert os.path.exists(lf), "Файл отсутствует lf"
-			except AssertionError: # as err:
-				logging.warning("Файл отсутствует %s" % lf)
-				# raise err
-				continue
+
 
 			try:
 				fname = lf.split("\\")[-1]
 			except:
 				fname = ""
+				continue
 
 			if all((not fname in short_set, fname)):
 				short_set.add(fname)
@@ -11305,13 +11305,15 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	if lfiles:
 		try:
 			# tmp = list(lf_gen()) # new(yes_gen)
-			tmp: list = [os.path.getsize(lf) for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if
-						os.path.getsize(lf) and not os.path.getsize(lf) in fsizes_freq]
+			tmp: list = list(set([os.path.getsize(lf) for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if
+						os.path.getsize(lf) and not os.path.getsize(lf) in fsizes_freq and lf]))
 		except:
 			tmp: list = []  # old(no_gen) # os.path.getsize(lf) for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if os.path.getsize(lf) and not os.path.getsize(lf) in fsizes_freq
 
-		tmp2 = list(set([t for t in filter(lambda x: x, tuple(tmp))]))
-		fsizes_freq = sorted(tmp2, reverse=False)
+		# tmp2 = list(set([t for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
+		
+		fsizes_freq = sorted(tmp, reverse=False) # re_sort_before(by_string)
+		# fsizes_freq = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
 
 		try:
 			mf = most_frequent(fsizes_freq)  # fsizes_freq(one) # ff(all) # freq_filesize(list) # freq_videos
@@ -11490,7 +11492,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for k, v in filecmdbase_dict.items():
 
 				try:
-					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # skip_maxint
+					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # skip_maxint # is_assert(debug)
 				except AssertionError as err:
 					logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 					raise err
@@ -11528,7 +11530,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[4]" # 4
+					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[4]" # 4 # is_assert(debug)
 				except AssertionError: # as err:
 					logging.warning("Меньше установленого лимита по времени hour[4]")
 					hour = 2 # limit_hour
@@ -11538,13 +11540,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				if all((hh > hour, hour)): # stop_if_more_30min # mm[0] // 60 >= limit_hour:  # stop_if_more_"2"hour
 					write_log("debug stop_job[filecmdbase_dict]", "Stop: at %s [%d]" % (k, cnt))
 					break
-
-				try:
-					assert os.path.exists(k), "Файл отсутствует k"
-				except AssertionError as err:
-					logging.warning("Файл отсутствует %s" % k)
-					raise err
-					continue
 
 				# find_dspace(nlocal)
 				try:
@@ -11878,11 +11873,18 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for lf in filter(lambda x: x, tuple(lfiles)):  # filter(lambda x: os.path.exists(x), tuple(lfiles))
 
 				try:
-					assert lfiles, "Пустой список или нет файлов lfiles"
+					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert(debug)
 				except AssertionError as err:
 					logging.warning("Пустой список или нет файлов lfiles")
 					raise err
 					break
+
+				try:
+					assert os.path.exists(lf), "Файл отсутствует lf" # is_assert(debug)
+				except AssertionError: # as err:
+					logging.warning("Файл отсутствует %s" % lf)
+					# raise err
+					continue				
 
 				cnt += 1
 
@@ -11903,7 +11905,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[5]" # 5
+					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[5]" # 5 # is_assert(debug)
 				except AssertionError: # as err:
 					logging.warning("Меньше установленого лимита по времени hour[5]")
 					hour = 2 # limit_hour
@@ -11915,16 +11917,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					break
 
 				try:
-					assert os.path.exists(lf), "Файл отсутствует lf"
-				except AssertionError: # as err:
-					logging.warning("Файл отсутствует %s" % lf)
-					# raise err
-					continue
-
-				try:
 					fname = lf.split("\\")[-1].strip()
 				except:
 					fname = ""
+					continue
 
 				if all((not fname in unique, fname)):
 					unique.add(fname)  # short_file(first)_by_set
@@ -12049,12 +12045,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		unique = full_list = set()
 		try:
 			# tmp = list(lf_gen()) # new(yes_gen)
-			tmp: list = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]
+			tmp: list = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))
 		except:
 			tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
 
-		tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
-		lfiles = sorted(tmp2, reverse=False)
+		# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
+		
+		lfiles = sorted(tmp, reverse=False) # re_sort_before(by_string)
+		# lfiles = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
 
 		cnt: int = 0
 
@@ -12071,16 +12069,24 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for lf in filter(lambda x: x, tuple(lfiles)):  # filter(lambda x: os.path.exists(x), tuple(lfiles)):
 
 				try:
-					assert lfiles, "Пустой список или нет файлов lfiles"
+					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert(debug)
 				except AssertionError as err:
 					logging.warning("Пустой список или нет файлов lfiles")
 					raise err
 					break
 
 				try:
+					assert os.path.exists(lf), "Файл отсутствует lf" # is_assert(debug)
+				except AssertionError as err:
+					logging.warning("Файл отсутствует %s" % lf)
+					raise err
+					continue
+
+				try:
 					fname = lf.strip("\\")[-1]
 				except:
 					fname = ""
+					continue
 
 				if all((not fname in unique, fname)):
 					unique.add(fname)  # short_file(first)_by_set
@@ -12105,7 +12111,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[6]" # 6
+					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[6]" # 6 # is_assert(debug)
 				except AssertionError: # as err:
 					logging.warning("Меньше установленого лимита по времени hour[6]")
 					hour = 2 # limit_hour
@@ -12165,8 +12171,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			except:
 				tmp: list = []  # old(no_gen) # lf.strip() for ls in lfiles_sizes for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if all((lf, os.path.getsize(lf) == ls, os.path.getsize(lf)))
 
-			tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
-			lfiles = sorted(tmp2, reverse=True)  # True=cba(sort) # False=abc(sort)
+			tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
+			
+			lfiles = sorted(tmp2, reverse=True)  # True=cba(sort) # False=abc(sort) # by_string
+			# lfiles = sorted(tmp2, key=len, reverse=True)  # True=cba(sort) # False=abc(sort) # by_length
 
 	write_log("debug jobsave", "%d" % len(lfiles))  # count_current_jobs(all_find_files)
 
@@ -12187,12 +12195,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	date1 = datetime.now()
 	try:
 		# tmp = list(lf_gen()) # new(yes_gen)
-		tmp: list = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]
+		tmp: list = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))
 	except:
 		tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
 
-	tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
-	lfiles = sorted(tmp2, reverse=False)
+	# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
+
+	lfiles = sorted(tmp, reverse=False) # re_sort_before(by_string)
+	# lfiles = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
 
 	hms_sum: int = 0
 	hms_len: int = 0
@@ -12210,7 +12220,21 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	date1 = datetime.now()
 
 	# with unique_semaphore:
-	for lf in filter(lambda x: x, tuple(lfiles)):  # filter(lambda x: os.path.exists(x), tuple(lfiles))
+	for lf in lfiles:
+
+		try:
+			assert lfiles, "Пустой список или нет файлов lfiles" # is_assert(debug)
+		except AssertionError as err:
+			logging.warning("Пустой список или нет файлов lfiles")
+			raise err
+			break
+
+		try:
+			assert os.path.exists(lf), "Файл отсутствует lf" # is_assert(debug)
+		except AssertionError as err:
+			logging.warning("Файл отсутствует %s" % lf)
+			raise err
+			continue
 
 		cnt += 1
 
@@ -12223,6 +12247,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			fname = fn
 		except:
 			fname = ""
+			continue
 
 		fext = lf.split(".")[-1].lower().strip()
 
@@ -12245,7 +12270,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			hour = hour[0] // 60
 
 		try:
-			assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[7]" # 7
+			assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[7]" # 7 # is_assert(debug)
 		except AssertionError: # as err:
 			logging.warning("Меньше установленого лимита по времени hour[7]")
 			hour = 2 # limit_hour
@@ -12255,13 +12280,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
 			write_log("debug stop_job[lfiles]", "Stop: at %s [%d]" % (lf, cnt))
 			break
-
-		try:
-			assert os.path.exists(lf), "Файл отсутствует lf"
-		except AssertionError: # as err:
-			logging.warning("Файл отсутствует %s" % lf)
-			# raise err
-			continue
 
 		if not lf in job_set:
 			job_set.add(lf)
@@ -12285,7 +12303,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		fext = lf.split(".")[-1].lower().strip() if os.path.exists(lf) else ""  # extention
 
 		try:
-			assert os.path.exists(lf) and fname and fext # is_assert(debug) # is_no_except
+			assert os.path.exists(lf) and fname and fext # is_assert(debug) # is_no_except(no_logging)
 		except AssertionError as err:
 			raise err
 			continue
@@ -12301,6 +12319,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			dfilename = fn
 		except:
 			dfilename = ""
+			continue
 
 		if fext != "mp4":
 			"""
@@ -13024,23 +13043,18 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		# shorts_in_list(upgrade)
 		try:
 			# short_list = [crop_filename_regex.sub("", lf.split("\\")[-1]) for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))] # equal
-			short_list = [
+			short_list = list(set([
 				crop_filename_regex.sub("", lf.split("\\")[-1]).split("_")[0].strip() if lf.split("\\")[-1].count(
 					"_") > 0 else crop_filename_regex.sub("", lf.split("\\")[-1]).strip() for lf in
-				filter(lambda x: os.path.exists(x), tuple(lfiles))]  # match_or_equal
+				filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))  # match_or_equal
 		except:
 			short_list = []  # old(no_gen) # crop_filename_regex.sub("", lf.split("\\")[-1]) for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
-		else:
-			if short_list:
-				tmp: list = []
 
-				tmp = list(set([sl.strip() for sl in short_list if len(sl) >= 2]))
-				short_list = sorted(tmp, reverse=False)
-
-		tmp = list(set([sl.strip() for sl in filter(lambda x: x, tuple(short_list))]))
-
-		short_list = sorted(tmp, reverse=False)
-		# short_list = sorted(tmp, key=len, reverse=False)
+		tmp: list = []
+		tmp = list(set([sl.strip() for sl in short_list if len(sl) >= 2]))
+				
+		short_list = sorted(tmp, reverse=False) # re_sort_before(by_string)
+		# short_list = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
 
 		if short_list:
 			write_log("debug short", ";".join(short_list))  # short_files
@@ -13053,7 +13067,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		for k, v in filecmdbase_dict.items():
 
 			try:
-				assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict"
+				assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert(debug)
 			except AssertionError as err:
 				logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 				raise err
@@ -13112,15 +13126,16 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				for jl in jobs_list:
 
 					try:
-						assert jobs_list, "Пустой список или нет задач jobs_list"
+						assert jobs_list, "Пустой список или нет задач jobs_list" # is_assert(debug)
 					except AssertionError as err:
 						logging.warning("Пустой список или нет задач jobs_list")
 						raise err
 						break
 
 					try:
-						assert jl
+						assert os.path.exists(jl), "Файл отсутствует jl" # is_assert(debug)
 					except AssertionError as err:
+						logging.warning("Файл отсутствует %s" % jl)
 						raise err
 						continue
 
@@ -13128,13 +13143,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						fname = jl.split("\\")[-1]
 					except:
 						fname = ""
-						continue
-
-					try:
-						assert os.path.exists(jl), "Файл отсутствует jl"
-					except AssertionError as err:
-						logging.warning("Файл отсутствует %s" % jl)
-						raise err
 						continue
 
 					is_rec = False
@@ -13184,7 +13192,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		for k, v in filecmdbase_dict.items():
 
 			try:
-				assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict"
+				assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert(debug)
 			except AssertionError as err:
 				logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 				raise err
@@ -13360,7 +13368,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		for k, v in filecmdbase_dict.items():
 
 			try:
-				assert filecmdbase_dict, "Пустой список или нет задач filecmdbase_dict"
+				assert filecmdbase_dict, "Пустой список или нет задач filecmdbase_dict" # is_assert(debug)
 			except AssertionError as err:
 				logging.warning("Пустой список или нет задач filecmdbase_dict")
 				raise err
@@ -13692,7 +13700,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for k, v in filecmdbase_dict.items():
 
 				try:
-					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict"
+					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert(debug)
 				except AssertionError as err:
 					logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 					raise err
@@ -13943,7 +13951,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for k, v in filecmdbase_dict.items(): # somebase_dict # cbf_dict
 
 				try:
-					assert filecmdbase_dict, "Пустой вловарь или нет задач filecmdbase_dict"
+					assert filecmdbase_dict, "Пустой вловарь или нет задач filecmdbase_dict" # is_assert(debug)
 				except AssertionError as err:
 					logging.warning("Пустой вловарь или нет задач filecmdbase_dict")
 					raise err
@@ -14064,7 +14072,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				for k, v in filecmdbase_dict.items():
 
 					try:
-						assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict"
+						assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert(debug)
 					except AssertionError as err:
 						logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 						raise err
@@ -14161,7 +14169,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				for k, v in filecmdbase_dict.items():
 
 					try:
-						assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict"
+						assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert(debug)
 					except AssertionError as err:
 						logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 						raise err
@@ -14216,7 +14224,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for k, v in filecmdbase_dict.items():
 
 				try:
-					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict"
+					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert(debug)
 				except AssertionError as err:
 					logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 					raise err
@@ -14333,7 +14341,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for k, v in filecmdbase_dict.items():
 
 				try:
-					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict"
+					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert(debug)
 				except AssertionError as err:
 					logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 					raise err
@@ -14409,13 +14417,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				# if all((fname in skip_file, fname, skip_file)) or all((jobs_dict_index, jobs_dict_index[fname] > 1)):  # fname_count_filter(list/dict)
 					# continue
-
-				try:
-					assert os.path.exists(k), "Файл отсутствует k"
-				except AssertionError as err:
-					logging.warning("Файл отсутствует %s" % k)
-					raise err
-					continue
 
 				main_count = cnt  # count_mp4
 
@@ -14586,7 +14587,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[8]" # 8
+					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[8]" # 8 # is_assert(debug)
 				except AssertionError: # as err:
 					logging.warning("Меньше установленого лимита по времени hour[8]")
 					hour = 2 # limit_hour
@@ -14682,7 +14683,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[9]" # 9
+					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[9]" # 9 # is_assert(debug)
 				except AssertionError: # as err:
 					logging.warning("Меньше установленого лимита по времени hour[9]")
 					hour = 2 # limit_hour
@@ -14788,14 +14789,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						for cj in check_job:
 
 							try:
-								assert check_job, "Пустой список или нет задач check_job"
+								assert check_job, "Пустой список или нет задач check_job" # is_assert(debug)
 							except AssertionError as err:
 								logging.warning("Пустой список или нет задач check_job")
 								raise err
 								break
 
 							try:
-								assert cj
+								assert cj # is_assert(debug) # assert os.path.exists(cj)
 							except AssertionError as err:
 								raise err
 								continue
@@ -15057,7 +15058,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				# """
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[10]" # 10
+					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[10]" # 10 # is_assert(debug)
 				except AssertionError: # as err:
 					logging.warning("Меньше установленого лимита по времени hour[10]")
 					hour = 2 # limit_hour
@@ -15227,7 +15228,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 						# """
 						try:
-							assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[11]" # 11
+							assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[11]" # 11 # is_assert(debug)
 						except AssertionError: # as err:
 							logging.warning("Меньше установленого лимита по времени hour[11]")
 							hour = 2 # limit_hour
