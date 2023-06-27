@@ -711,10 +711,9 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 			else:
 				if all((desc_dict_filter, len(desc_dict_filter) <= len(desc_dict))): # desc_dict
 
-					if len(desc_dict_filter) != len(desc_dict):
-						print(Style.BRIGHT + Fore.CYANimport  + "будет обновлено",
-							Style.BRIGHT + Fore.WHITE + "%d",
-							Style.BRIGHT + Fore.YELLOW + "записей" % abs(len(desc_dict_filter) - len(desc_dict)))
+					print(Style.BRIGHT + Fore.CYANimport  + "будет обновлено",
+						Style.BRIGHT + Fore.WHITE + "%d",
+						Style.BRIGHT + Fore.YELLOW + "записей" % abs(len(desc_dict_filter) - len(desc_dict)))
 
 					desc_dict.update(desc_dict_filter)
 
@@ -795,7 +794,44 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 										except:
 											desc = ""
 										else:
-											desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:])
+											try:
+												desc_check = ";".join(desc.split(";")[1:])
+											except:
+												desc_check = None
+
+											is_skip: bool = False
+
+											try:
+												is_upd = (desc_check != None and desc_dict[desc.split(";")[0].strip()] != desc_check)
+												is_eq = (desc_check != None and desc_dict[desc.split(";")[0].strip()] == desc_check)
+												is_new = (desc_check == None)
+
+												assert any((is_upd, is_eq, is_new)), ""
+											except AssertionError as err:
+												is_skip = True
+												raise err
+
+											# @logging_all_descriptions # is_need_try_except(is_debug/is_error)
+											if is_skip == False:
+												if is_upd: # desc_check != None and desc_dict[desc.split(";")[0].strip()] != desc_check:
+													desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]) # update_desc
+
+													print(Style.BRIGHT + Fore.WHITE + "%s" % desc.split(";")[0].strip(),
+														Style.BRIGHT + Fore.YELLOW + "%s" % ";".join(desc.split(";")[1:]), "update") 
+
+												if is_eq:# desc_check != None and desc_dict[desc.split(";")[0].strip()] == desc_check:
+													# desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]) # try_skip_desc
+
+													print(Style.BRIGHT + Fore.WHITE + "%s" % desc.split(";")[0].strip(),
+														Style.BRIGHT + Fore.CYAN + "%s" % ";".join(desc.split(";")[1:]), "equal")
+
+												if is_new: # desc_check == None:
+													desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]) # add_desc
+
+													print(Style.BRIGHT + Fore.WHITE + "%s" % desc.split(";")[0].strip(),
+														Style.BRIGHT + Fore.GREEN + "%s" % ";".join(desc.split(";")[1:]), "new")
+											elif is_skip == True:
+												print(Style.BRIGHT + Fore.WHITE + "Skipped description: %s" % str(parse_desc)) # original_desc # is_color
 
 										# print(Style.BRIGHT + Fore.CYAN + "Info: %s" % str(parse_desc)) # original_desc
 										# print(Style.BRIGHT + Fore.CYAN + "%s" % desc_dict[parse_desc[0].strip()]) # "eng" / date
@@ -1063,19 +1099,6 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 							# write_log("debug fsf[is_two_desc_found][ok]", "%s" % fsf) # is_delete
 
 			if desc_dict: # some_data # data
-
-				# hide_temp_description
-				"""
-				if desc_dict2:
-					desc_dict.update(desc_dict2)
-
-					if all((desc_dict2, set([*desc_dict2]) & set([*desc_dict]))): # newbie_in_current_desc_by_json
-						with open(desc_base_temp, "w", encoding="utf-8") as dbtf:
-							json.dump({}, dbtf, ensure_ascii=False, indent=2, sort_keys=True) # clear_manual_desc_if_some_added
-
-						if os.path.exists(desc_base_temp):
-							os.remove(desc_base_temp) # delete_after_update
-				"""
 
 				with open(desc_base, "w", encoding="utf-8") as dbf:
 					json.dump(desc_dict, dbf, ensure_ascii=False, indent=2, sort_keys=True)
