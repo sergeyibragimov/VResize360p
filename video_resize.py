@@ -817,7 +817,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 													desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]) # update_desc
 
 													print(Style.BRIGHT + Fore.WHITE + "%s" % desc.split(";")[0].strip(),
-														Style.BRIGHT + Fore.YELLOW + "%s" % ";".join(desc.split(";")[1:]), "update") 
+														Style.BRIGHT + Fore.YELLOW + "%s" % ";".join(desc.split(";")[1:]), "update")
 
 												if is_eq:# desc_check != None and desc_dict[desc.split(";")[0].strip()] == desc_check:
 													# desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]) # try_skip_desc
@@ -880,7 +880,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 						break
 
 					try:
-						assert k and v # is_assert(debug) # assert os.path.exists(k)
+						assert k and v, "" # is_assert(debug) # assert os.path.exists(k)
 					except AssertionError as err:
 						raise err
 						continue
@@ -1458,10 +1458,10 @@ def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging:
 				assert lprint, "" # is_assert(debug)
 			except AssertionError as err:
 				raise err
-				break			
+				break
 
 			try:
-				assert len(lp.strip()) > 0 # is_assert(debug)
+				assert len(lp.strip()) > 0, "" # is_assert(debug)
 			except AssertionError as err:
 				raise err
 				continue
@@ -1865,7 +1865,7 @@ def full_to_short(filename) -> str:
 		try:
 			short_filename: str = filename.split("\\")[-1].strip() # default_short_without_drive
 		except:
-			short_filename: str = filename.strip() # if_error_stay_old_filename	
+			short_filename: str = filename.strip() # if_error_stay_old_filename
 
 	return short_filename
 
@@ -4929,7 +4929,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 					break
 
 				try:
-					assert ff2 # is_assert(debug) # assert os.path.exists(ff2)
+					assert ff2, "" # is_assert(debug) # assert os.path.exists(ff2)
 				except AssertionError as err:
 					raise err
 					continue
@@ -8212,7 +8212,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								break
 
 							try:
-								assert pf # is_assert(debug) # assert os.path.exists(pf)
+								assert pf, "" # is_assert(debug) # assert os.path.exists(pf)
 							except AssertionError as err:
 								raise err
 								continue
@@ -8689,7 +8689,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						break
 
 					try:
-						assert fl # is_assert(debug) # assert os.path.exists(fl)
+						assert fl, "" # is_assert(debug) # assert os.path.exists(fl)
 					except AssertionError as err:
 						raise err
 						continue
@@ -8724,7 +8724,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						break
 
 					try:
-						assert fl # is_assert(debug) # assert os.path.exists(fl)
+						assert fl, "" # is_assert(debug) # assert os.path.exists(fl)
 					except AssertionError as err:
 						raise err
 						continue
@@ -8785,7 +8785,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				break
 
 			try:
-				assert ffj # is_assert(debug) # assert os.path.exists(ffj)
+				assert ffj, "" # is_assert(debug) # assert os.path.exists(ffj)
 			except AssertionError as err:
 				raise err
 				continue
@@ -9621,7 +9621,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							break
 
 						try:
-							assert k and v # is_assert(debug) # assert os.path.exists(k)
+							assert k and v, "" # is_assert(debug) # assert os.path.exists(k)
 						except AssertionError as err:
 							raise err
 							continue
@@ -9677,7 +9677,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							break
 
 						try:
-							assert k and v # is_assert(debug) # assert os.path.exists(k)
+							assert k and v, "" # is_assert(debug) # assert os.path.exists(k)
 						except AssertionError as err:
 							raise err
 							continue
@@ -10533,7 +10533,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				except AssertionError: # as err:
 					logging.warning("Файл отсутствует %s" % lf)
 					# raise err
-					continue				
+					continue
 
 				cnt += 1
 
@@ -10716,7 +10716,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				except AssertionError: # as err:
 					logging.warning("Файл отсутствует %s" % lf)
 					# raise err
-					continue				
+					continue
 
 				cnt += 1
 
@@ -11013,7 +11013,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					break
 
 				try:
-					assert f # is_assert(debug) # assert os.path.exists(f)
+					assert f, "" # is_assert(debug) # assert os.path.exists(f)
 				except AssertionError as err:
 					raise err
 					continue
@@ -11162,7 +11162,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
 
 	# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
-	
+
 	lfiles = sorted(tmp, reverse=False) # re_sort_before(by_string)
 	# lfiles = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
 
@@ -11190,7 +11190,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			except AssertionError: # as err:
 				logging.warning("Файл отсутствует %s" % lf)
 				# raise err
-				continue			
+				continue
 
 			cnt += 1
 
@@ -11324,7 +11324,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			tmp: list = []  # old(no_gen) # os.path.getsize(lf) for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if os.path.getsize(lf) and not os.path.getsize(lf) in fsizes_freq
 
 		# tmp2 = list(set([t for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
-		
+
 		fsizes_freq = sorted(tmp, reverse=False) # re_sort_before(by_string)
 		# fsizes_freq = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
 
@@ -11349,7 +11349,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				fnames_freq: list = []  # old(no_gen) # l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lfiles)) if os.path.getsize(l) == mf and all((mf, l))
 
 			# tmp = list(set([ff.strip() for ff in filter(lambda x: x, tuple(fnames_freq))])) # if_yes_gen
-			
+
 			fnames_freq = sorted(fnames_freq, reverse=False) # re_sort_before(by_string)
 			# fnames_freq = sorted(fnames_freq, key=len, reverse=False) # re_sort_before(by_length)
 
@@ -11901,7 +11901,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				except AssertionError: # as err:
 					logging.warning("Файл отсутствует %s" % lf)
 					# raise err
-					continue				
+					continue
 
 				cnt += 1
 
@@ -12067,7 +12067,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
 
 		# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
-		
+
 		lfiles = sorted(tmp, reverse=False) # re_sort_before(by_string)
 		# lfiles = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
 
@@ -12189,7 +12189,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				tmp: list = []  # old(no_gen) # lf.strip() for ls in lfiles_sizes for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if all((lf, os.path.getsize(lf) == ls, os.path.getsize(lf)))
 
 			tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
-			
+
 			lfiles = sorted(tmp2, reverse=True)  # True=cba(sort) # False=abc(sort) # by_string
 			# lfiles = sorted(tmp2, key=len, reverse=True)  # True=cba(sort) # False=abc(sort) # by_length
 
@@ -13069,7 +13069,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		tmp: list = []
 		tmp = list(set([sl.strip() for sl in short_list if len(sl) >= 2]))
-				
+
 		short_list = sorted(tmp, reverse=False) # re_sort_before(by_string)
 		# short_list = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
 
@@ -14813,7 +14813,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								break
 
 							try:
-								assert cj # is_assert(debug) # assert os.path.exists(cj)
+								assert cj, "" # is_assert(debug) # assert os.path.exists(cj)
 							except AssertionError as err:
 								raise err
 								continue
