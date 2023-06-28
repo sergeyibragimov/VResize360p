@@ -11,7 +11,8 @@
 
 # import io
 from concurrent.futures import ThreadPoolExecutor  # Thread by pool # man+ / youtube
-from datetime import datetime  # datetime
+from datetime import datetime, timezone # datetime
+import ntplib # pip install -U ntplib # server time
 from functools import reduce
 from os import getcwd  # current_folder
 from psutil import cpu_count  # Process # psutil (process and system utilities)
@@ -1997,6 +1998,18 @@ async def utc_time(dt = datetime.now()):
 		raise err
 
 	return gmt
+
+
+async def ntp_to_utc():
+	try:
+		c = ntplib.NTPClient()
+		response = c.request('uk.pool.ntp.org', version=3) # ntp.server.pool
+		# print(response.offset) #0.22685885429382324
+	except:
+		return ("", "")
+	else:
+		# print(datetime.fromtimestamp(response.tx_time, timezone.utc)) #2023-06-28 02:59:11.460592+00:00 # gmt+5
+		return datetime.fromtimestamp(response.tx_time, timezone.utc)
 
 
 utc = asyncio.run(utc_time())
@@ -14354,6 +14367,79 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			prc_pos_set = set()
 			prc_pos: int = 0
 
+			# debug_run_by_classify(and_by_filesizes) / fast_or_long # is_need_hidden(by_default)
+			# '''
+
+			s, l, a = 0, 0, 0
+
+			lst_classify: list = []
+
+			lst1 = lst2 = [] # classify(1 <=> 0)
+
+			fsizes_list: list = []
+
+			for k, v in filecmdbase_dict.items():
+
+				try:
+					assert filecmdbase_dict, "" # is_assert(debug)
+				except AssertionError as err:
+					raise err
+					break
+
+				try:
+					assert os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v, ""
+				except AssertionError as err:
+					logging.warning("Файл отсутствует %s" % k)
+					raise err
+					continue
+
+				try:
+					fsize = os.path.getsize(k)
+					assert fsize, "Файл k пустой или не содержит информации" # is_assert(debug) # is_another_except
+				except AssertionError as err:
+					logging.warning("Файл %s пустой или не содержит информации" % k)
+					raise err
+					continue
+				else:
+					fsizes_list.append(fsize) # pass_1_of_2
+
+			if fsizes_list:
+				try:
+					s, l = sum(fsizes_list), len(fsizes_list)
+					a = (lambda s, l: s / l)(s, l)
+				except AssertionError as err:
+					a = 0
+					raise err
+				else:
+					if a:
+						lst_classify = [(fl,1) if fl - a > 0 else (fl,0) for fl in fsizes_list]
+
+				if lst_classify:
+					lst1 = [fl[0] for lc in lst_classify if fl[1] == 1] # classify_1
+					lst2 = [fl[0] for lc in lst_classify if fl[1] == 0] # classify_0
+
+					if len(lst1) > len(lst2): # first_more_second
+						fsizes_list = lst1
+					elif len(lst2) > len(lst1): # second_more_first
+						fsizes_list = lst2
+					elif all((lst1, len(lst1) == len(lst2))): # if_eq_length_and_first_some_data
+						fsizes_list = lst1
+					elif all((not lst1, lst2, lst1 != lst2)): # first_is_null_and_second_some_data
+						fsizes_list = lst2
+					# else:
+						# pass
+
+					fsizes_list.sort(reverse=False) # default_sort(is_sorted)
+
+					try:
+						filecmdbase_dict_filter = {k:v for k, v in filecmdbase_dict.items() if os.path.exists(k) and os.path.getsize(k) in fsizes_list}
+					except:
+						filecmdbase_dict_filter = {}
+
+					if all((filecmdbase_dict_filter, len(filecmdbase_dict_filter) <= len(filecmdbase_dict))):
+						filecmdbase_dict = filecmdbase_dict_filter
+			# '''
+
 			# new_script
 			for k, v in filecmdbase_dict.items():
 
@@ -14836,7 +14922,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								is_clean = False
 
 							if all((is_clean == True, cj["src"].split("\\")[-1] == cj["dst"].split("\\")[-1])): # try_save # int(cj["leng"]) == MM.get_length(cj["dst"])
-								print(Style.BRIGHT + Fore.GREEN + "Задача %s выполнена успешно, её можно сохранить" % full_to_short(cj["dst"]))
+								print(Style.BRIGHT + Fore.CYAN + "Задача %s выполнена успешно, её можно сохранить" % full_to_short(cj["dst"])) # is_color
 								write_log("debug check_job[equal]", "Задача %s выполнена успешно, её можно сохранить" % cj["dst"])
 
 								is_ok, is_bad = True, False
