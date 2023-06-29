@@ -673,7 +673,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 	# if_more_one_file_then_save # debug
 	try:
-		folder_scan_full = list(set(["".join([mydir, df]) for df in os.listdir(mydir) if os.path.exists("".join([mydir, df]))])) # os.listdir("".join([mydir, df])
+		folder_scan_full = list(set(["".join([mydir, df]) for df in os.listdir(mydir) if os.path.exists("".join([mydir, df])) and df])) # os.listdir("".join([mydir, df])
 	except:
 		folder_scan_full = []
 	else:
@@ -723,22 +723,28 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 			# true_sym = re.compile(r"([^A-ZА-Я\d\-])", re.I); # sample = "Hello world"; print(list(set(true_sym.findall(sample)))) # need_skip
 
-			for fsf in filter(lambda x: x, tuple(folder_scan_full)):
+			for fsf in folder_scan_full:
 
 				try:
 					list_files = os.listdir(fsf)
-				except:
-					list_files = []
+				except BaseException: # as err:
+					list_files = [] 
+					logging.warning("Нет файлов в папке %s" % fsf)
+					# raise err
 				else:
-					is_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) > 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) > 0) # desc(1) / files(1)
+					is_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 1) # desc(1) / files(0/1)
 					is_not_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) == 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 0) # desc(0) / files(0)
 					is_two_desc = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 2) # desc(2) / files(0/1)
 
 				# path_to_description
 				try:
-					full_list = ["\\".join([fsf, ol]).strip() for ol in filter(lambda x: "txt" in x, tuple(list_files))] #  if os.path.exists("\\".join([fsf, ol]).strip())
-				except:
+					full_list = list(set(["\\".join([fsf, ol]).strip() for ol in filter(lambda x: "txt" in x, tuple(list_files)) if ol]))
+				except BaseException: # as err:
 					full_list = []
+					logging.warning("Пустой список или нет описаний full_list")
+					# raise err
+				else:
+					full_list.sort(reverse=False)
 
 				# descriptions
 				if len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 1 and full_list:
@@ -751,7 +757,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 					desc_regex = re.compile(r"(.*)\s\((.*)\)\s(?:([\d+]{1,2}\s[A-Za-z]{3}\s[\d+]{4}|[\d+]{1,2}\.[\d+]{1,2}\.[\d+]{4}))", re.I) # rus / eng / date
 					# se_or_year = re.compile(r"(?:([\d+]{2}s[\d+]e|\([\d+]{4}\)))", re.I)
 
-					for fl in filter(lambda x: x, tuple(full_list)):
+					for fl in full_list:
 
 						if fl.lower().endswith("txt"):
 
@@ -944,7 +950,12 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 						is_backup: bool = False
 						is_backup = all((dt.hour % 3 == 0, dt.minute <= 15)) # every_3_hour's_between_in_15min # is_default(?)
 
-						desc_list = [ld.strip() for ld in os.listdir(fsf) if ld.lower().endswith(".txt")]
+						try:
+							desc_list = [ld.strip() for ld in os.listdir(fsf) if ld.lower().endswith(".txt")]
+						except BaseException as err:
+							desc_list = []
+							logging.warning("%s" % ";".join([fsf, str(err)]))
+							# raise err
 
 						if all((len(desc_list) == 1, is_backup)):
 							try:
@@ -2005,7 +2016,8 @@ async def ntp_to_utc():
 		c = ntplib.NTPClient()
 		response = c.request('uk.pool.ntp.org', version=3) # ntp.server.pool
 		# print(response.offset) #0.22685885429382324
-	except:
+	except BaseException as err:
+		raise err
 		return ("", "")
 	else:
 		# print(datetime.fromtimestamp(response.tx_time, timezone.utc)) #2023-06-28 02:59:11.460592+00:00 # gmt+5
