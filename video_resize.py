@@ -8199,13 +8199,13 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				try:
 					print(Style.BRIGHT + Fore.CYAN + MySt.last2str(
-						maintxt="Запускаю:", endtxt="[1 из 7]", count=len_proc, kw="задач"))
+						maintxt="Запускаю:", endtxt="[1 из 6]", count=len_proc, kw="задач"))
 					# print(Style.BRIGHT + Fore.WHITE + MySt.last2str(maintxt=MySt.maintext, endtxt=MySt.endtext, count=len_proc, kw="задач"))
 				except:
-					print(Style.BRIGHT + Fore.YELLOW + "Обновляю или удаляю %d файлы(а,ов) [1 из 7]" % len_proc)  # old(is_except)
+					print(Style.BRIGHT + Fore.YELLOW + "Обновляю или удаляю %d файлы(а,ов) [1 из 6]" % len_proc)  # old(is_except)
 				else:
 					write_log("debug run[task1]", MySt.last2str(
-						maintxt="Запускаю:", endtxt="[1 из 7]", count=len_proc, kw="задач"))
+						maintxt="Запускаю:", endtxt="[1 из 6]", count=len_proc, kw="задач"))
 
 				del MySt
 
@@ -8971,15 +8971,15 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		len_proc: int = len(processes_ram) + len(processes_ram2)
 
 		if all((len_proc, is_debug == False)):
-			MySt = MyString() # MyString("Запускаю:", "[2 из 7]")
+			MySt = MyString() # MyString("Запускаю:", "[2 из 6]")
 
 			try:
-				print(Style.BRIGHT + Fore.CYAN + MySt.last2str(maintxt="Запускаю:", endtxt="[2 из 7]", count=len_proc,	kw="задач"))
+				print(Style.BRIGHT + Fore.CYAN + MySt.last2str(maintxt="Запускаю:", endtxt="[2 из 6]", count=len_proc,	kw="задач"))
 				# print(Style.BRIGHT + Fore.WHITE + MySt.last2str(maintxt=MySt.maintext, endtxt=MySt.endtext, count=len_proc, kw="задач"))
 			except:
-				print(Style.BRIGHT + Fore.YELLOW + "Обновляю или удаляю %d файлы(а,ов) [2 из 7]" % len_proc)  # old(is_except)
+				print(Style.BRIGHT + Fore.YELLOW + "Обновляю или удаляю %d файлы(а,ов) [2 из 6]" % len_proc)  # old(is_except)
 			else:
-				write_log("debug run[task2]", MySt.last2str(maintxt="Запускаю:", endtxt="[2 из 7]", count=len_proc, kw="задач"))
+				write_log("debug run[task2]", MySt.last2str(maintxt="Запускаю:", endtxt="[2 из 6]", count=len_proc, kw="задач"))
 
 			del MySt
 
@@ -9504,15 +9504,15 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		len_proc: int = len(processes_ram) + len(processes_ram2)
 
 		if len_proc:
-			MySt = MyString() # MyString("Запускаю:", "[3 из 7]")
+			MySt = MyString() # MyString("Запускаю:", "[3 из 6]")
 
 			try:
-				print(Style.BRIGHT + Fore.CYAN + MySt.last2str(maintxt="Запускаю:", endtxt="[3 из 7]", count=len_proc,	kw="задач"))
+				print(Style.BRIGHT + Fore.CYAN + MySt.last2str(maintxt="Запускаю:", endtxt="[3 из 6]", count=len_proc,	kw="задач"))
 				# print(Style.BRIGHT + Fore.WHITE + MySt.last2str(maintxt=MySt.maintext, endtxt=MySt.endtext, count=len_proc, kw="задач"))#
 			except:
-				print(Style.BRIGHT + Fore.YELLOW + "Обновляю или удаляю %d файлы(а,ов) [3 из 7]" % len_proc)  # old(is_except)
+				print(Style.BRIGHT + Fore.YELLOW + "Обновляю или удаляю %d файлы(а,ов) [3 из 6]" % len_proc)  # old(is_except)
 			else:
-				write_log("debug run[task3]", MySt.last2str(maintxt="Запускаю:", endtxt="[3 из 7]", count=len_proc, kw="задач"))
+				write_log("debug run[task3]", MySt.last2str(maintxt="Запускаю:", endtxt="[3 из 6]", count=len_proc, kw="задач"))
 
 			del MySt
 
@@ -11147,17 +11147,17 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		len_proc = len(processes_ram) + len(processes_ram2)
 
 		if len_proc: # need_count_and_index
-			MySt = MyString() # MyString("Запускаю:", "[4 из 7]")
+			MySt = MyString() # MyString("Запускаю:", "[4 из 6]")
 
 			try:
-				print(Style.BRIGHT + Fore.CYAN + MySt.last2str(maintxt="Запускаю:", endtxt="[4 из 7]", count=len_proc, kw="задач"))
+				print(Style.BRIGHT + Fore.CYAN + MySt.last2str(maintxt="Запускаю:", endtxt="[4 из 6]", count=len_proc, kw="задач"))
 				# print(Style.BRIGHT + Fore.WHITE + MySt.last2str(maintxt=MySt.maintext, endtxt=MySt.endtext, count=len_proc, kw="задач"))
 			except:
 				print(
-					Style.BRIGHT + Fore.YELLOW + "Обновляю или удаляю %d файлы(а,ов) [4 из 7]" % len_proc)  # old(is_except)
+					Style.BRIGHT + Fore.YELLOW + "Обновляю или удаляю %d файлы(а,ов) [4 из 6]" % len_proc)  # old(is_except)
 			else:
 				write_log("debug run[task4]",
-						  MySt.last2str(maintxt="Запускаю:", endtxt="[4 из 7]", count=len_proc, kw="задач"))
+						  MySt.last2str(maintxt="Запускаю:", endtxt="[4 из 6]", count=len_proc, kw="задач"))
 
 			del MySt
 
@@ -11335,81 +11335,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 	if temp:
 		lfiles = sorted(temp, reverse=False)
-
-	# --- Frequency files by filter or all files / temporary hidden (is_debug) ---
-	'''
-	fsizes_freq = fnames_freq = []  # sizes/filenames # fnames_freq_copy
-
-	if lfiles:
-		try:
-			# tmp = list(lf_gen()) # new(yes_gen)
-			tmp: list = list(set([os.path.getsize(lf) for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if
-						os.path.getsize(lf) and not os.path.getsize(lf) in fsizes_freq and lf]))
-		except:
-			tmp: list = []  # old(no_gen) # os.path.getsize(lf) for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if os.path.getsize(lf) and not os.path.getsize(lf) in fsizes_freq
-
-		# tmp2 = list(set([t for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
-
-		fsizes_freq = sorted(tmp, reverse=False) # re_sort_before(by_string)
-		# fsizes_freq = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
-
-		try:
-			mf = most_frequent(fsizes_freq)  # fsizes_freq(one) # ff(all) # freq_filesize(list) # freq_videos
-		except:
-			mf = None
-
-		if all((mf != None, fsizes_freq)):
-			try:
-				fext_freq = list(set([l.split(".")[-1].lower().strip() for l in
-							 filter(lambda x: os.path.exists(x), tuple(lfiles)) if
-							 os.path.getsize(l) == mf and all((mf, l))]))
-			except:
-				fext_freq = []
-
-			try:
-				# fnames_freq = list(fnames_freq_gen()) # new(yes_gen)
-				fnames_freq: list = list(set([l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lfiles)) if
-									os.path.getsize(l) == mf and all((mf, l))]))
-			except:
-				fnames_freq: list = []  # old(no_gen) # l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lfiles)) if os.path.getsize(l) == mf and all((mf, l))
-
-			# tmp = list(set([ff.strip() for ff in filter(lambda x: x, tuple(fnames_freq))])) # if_yes_gen
-
-			fnames_freq = sorted(fnames_freq, reverse=False) # re_sort_before(by_string)
-			# fnames_freq = sorted(fnames_freq, key=len, reverse=False) # re_sort_before(by_length)
-
-			if fnames_freq and all((fext_freq, fext_freq.count(fext_freq[-1]) >= 1)):  # min(2)
-				print(Style.BRIGHT + Fore.WHITE + "Найдено %d уникальных файлов" % len(fnames_freq))
-
-				if len(fnames_freq) > 1:
-					crec = fnames_freq[-1]
-					fnames_freq.remove(crec)
-
-				for ff in sorted(fnames_freq, reverse=False): # sorted(fnames_freq, key=len, reverse=False)
-					print(Style.BRIGHT + Fore.CYAN + "%s" % ff)
-					write_log("debug ff", "%s" % ff)
-
-		print()
-
-		len_proc = len(processes_ram2)
-
-		if len_proc:
-			MySt = MyString() # MyString("Запускаю:", "[5 из 7]")
-
-			try:
-				print(Style.BRIGHT + Fore.CYAN + MySt.last2str(maintxt="Запускаю:", endtxt="[5 из 7]", count=len_proc, kw="задач"))
-				# print(Style.BRIGHT + Fore.WHITE + MySt.last2str(maintxt=MySt.maintext, endtxt=MySt.endtext, count=len_proc, kw="задач"))
-			except:
-				print(Style.BRIGHT + Fore.YELLOW + "Удаляю %d файлы(а,ов) [5 из 7]" % len_proc)  # old(is_except)
-			else:
-				write_log("debug run[task5]",
-						  MySt.last2str(maintxt="Запускаю:", endtxt="[5 из 7]", count=len_proc, kw="задач"))
-
-			del MySt
-
-		# debug
-		# exit()
-	'''
 
 	filecmdbase_copy: dict = {}
 
@@ -11725,18 +11650,18 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			len_proc = len(processes_ram) + len(processes_ram2)
 
-			MySt = MyString() # MyString("Запускаю:", "[6 из 7]")
+			MySt = MyString() # MyString("Запускаю:", "[5 из 6]")
 
 			if len_proc:
 				try:
-					print(Style.BRIGHT + Fore.CYAN + MySt.last2str(maintxt="Запускаю:", endtxt="[6 из 7]", count=len_proc, kw="задач"))
+					print(Style.BRIGHT + Fore.CYAN + MySt.last2str(maintxt="Запускаю:", endtxt="[5 из 6]", count=len_proc, kw="задач"))
 					# print(Style.BRIGHT + Fore.WHITE + MySt.last2str(maintxt=MySt.maintext, endtxt=MySt.endtext, count=len_proc, kw="задач"))
 				except:
 					print(
-						Style.BRIGHT + Fore.YELLOW + "Обновляю или удаляю %d файлы(а,ов) [6 из 7]" % len_proc)  # old(is_except)
+						Style.BRIGHT + Fore.YELLOW + "Обновляю или удаляю %d файлы(а,ов) [5 из 6]" % len_proc)  # old(is_except)
 				else:
 					write_log("debug run[task6]",
-							  MySt.last2str(maintxt="Запускаю:", endtxt="[6 из 7]", count=len_proc, kw="задач"))
+							  MySt.last2str(maintxt="Запускаю:", endtxt="[5 из 6]", count=len_proc, kw="задач"))
 
 			# update_data_if_stay_files(some)_or_all_ready(null)
 			if all((len(filecmdbase_copy) >= 0, filecmdbase_dict, len(filecmdbase_copy) < len(filecmdbase_dict))):
@@ -15531,15 +15456,15 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				len_proc = len(processes_ram) + len(processes_ram2)
 
 				if len_proc:
-					MySt = MyString() # MyString("Запускаю:", "[7 из 7]")
+					MySt = MyString() # MyString("Запускаю:", "[6 из 6]")
 
 					try:
-						print(Style.BRIGHT + Fore.CYAN + MySt.last2str(maintxt="Запускаю:", endtxt="[7 из 7]", count=len_proc, kw="задач"))
+						print(Style.BRIGHT + Fore.CYAN + MySt.last2str(maintxt="Запускаю:", endtxt="[6 из 6]", count=len_proc, kw="задач"))
 						# print(Style.BRIGHT + Fore.WHITE + MySt.last2str(maintxt=MySt.maintext, endtxt=MySt.endtext, count=len_proc, kw="задач"))
 					except:
-						print(Style.BRIGHT + Fore.YELLOW + "Обновляю или удаляю %d файлы(а,ов) [7 из 7]" % len_proc) # old(is_except)
+						print(Style.BRIGHT + Fore.YELLOW + "Обновляю или удаляю %d файлы(а,ов) [6 из 6]" % len_proc) # old(is_except)
 					else:
-						write_log("debug run[task7]", MySt.last2str(maintxt="Запускаю:", endtxt="[7 из 7]", count=len_proc, kw="задач"))
+						write_log("debug run[task7]", MySt.last2str(maintxt="Запускаю:", endtxt="[6 из 6]", count=len_proc, kw="задач"))
 
 					del MySt
 
