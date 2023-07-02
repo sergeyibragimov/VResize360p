@@ -188,8 +188,26 @@ copy_src2: str = "C:\\Downloads\\Combine\\Original\\BigFilms\\".lower()
 
 envdict = os.getenv.__globals__ # переменные_среды
 
+# error_save_json
+'''
+environ_file: str = "".join([path_for_queue, "environ.json"])
+environ_dict: dict = {}
+try:
+	environ_dict = envdict["environ"]
+	assert environ_dict, ""
+except AssertionError as err:
+	raise err # logging.warning
+else:
+	with open(environ_file, "w", encoding="utf-8") as eff:
+		json.dump(environ_dict, eff, ensure_ascii=False, indent=2)
+'''
+
+# environ_block(windows) # debug(is_error)
 userprofile: str = envdict["environ"]["userprofile"].lower() # os.getenv("USERPROFILE") # r"c:\\users\\sergey
 programfiles: str = envdict["environ"]["programfiles"].lower() # os.getenv("PROGRAMFILES") # r"c:\\program files
+# userdomain: str = envdict["environ"]["userdomain"].lower() # os.getenv("USERDOMAIN") # SERGEYPC # debug
+# username: str = envdict["environ"]["username"].lower() # os.getenv("USERNAME") # Sergey # debug
+# logonserver: str = envdict["environ"]["logonserver"].lower() # os.getenv("LOGONSERVER") # r"\\SERGEYPC" # debug
 
 # allusersprofile # r"c:\\programdata
 # appdata # r"c:\\users\\sergey\\appdata\\roaming
@@ -703,18 +721,20 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 			desc_dict_filter: dict = {}
 
-			# clear_old_desc
+			# clear_old_desc # replace)1)/is_old(0)
 			try:
-				desc_dict_filter = {k.strip(): v.replace(";(", ";").replace(");", ";").strip() for k, v in desc_dict.items() if
-									v != v.replace(";(", ";").replace(");", ";")}
+				desc_dict_filter = {k.strip(): v.replace(";(", ";").replace(");", ";").strip() if
+									v != v.replace(";(", ";").replace(");", ";") else v.strip() for k, v in desc_dict.items() }
 			except:
 				desc_dict_filter = {}
 			else:
 				if all((desc_dict_filter, len(desc_dict_filter) <= len(desc_dict))): # desc_dict
 
-					print(Style.BRIGHT + Fore.CYANimport  + "будет обновлено",
-						Style.BRIGHT + Fore.WHITE + "%d",
-						Style.BRIGHT + Fore.YELLOW + "записей" % abs(len(desc_dict_filter) - len(desc_dict)))
+					dsc_cnt = abs(len(desc_dict_filter) - len(desc_dict))
+
+					print(Style.BRIGHT + Fore.CYAN + "будет обновлено",
+						Style.BRIGHT + Fore.WHITE + "%d" % dsc_cnt,
+						Style.BRIGHT + Fore.YELLOW + "записей")
 
 					desc_dict.update(desc_dict_filter)
 
