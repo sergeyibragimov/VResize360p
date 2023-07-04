@@ -906,11 +906,11 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 						raise err
 						break
 
-					try:
-						assert k and v, "" # is_assert(debug) # assert os.path.exists(k)
-					except AssertionError as err:
-						raise err
-						continue
+					# try:
+						# assert k and v, "" # is_assert(debug) # assert os.path.exists(k)
+					# except AssertionError as err:
+						# raise err
+						# continue
 
 					print(Style.BRIGHT + Fore.WHITE + "%s %s" % (k, v)) # folder(file) / days_ago
 
@@ -7645,12 +7645,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				raise err
 				break
 
-			try:
-				assert k and os.path.exists(k), "Файл отсутствует @project_done/k" # is_assert(debug) # assert k and v
-			except AssertionError as err:
-				logging.warning("Файл отсутствует @project_done/%s" % k)
-				raise err
-				continue
+			# try:
+				# assert k and os.path.exists(k), "Файл отсутствует @project_done/k" # is_assert(debug) # assert k and v
+			# except AssertionError as err:
+				# logging.warning("Файл отсутствует @project_done/%s" % k)
+				# raise err
+				# continue
 
 			try:
 				gl = MM.get_length(k)
@@ -9232,18 +9232,18 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					raise err
 					break
 
-				try:
-					assert k and os.path.exists(k), "Файл отсутствует @update_bigcinema/k" # is_assert(debug) # assert k and v
-				except AssertionError as err:
-					logging.warning("Файл отсутствует @update_bigcinema/%s" % k)
-					raise err
-					continue
+				# try:
+					# assert k and os.path.exists(k), "Файл отсутствует @update_bigcinema/k" # is_assert(debug) # assert k and v
+				# except AssertionError as err:
+					# logging.warning("Файл отсутствует @update_bigcinema/%s" % k)
+					# raise err
+					# continue
 
 				try:
 					fname1 = k.split("\\")[-1].strip()  # project(v) -> ready(k)
 				except:
 					fname1 = ""
-					continue
+					# continue
 
 				# new_count: int = 0
 				move_count: int = 0
@@ -9680,23 +9680,23 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							raise err
 							break
 
-						try:
-							assert k and v, "" # is_assert(debug) # assert os.path.exists(k)
-						except AssertionError as err:
-							raise err
-							continue
+						# try:
+							# assert k and v, "" # is_assert(debug) # assert os.path.exists(k)
+						# except AssertionError as err:
+							# raise err
+							# continue
 
 						try:
 							fname1 = k.split("\\")[-1].strip()
 						except:
 							fname1 = ""
-							continue
+							# continue
 
 						try:
 							fname2 = v.split("\\")[-1].strip()
 						except:
 							fname2 = ""
-							continue
+							# continue
 
 						diff_dict: dict = {}
 						count1: int = 0
@@ -9738,11 +9738,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							raise err
 							break
 
-						try:
-							assert k and v, "" # is_assert(debug) # assert os.path.exists(k)
-						except AssertionError as err:
-							raise err
-							continue
+						# try:
+							# assert k and v, "" # is_assert(debug) # assert os.path.exists(k)
+						# except AssertionError as err:
+							# raise err
+							# continue
 
 						# Надо заменить c:\downloads\new\Reginald_the_Vampire_01s07e.mp4 на c:\downloads\new\Reginald_The_Vampire_01s07e.mp4 # write_log
 						# Надо заменить c:\...\Reginald_the_Vampire_01s07e.mp4 на c:\...\Reginald_The_Vampire_01s07e.mp4 # print
@@ -9753,7 +9753,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 									full_to_short(k), v))  # is_color
 								move(k, v)  # no_async_if_"big"
 							except:
-								continue
+								pass # continue
 							else:
 								write_log("debug filter_dict[move]!",
 									  "Будет заменён %s на %s" % (k, v))  # debug/test # only_here
@@ -11501,20 +11501,20 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					raise err
 					break
 
-				try:
-					assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-				except AssertionError as err:
-					logging.warning("Файл отсутствует %s" % k)
-					raise err
-					continue
+				# try:
+					# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
+				# except AssertionError as err:
+					# logging.warning("Файл отсутствует %s" % k)
+					# raise err
+					# continue
 
 				cnt += 1
 
 				if not k in full_set:
 					full_set.add(k.strip())  # save_unique_job
 
-				elif k in full_set:
-					continue  # skip_unique_job
+				# elif k in full_set:
+					# continue  # skip_unique_job
 
 				date2 = datetime.now()
 
@@ -11554,13 +11554,13 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					fname1 = k.strip()
 				except:
 					fname1 = ""
-					continue
+					# continue
 
 				try:
 					fname2 = v.split(" ")[-1].strip()
 				except:
 					fname2 = ""
-					continue
+					# continue
 
 				date2 = datetime.now()
 
@@ -13078,17 +13078,17 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				raise err
 				break
 
-			try:
-				assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-			except AssertionError as err:
-				logging.warning("Файл отсутствует %s" % k)
-				raise err
-				continue
+			# try:
+				# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
+			# except AssertionError as err:
+				# logging.warning("Файл отсутствует %s" % k)
+				# raise err
+				# continue
 
 			try:
 				fileinfo = (k, MM.get_length(MM))
 			except:
-				continue
+				pass # continue
 			else:
 				fcmd_filter.append(fileinfo)
 
@@ -13203,12 +13203,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				raise err
 				break
 
-			try:
-				assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-			except AssertionError as err:
-				logging.warning("Файл отсутствует %s" % k)
-				raise err
-				continue
+			# try:
+				# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
+			# except AssertionError as err:
+				# logging.warning("Файл отсутствует %s" % k)
+				# raise err
+				# continue
 
 			write_log("debug filecmdbase_dict[job][index]", "%s" % "x".join(
 				[k.strip(), str(v.count("scale")), str(v.count("profile")), str(v.count("level"))]))
@@ -13380,18 +13380,18 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				raise err
 				break
 
-			try:
-				assert k and os.path.exists(k), "Файл не найден k" # is_assert(debug) # assert k and v
-			except AssertionError as err:
-				logging.warning("Файл не найден %s" % k)
-				raise err
-				continue
+			# try:
+				# assert k and os.path.exists(k), "Файл не найден k" # is_assert(debug) # assert k and v
+			# except AssertionError as err:
+				# logging.warning("Файл не найден %s" % k)
+				# raise err
+				# continue
 
 			try:
 				fname1 = v.split(" ")[-1].split("\\")[-1].strip()
 			except:
 				fname1 = ""
-				continue
+				# continue
 
 			try:
 				fp, fn = split_filename(k)
@@ -13402,7 +13402,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				fname2 = fn
 			except:
 				fname2 = ""
-				continue
+				# continue
 
 			if all((fname1 == fname2, fname1, fname2)):
 				print(Style.BRIGHT + Fore.WHITE + "Файл %s" % fname1,
@@ -13714,18 +13714,18 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					raise err
 					break
 
-				try:
-					assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-				except AssertionError as err:
-					logging.warning("Файл отсутствует %s" % k)
-					raise err
-					continue
+				# try:
+					# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
+				# except AssertionError as err:
+					# logging.warning("Файл отсутствует %s" % k)
+					# raise err
+					# continue
 
 				try:
 					fname = k.split("\\")[-1].strip()
 				except:
 					fname = ""
-					continue
+					# continue
 
 				if os.path.exists(k) and fname: # exists_job
 					try:
@@ -13966,12 +13966,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					raise err
 					break
 
-				try:
-					assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-				except AssertionError as err:
-					logging.warning("Файл отсутствует %s" % k)
-					raise err
-					continue
+				# try:
+					# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
+				# except AssertionError as err:
+					# logging.warning("Файл отсутствует %s" % k)
+					# raise err
+					# continue
 
 				try:
 					fileinfo = (k.strip(), os.path.getsize(k), str(datetime.now())) # file / filesize / daterun
@@ -14087,12 +14087,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						raise err
 						break
 
-					try:
-						assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-					except AssertionError as err:
-						logging.warning("Файл отсутствует %s" % k)
-						raise err
-						continue
+					# try:
+						# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
+					# except AssertionError as err:
+						# logging.warning("Файл отсутствует %s" % k)
+						# raise err
+						# continue
 
 					try:
 						gl = MM.get_length(k)
@@ -14183,12 +14183,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						raise err
 						break
 
-					try:
-						assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-					except AssertionError as err:
-						logging.warning("Файл отсутствует %s" % k)
-						raise err
-						continue
+					# try:
+						# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
+					# except AssertionError as err:
+						# logging.warning("Файл отсутствует %s" % k)
+						# raise err
+						# continue
 
 					if os.path.exists(k):
 						try:
@@ -14238,24 +14238,24 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					raise err
 					break
 
-				try:
-					assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-				except AssertionError as err:
-					logging.warning("Файл отсутствует %s" % k)
-					raise err
-					continue
+				# try:
+					# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
+				# except AssertionError as err:
+					# logging.warning("Файл отсутствует %s" % k)
+					# raise err
+					# continue
 
 				try:
 					fname = k.split("\\")[-1]
 				except:
 					fname = ""
-					continue
+					# continue
 
 				try:
 					fsize = os.path.getsize(k)
 				except:
 					fsize = 0
-					continue
+					# continue
 
 				if fsize:
 					summ += fsize
@@ -14366,12 +14366,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					raise err
 					break
 
-				try:
-					assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v, ""
-				except AssertionError as err:
-					logging.warning("Файл отсутствует %s" % k)
-					raise err
-					continue
+				# try:
+					# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v, ""
+				# except AssertionError as err:
+					# logging.warning("Файл отсутствует %s" % k)
+					# raise err
+					# continue
 
 				try:
 					fsize = os.path.getsize(k)
@@ -14379,7 +14379,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				except AssertionError as err:
 					logging.warning("Файл %s пустой или не содержит информации" % k)
 					raise err
-					continue
+					# continue
 				else:
 					fsizes_list.append(fsize) # pass_1_of_2
 
@@ -14430,12 +14430,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					raise err
 					break
 
-				try:
-					assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-				except AssertionError as err:
-					logging.warning("Файл отсутствует %s" % k)
-					raise err
-					continue
+				# try:
+					# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
+				# except AssertionError as err:
+					# logging.warning("Файл отсутствует %s" % k)
+					# raise err
+					# continue
 
 				'''
 				write_log("debug classify_files[skip]", "Файл %s был пропущен т.к. он не классифицирован [%s]" % (k, str(datetime.now()))) # logging_if_not_classify
@@ -14470,7 +14470,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					fname = fn
 				except:
 					fname = ""
-					continue
+					# continue
 
 				try:
 					fsize: int = os.path.getsize(k)
@@ -14885,7 +14885,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								assert cj, "" # is_assert(debug) # assert os.path.exists(cj)
 							except AssertionError as err:
 								raise err
-								continue
+								# continue
 
 							# src_length
 							try:
