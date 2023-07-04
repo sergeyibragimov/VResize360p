@@ -446,7 +446,7 @@ async def calc_number_of_day(is_default: bool = True, day: int = 0, month: int =
 			continue
 	else: # is_no_break
 		if len(sm) >= 0:
-			is_day_calc = (lambda dc: "Число дня получено!" if sm else "Число дня неизвестно!")(sm)
+			is_day_calc = "Число дня получено!" if sm else "Число дня неизвестно!"
 			print(is_day_calc)
 
 	calc1 = calc2 = False
@@ -1073,7 +1073,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 										soundtrack_count_list = [(k, int(v)) for k, v in soundtrack_count.items()]
 										soundtrack_count_sorted = sorted(soundtrack_count_list, key=lambda soundtrack_count_list: soundtrack_count_list[1]) # sorted_by_value
 										stc = {scs[0]: scs[1] for scs in soundtrack_count_sorted} # sorted_json
-										soundtrack_count = (lambda stc: stc if stc else {})(stc)
+										soundtrack_count = stc if stc else {} # is_no_lambda
 
 										print(Style.BRIGHT + Fore.WHITE + "debug soundtrack_count[combine] \'%s\'" % str(soundtrack_count)) # is_color
 										# print(Style.BRIGHT + Fore.WHITE + "debug soundtrack_count[combine] \'%d soundtrack count\'" % len(soundtrack_count)) # is_color
@@ -1097,7 +1097,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 											if all((sort_class, len(sort_class) <= len(class_dict))): # is_sorted_dict # less_or_equal
 												class_dict = sort_class
 
-											class_status = (lambda class_dict: str(class_dict) if class_dict else "")(class_dict)
+											class_status = str(class_dict) if class_dict else "" # is_no_lambda
 											if class_status:
 												print(Style.BRIGHT + Fore.CYAN + "debug soundtrack_count[popular] \'%s\'" % class_status) # is_color
 												# write_log("debug soundtrack_count[popular]", "%s" % class_status)
@@ -1220,10 +1220,10 @@ if all_list:
 	except:
 		tmp = [] # null_if_error
 
-	all_list = (lambda tmp: tmp if tmp else [])(tmp)
+	all_list = tmp if tmp else [] # is_no_lambda
 
 # 1684 [None, None] Текущий список папок, общий список папок # current_list_length / is_full_list / status's
-all_list_status = (lambda all_list: "Общий список в %d папках" % len(all_list) if all_list else "Общего списка в папках не найдено")(all_list) # str(debug) -> int(count)
+all_list_status = "Общий список в %d папках" % len(all_list) if all_list else "Общего списка в папках не найдено" # str(debug) -> int(count) # is_no_lambda
 
 print(Style.BRIGHT + Fore.YELLOW + "%d" % len(all_list), Style.BRIGHT + Fore.WHITE + "%s" % all_list_status)
 
@@ -1913,7 +1913,7 @@ def count_level_from_full(filename) -> int:
 		return 0
 
 	try:
-		level_count: int = (lambda filename: len(filename.split("\\")) if filename else 0)(filename)
+		level_count: len(filename.split("\\")) if filename else 0 # is_no_lambda
 	except BaseException as e:
 		level_count: int = 0
 		write_log("debug level_count[filename][error]", "%s [%s]" % (filename, str(e)), is_error=True)
@@ -2288,7 +2288,7 @@ def mdate_by_days(filename, period: int = 30, is_select: bool = False, is_dir: b
 	def is_year_leap() -> int:
 
 		try:
-			max_days_by_year: int = 366 if dt.year % 4 == 0 else 365
+			max_days_by_year = 366 if dt.year % 4 == 0 else 365
 		except:
 			max_days_by_year: int = 365
 
@@ -3483,7 +3483,7 @@ class MyMeta:
 			os.remove(fpsf)
 
 		try:
-			fps: int = (lambda fps_value: fps_value if fps_value else 0)(fps_value)
+			fps = fps_value if fps_value else 0 # is_no_lambda
 
 			assert fps, "Не могу получить скорость кадров @get_fps/fps" # is_assert(debug)
 		except AssertionError as err:
@@ -3542,9 +3542,9 @@ class MyMeta:
 		fpsdict[480] = ["Unknown(480)", "skateboard tricks, skiing, surfing, etc"]
 
 		try:
-			fps_desc: str = ";".join(fpsdict[fps]) if fpsdict[fps][1] else "[Unknown framerate] [%s] [%s]" % (self.filename, str(fps)) # fps_desc(full/unknown) # filename / fps_value # is_no_lambda
+			fps_desc = ";".join(fpsdict[fps]) if fpsdict[fps][1] else "[Unknown framerate] [%s] [%s]" % (self.filename, str(fps)) # fps_desc(full/unknown) # filename / fps_value # is_no_lambda
 		except:
-			fps_desc: str = "[Unknown framerate] [%s] [%s]" % (self.filename, str(fps)) # filename / fps_value
+			fps_desc = "[Unknown framerate] [%s] [%s]" % (self.filename, str(fps)) # filename / fps_value
 
 		if any((fps, fps_desc)):
 			fps_dict[self.filename.strip()] = [fps, fps_desc, str(type(fps))] # fps_value / fps_desc(full/unknown) / int(float)
@@ -3619,7 +3619,7 @@ class MyMeta:
 		# width(640) # scale # 1:1
 
 		try:
-			width: float = (lambda owidth: 640 if owidth > 640 else owidth)(owidth)  # 640(if_width_more)
+			width: float = 640 if owidth > 640 else owidth # 640(if_width_more) # is_no_lambda
 
 			assert width, "Ширина видео не должно быть пустым @calc_vbr/width" # is_assert(debug)
 		except AssertionError as err:
@@ -3673,7 +3673,7 @@ class MyMeta:
 		# height(360p) # scale # 1:1
 
 		try:
-			height: float = (lambda oheight: 360 if oheight > 360 else oheight)(oheight)  # 360(if_height_more)
+			height: float = 360 if oheight > 360 else oheight # 360(if_height_more) # is_no_lambda
 
 			assert height, "Пустое значение высоты видео @calc_vbr/height" # is_assert(debug)
 		except AssertionError as err:
@@ -5100,7 +5100,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 					check_folders = sorted(tmp, reverse=False)
 					# check_folders = sorted(tmp, key=len, reverse=False)
 
-					check_f_status = (lambda check_folders: ";".join(check_folders) if check_folders else "")(check_folders)
+					check_f_status = ";".join(check_folders) if check_folders else "" # is_no_lambda
 
 					write_log("debug check_folders", "%s" % check_f_status)
 
@@ -5115,7 +5115,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 					check_files = sorted(tmp, reverse=False)
 					# check_files = sorted(tmp, key=len, reverse=False)
 
-					check_f_status = (lambda check_files: ";".join(check_files) if check_files else "")(check_files)
+					check_f_status = ";".join(check_files) if check_files else "" # is_no_lambda
 
 					write_log("debug check_files", "%s" % check_f_status)
 
@@ -5514,9 +5514,9 @@ async def process_move(file1: str = "", file2: str = "", is_copy: bool = False, 
 			fast_move: bool = False
 
 		try:
-			fast_move_status: str = "Быстрый перенос %s" % file1 if fast_move else "Обычный перенос %s" % file1 # is_no_lambda
+			fast_move_status = "Быстрый перенос %s" % file1 if fast_move else "Обычный перенос %s" % file1 # is_no_lambda
 		except BaseException as e:
-			fast_move_status: str = "Неизвестный перенос %s [%s]" % (file1, str(e))
+			fast_move_status = "Неизвестный перенос %s [%s]" % (file1, str(e))
 
 		write_log("debug process_move!", "%s %s [%d]" % (
 			fname, fast_move_status, avg_size))  # Star_Wars_The_Bad_Batch_02s03e.mp4, True, 133138825
@@ -5848,7 +5848,7 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 					soundtrack_count_list = [(k, int(v)) for k, v in soundtrack_count.items()]
 					soundtrack_count_sorted = sorted(soundtrack_count_list, key=lambda soundtrack_count_list: soundtrack_count_list[1]) # sorted_by_value
 					stc = {scs[0]: scs[1] for scs in soundtrack_count_sorted} # sorted_json
-					soundtrack_count = (lambda stc: stc if stc else {})(stc)
+					soundtrack_count = stc if stc else {} # is_no_lambda
 
 					write_log("debug soundtrack_count[combine]", "%s" % str(soundtrack_count))
 					# write_log("debug soundtrack_count[combine]", "%d soundtracks count" % len(soundtrack_count))
@@ -5871,7 +5871,7 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 						if all((sort_class, len(sort_class) <= len(class_dict))): # is_sorted_dict # less_or_equal
 							class_dict = sort_class
 
-						class_status = (lambda class_dict: str(class_dict) if class_dict else "")(class_dict)
+						class_status = str(class_dict) if class_dict else "" # is_no_lambda
 						if class_status:
 							write_log("debug soundtrack_count[popular]", "%s" % class_status)
 
@@ -7772,7 +7772,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			except:
 				h, m = 0, 0
 
-			job_timing_status = (lambda h, m: "Время обработки задания загружено" if all((h, m)) else "Ошибка загрузки времени обработки задания")(h, m)
+			job_timing_status = "Время обработки задания загружено" if all((h, m)) else "Ошибка загрузки времени обработки задания" # is_no_lambda
 
 			if job_timing_status.startswith("Время"):
 				print(Style.BRIGHT + Fore.WHITE + "%s" % job_timing_status)
@@ -8237,7 +8237,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				del MySt
 
 			if len(proj_files) >= 0:
-				temp = [True if os.path.exists(pf) else False for pf in proj_files]
+				temp = [True if os.path.exists(pf) else False for pf in proj_files] # is_no_lambda
 
 				if temp.count(True):
 					try:
@@ -8584,9 +8584,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		if len(list_total) > 0:
 
 			try:
-				tmp = (lambda list_total: len(list_total) // 2 if list_total else 0)(list_total)
+				tmp = len(list_total) // 2 if list_total else 0 # is_no_lambda
 			except:
-				tmp = 0
+				tmp: int = 0
 
 			# list_total_tmp -> tmp
 			print(Style.BRIGHT + Fore.YELLOW + "Найдено", Style.BRIGHT + Fore.WHITE + "%d" % tmp,
@@ -9046,7 +9046,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			with open(some_base, "w", encoding="utf-8") as sbf:
 				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
 		finally:
-			some_files = (lambda somebase_dict: [*somebase_dict] if somebase_dict else [])(somebase_dict)
+			some_files = [*somebase_dict] if somebase_dict else [] # is_no_lambda
 
 		# some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit
 
@@ -9981,7 +9981,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			filter_temp3 = []
 
 		try:
-			filter3 = (lambda filter_temp3: filter_temp3 if filter_temp3 else [])(filter_temp3)
+			filter3 = filter_temp3 if filter_temp3 else [] # is_no_lambda
 		except:
 			filter3 = sorted(filter_temp3, reverse=False)
 			# filter3 = sorted(filter_temp3, key=len, reverse=False)
@@ -10041,7 +10041,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			filter_temp4 = []
 
 		try:
-			filter4 = (lambda filter_temp4: filter_temp4 if filter_temp4 else [])(filter_temp4)
+			filter4 = filter_temp4 if filter_temp4 else [] # is_no_lambda
 		except:
 			filter4 = sorted(filter_temp4, reverse=False)
 			# filter4 = sorted(filter_temp4, key=len, reverse=False)
@@ -10116,7 +10116,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		# default_short_names_without_slice
 		tmp = [fl.strip() for fl in filter_list if all((len(fl) >= 2, fl != "''"))]  # skip_null_filter
-		filter_list = (lambda tmp: tmp if tmp else [])(tmp)
+		filter_list = tmp if tmp else [] # is_no_lambda
 
 		# slice_by_short_names # @filter_list # combine_jobs_filter_by_short_names
 		# tmp = ["Hello", "World", "9-1-1", "test", "Test_world"] # ["Hello", "World", "9-1-1", "Test"]
@@ -10129,7 +10129,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			filter_list = sorted(temp2, reverse=False) # list_by_abc
 			# filter_list = sorted(temp2, key=len, reverse=False) # list_by_key
 
-		fl_count = (lambda filter_list: str(len(filter_list)) if filter_list else "All")(filter_list)
+		fl_count = str(len(filter_list)) if filter_list else "All" # is_no_lambda
 
 		if filter_list:
 			if len(filter_list) >= 20:  # first_20_short_templates
@@ -10153,7 +10153,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			with open(some_base, "w", encoding="utf-8") as sbf:
 				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
 		finally:
-			some_files = (lambda somebase_dict: [*somebase_dict] if somebase_dict else [])(somebase_dict)
+			some_files = [*somebase_dict] if somebase_dict else [] # is_no_lambda
 
 		# some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit
 
@@ -10274,7 +10274,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				elif not short_files:  # save_if_some_list
 					write_log("debug shortfiles[filter]", "No_short_files at [%s]" % str(datetime.now()))
 
-		filter_list = (lambda short_files: list(set(short_files)) if short_files else [])(short_files)
+		filter_list: list(set(short_files)) if short_files else [] # is_no_lambda
 
 		if filter_list:  # M(atch)/I(gnore)_case # by_filter
 			write_log("debug files[filter]", "%s" % "|".join(filter_list))  # current(2)
@@ -10303,7 +10303,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			with open(some_base, "w", encoding="utf-8") as sbf:
 				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
 		finally:
-			some_files = (lambda somebase_dict: [*somebase_dict] if somebase_dict else [])(somebase_dict)  # list(somebase_dict.keys())
+			some_files: [*somebase_dict] if somebase_dict else [] # list(somebase_dict.keys()) # is_no_lambda
 
 		# some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit
 
@@ -10365,7 +10365,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		short_list = sorted(short_list, reverse=False) # re_sort_before_save(by_string)
 		# short_list = sorted(tmp, key=len, reverse=False) # re_sort_before_save(by_length)
 
-		short_string = (lambda short_list: "|".join(short_list) if len(short_list) > 1 else short_list[0])(short_list)
+		short_string = "|".join(short_list) if len(short_list) > 1 else short_list[0] # is_no_lambda
 
 		if short_string:
 			short_regex = re.compile(r"^(%s)" % short_string)
@@ -10421,11 +10421,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			else:
 				write_log("debug shortfiles[job]", "|".join(short_list))
 
-		filter_list = (lambda short_list: list(set(short_list)) if short_list else [])(short_list)
+		filter_list = list(set(short_list)) if short_list else [] # is_no_lambda
 
 		# default_short_names_without_slice
 		tmp = [fl.strip() for fl in filter_list if all((len(fl) >= 2, fl != "''"))]  # skip_null_filter
-		filter_list = (lambda tmp: tmp if tmp else [])(tmp)
+		filter_list: tmp if tmp else [] # is_no_lambda
 
 		# slice_by_short_names # @filter_list # find_jobs_filter_by_short_names
 		# tmp = ["Hello", "World", "9-1-1", "test", "Test_world"] # ["Hello", "World", "9-1-1", "Test"]
@@ -10444,7 +10444,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		elif not filter_list:
 			need_find_period = True  # find_all_if_null_filter(period)
 
-		fl_count = (lambda filter_list: str(len(filter_list)) if filter_list else "All")(filter_list)
+		fl_count = str(len(filter_list)) if filter_list else "All" # is_no_lambda
 
 		try:
 			if len(filter_list) >= 20:
@@ -10670,7 +10670,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			with open(some_base, "w", encoding="utf-8") as sbf:
 				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
 		finally:
-			some_files = (lambda somebase_dict: [*somebase_dict] if somebase_dict else [])(somebase_dict)  # list(somebase_dict.keys())
+			some_files = [*somebase_dict] if somebase_dict else [] # list(somebase_dict.keys()) # is_no_lambda
 
 		# some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit
 
@@ -10734,7 +10734,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		if filter_list:
 			tfilter_list = [f.strip() for f in filter_list if len(f) > 1]
-			filter_list = (lambda tfilter_list: tfilter_list if tfilter_list else [])(tfilter_list)
+			filter_list = tfilter_list if tfilter_list else [] # is_no_lambda
 
 			write_log("debug files[filter][reserved]", "%s" % "|".join(filter_list))  # current(4)
 
@@ -11428,7 +11428,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			# \"scale=640:360\" -profile:v main -movflags faststart -threads 2 -c:a aac -af \"dynaudnorm\"
 			# c:\\downloads\\Gangs_Of_London_02s02e.mp4"
 
-			maxcnt = (lambda filecmdbase_dict: len(filecmdbase_dict) if filecmdbase_dict else 0)(filecmdbase_dict)
+			maxcnt = len(filecmdbase_dict) if filecmdbase_dict else 0 # is_no_lambda
 
 			prc: int = 0
 			cnt: int = 0
@@ -11464,7 +11464,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			full_set = set()
 
-			limit_hour: int = (lambda year_filter: 4 if year_filter else 2)(year_filter) # ?debug
+			limit_hour = 4 if year_filter else 2 # is_no_lambda
 
 			avg_sum: int = 0
 			avg_len: int = 0
@@ -11710,8 +11710,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				filter_run = {k: v for k, v in filter_run.items() for k2, v2 in filter_skip.items() if
 								all((k, k2, k != k2))}  # include_run_delete_skip
 
-			filter_run_count = (lambda filter_run: len(filter_run) if filter_run else 0)(filter_run)  # count_or_null
-			filter_skip_count = (lambda  filter_skip: len(filter_skip) if filter_skip else 0)(filter_skip)  # count_or_null
+			filter_run_count = len(filter_run) if filter_run else 0 # count_or_null # is_no_lambda
+			filter_skip_count = len(filter_skip) if filter_skip else 0 # count_or_null # is_no_lambda
 
 			# print_counts(run/skip)_and_logging # last2str
 
@@ -11971,7 +11971,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			with open(some_base, "w", encoding="utf-8") as sbf:
 				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
 		finally:
-			some_files = (lambda somebase_dict: [*somebase_dict] if somebase_dict else [])(somebase_dict)  # list(somebase_dict.keys())
+			some_files = [*somebase_dict] if somebase_dict else [] # list(somebase_dict.keys()) # is_no_lambda
 
 		# some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit
 
@@ -12040,7 +12040,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		if filter_list:
 			tfilter_list = [f.strip() for f in filter_list if len(f) > 1]
-			filter_list = (lambda tfilter_list: tfilter_list if tfilter_list else [])(tfilter_list)
+			filter_list = tfilter_list if tfilter_list else [] # is_no_lambda
 
 			write_log("debug files[filter][reserved]", "%s" % "|".join(filter_list))  # current(5)
 
@@ -12743,7 +12743,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			with open(some_base, "w", encoding="utf-8") as sbf:
 				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
 		finally:
-			some_files = (lambda somebase_dict: [*somebase_dict] if somebase_dict else [])(somebase_dict)  # list(somebase_dict.keys())
+			some_files: [*somebase_dict] if somebase_dict else [] # list(somebase_dict.keys()) # is_no_lambda
 
 		# some_files = some_files[0:1000] if len(some_files) > 1000 else some_files # no_limit
 
@@ -12995,7 +12995,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		if cmd_file2:
 			write_log("debug withvbr/withabr", "%s" % cmd_file2)
 
-		pathbase_dict[lf.strip()] = (lambda is_change: "True" if is_change else "False")(is_change)
+		pathbase_dict[lf.strip()] = "True" if is_change else "False" # is_no_lambda
 
 		write_log("debug is_changed[+]", "%s [%s]" % (pathbase_dict[lf.strip()], lf))
 
@@ -14137,7 +14137,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					# hh_time = max(fcmd_hours) if max(fcmd_hours) > fcmd_hours_avg else fcmd_hours_avg # pass_1_of_2
 					# hh_time = int(3600 // hh_time) if max(fcmd_hours) < 3600 else int(hh_time // 3600) # pass_2_of_2
 
-
 					hh_avg_time = hh_time # is_debug
 
 					print("Оптимально время для обработки в часах %d часов(а)" % hh_avg_time)
@@ -14956,7 +14955,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 						continue # if_none_next_record(eof)
 					else:
-						answer_status = (lambda is_ok: "Данные совпадают" if is_ok else "Данные не совпадают")(is_ok)
+						answer_status = "Данные совпадают" if is_ok else "Данные не совпадают" # is_no_lambda
 						write_log("debug check_job[ok]", "%s" % answer_status)
 
 			del MM
