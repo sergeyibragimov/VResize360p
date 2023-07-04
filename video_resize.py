@@ -8742,11 +8742,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						raise err
 						break
 
-					try:
-						assert fl, "" # is_assert(debug) # assert os.path.exists(fl)
-					except AssertionError as err:
-						raise err
-						continue
+					# try:
+						# assert fl, "" # is_assert(debug) # assert os.path.exists(fl)
+					# except AssertionError as err:
+						# raise err
+						# continue
 
 					try:
 						fname = fl.split("\\")[-1].strip()
@@ -8850,7 +8850,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				fname = ffj.split("\\")[-1].strip()
 			except:
 				fname = ""
-				continue
+				# continue
 
 			try:
 				fnshort = fname.split(".")[0].strip()
@@ -8901,7 +8901,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					fname = ffj.split("\\")[-1].strip()
 				except:
 					fname = ""
-					continue
+					# continue
 
 				try:
 					fnshort = fname.split(".")[0].strip()
@@ -9243,7 +9243,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					fname1 = k.split("\\")[-1].strip()  # project(v) -> ready(k)
 				except:
 					fname1 = ""
-					# continue
 
 				# new_count: int = 0
 				move_count: int = 0
@@ -9269,7 +9268,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							fname2 = bc.split("\\")[-1].strip()
 						except:
 							fname2 = ""
-							continue
 
 						fext = ""
 
@@ -9690,13 +9688,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							fname1 = k.split("\\")[-1].strip()
 						except:
 							fname1 = ""
-							# continue
 
 						try:
 							fname2 = v.split("\\")[-1].strip()
 						except:
 							fname2 = ""
-							# continue
 
 						diff_dict: dict = {}
 						count1: int = 0
@@ -11318,7 +11314,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						fname = dub_list[ind1].split("\\")[-1]
 					except:
 						fname = ""
-						continue
 
 					try:
 						fsize: int = os.path.getsize(dub_list[ind1])
@@ -11554,13 +11549,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					fname1 = k.strip()
 				except:
 					fname1 = ""
-					# continue
 
 				try:
 					fname2 = v.split(" ")[-1].strip()
 				except:
 					fname2 = ""
-					# continue
 
 				date2 = datetime.now()
 
@@ -13391,7 +13384,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				fname1 = v.split(" ")[-1].split("\\")[-1].strip()
 			except:
 				fname1 = ""
-				# continue
 
 			try:
 				fp, fn = split_filename(k)
@@ -13402,7 +13394,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				fname2 = fn
 			except:
 				fname2 = ""
-				# continue
 
 			if all((fname1 == fname2, fname1, fname2)):
 				print(Style.BRIGHT + Fore.WHITE + "Файл %s" % fname1,
@@ -13725,7 +13716,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					fname = k.split("\\")[-1].strip()
 				except:
 					fname = ""
-					# continue
 
 				if os.path.exists(k) and fname: # exists_job
 					try:
@@ -14249,13 +14239,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					fname = k.split("\\")[-1]
 				except:
 					fname = ""
-					# continue
 
 				try:
 					fsize = os.path.getsize(k)
 				except:
 					fsize = 0
-					# continue
 
 				if fsize:
 					summ += fsize
@@ -14741,20 +14729,17 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					fname1 = lastfile[-1].split("\\")[-1]
 				except:
 					fname1 = ""
-					continue
 
 				try:
 					fname2 = k.split("\\")[-1]
 				except:
 					fname2 = ""
-					continue
 
 				# compare_lengths(src=dst) # clear(null)_xml_if_ready_ok # @last.xml
 
 				date2 = datetime.now()
 
 				hour = divmod(int(abs(date1 - date2).total_seconds()), 60)  # 60(min) -> 3600(hours)
-
 
 				try:
 					_, hh, mm, _ = MT.seconds_to_hms(date1, date2) # days -> _ # ss -> _
