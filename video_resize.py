@@ -63,6 +63,7 @@ logging.info(f"debug start {str(datetime.now())}")
 
 mytime: dict = {"jobtime": [9, 18, 4], "dinnertime": [12, 13], "sleeptime": [0, 7], "anytime": [True]}
 
+                
 # 640x360 -> 1280x720 -> 1920x1080 # 16/9(hd)
 
 # @16/9(hd) # 8/16
@@ -541,6 +542,20 @@ async def month_to_seasdays(month: int = 0, year: int = 0) -> tuple:
 	return (seas, days)
 
 
+async def fromdaytohny():
+	dt = datetime.today()
+	ny = datetime(dt.year + 1, 1, 1)
+	d = ny - dt
+
+	try:
+		mm, ss = divmod(d.seconds, 60)
+		hh, mm = dimvod(mm, 60)
+	except:
+		return ""
+	else:
+		return f"До нового года осталось {d.days} дней, {hh} час. {mm} мин. {ss} сек."
+
+
 async def date_to_week() -> dict:
 	# Creating an dictionary with the return
 	# value as keys and the day as the value
@@ -574,10 +589,16 @@ async def date_to_week() -> dict:
 		# retrieve the day of the given date
 		day = todays_date.isoweekday()
 		# print("The date", todays_date, "falls on", weekdays[day])
+
+		try:
+			fdth = await fromdaytohny()
+		except:
+			fdth = ""
+
 	except:
-		return {"date": "unknown", "weekday": "unknown", "season(days)": "unknown", "number_of_day": "unknown"} # false_date
+		return {"date": "unknown", "weekday": "unknown", "season(days)": "unknown", "number_of_day": "unknown", "days to ny": "unknown"} # false_date
 	else:
-		return {"date": todays_date, "weekday": weekdays[day], "season(days)": str(mts), "number_of_day": str(cnod)} # true_date / season(days_in_month)
+		return {"date": todays_date, "weekday": weekdays[day], "season(days)": str(mts), "number_of_day": str(cnod), "days to ny": str(fdth)} # true_date / season(days_in_month) / days_to_newyear
 
 
 # gcd_list = gcd_from_numbers([i for i in range(20) if i]) # filter_integers_from_to
@@ -14383,8 +14404,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						lst_classify = [(fl,1) if fl - a > 0 else (fl,0) for fl in fsizes_list] # is_no_lambda
 
 				if lst_classify:
-					lst1 = [fl[0] for lc in lst_classify if fl[1] == 1] # classify_1
-					lst2 = [fl[0] for lc in lst_classify if fl[1] == 0] # classify_0
+					lst1 = [lc[0] for lc in lst_classify if lc[1] == 1] # classify_1
+					lst2 = [lc[0] for lc in lst_classify if lc[1] == 0] # classify_0
 
 					if len(lst1) > len(lst2): # first_more_second
 						fsizes_list = lst1
