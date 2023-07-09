@@ -596,9 +596,9 @@ async def date_to_week() -> dict:
 			fdth = ""
 
 	except:
-		return {"date": "unknown", "weekday": "unknown", "season(days)": "unknown", "number_of_day": "unknown", "days to ny": "unknown"} # false_date
+		return {"date": "unknown", "weekday": "unknown", "season(days)": "unknown", "number_of_day": "unknown", "days_to_ny": "unknown"} # false_date
 	else:
-		return {"date": todays_date, "weekday": weekdays[day], "season(days)": str(mts), "number_of_day": str(cnod), "days to ny": str(fdth)} # true_date / season(days_in_month) / days_to_newyear
+		return {"date": todays_date, "weekday": weekdays[day], "season(days)": str(mts), "number_of_day": str(cnod), "days_to_ny": str(fdth)} # true_date / season(days_in_month) / days_to_newyear
 
 
 # gcd_list = gcd_from_numbers([i for i in range(20) if i]) # filter_integers_from_to
@@ -897,7 +897,8 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 				days = 366 if dt.year % 4 == 0 else 365 # by_year # is_no_lambda
 
 				try:
-					ftd = ff_to_days(ff=fsf, period=days, is_dir=False, is_less=False, is_any=True) # period=30(is_month) # period=days(is_year) # is_all
+					#ftd = ff_to_days(ff=fsf, period=days, is_dir=False, is_less=False, is_any=True) # period=30(is_month) # period=days(is_year) # by_Year
+					ftd = ff_to_days(ff=fsf, period=12*days, is_dir=False, is_less=False, is_any=True) # period=30(is_month) # period=days(is_year) # 12_Year
 				except:
 					ftd = (None, ) # if_error2(None)
 
@@ -1320,8 +1321,13 @@ if all((filter_top_list, len(somebase_dict) >= 0)):
 	if all((filter_get1000, len(filter_get1000) <= len(filter_top_by_folders))):
 		filter_top_by_folders = filter_get1000
 
+	dt = datetime.now()
+
+	days = 366 if dt.year % 4 == 0 else 365 # by_year # is_no_lambda
+
 	# new # no_folders / only_backup # is_count_equal_template # default(30_days)
-	filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = 0, is_dir=False, is_less=False, is_any=True)[0] != None])) # is_all
+	# filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = 0, is_dir=False, is_less=False, is_any=True)[0] != None])) # by_Year
+	filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period =12*days, is_dir=False, is_less=False, is_any=True)[0] != None])) # 12_year
 
 	filter_get1000 = filter_for_new_backup[0:1000] if len(filter_for_new_backup) > 1000 else filter_for_new_backup # only_1000(for_fast) # top_1000
 	if all((filter_get1000, len(filter_get1000) <= len(filter_for_new_backup))):
@@ -2012,8 +2018,8 @@ except BaseException as e:
 	logging.error("Ошибка даты [%s]" % str(e))
 	write_log("debug dtw[error]", "Ошибка даты [%s]" % str(e), is_error=True)
 else:
-	logging.info("Today is: %s, weekday is: %s, season(days): %s, number_of_day: %s" % (dtw["date"], dtw["weekday"], dtw["season(days)"], dtw["number_of_day"]))
-	write_log("debug dtw[ok]", "Today is: %s, weekday is: %s, season(days): %s, number_of_day: %s" % (dtw["date"], dtw["weekday"], dtw["season(days)"], dtw["number_of_day"]))
+	logging.info("Today is: %s, weekday is: %s, season(days): %s, number_of_day: %s, days_to_ny: %s" % (dtw["date"], dtw["weekday"], dtw["season(days)"], dtw["number_of_day"], dtw["days_to_ny"]))
+	write_log("debug dtw[ok]", "Today is: %s, weekday is: %s, season(days): %s, number_of_day: %s, days_to_ny: %s" % (dtw["date"], dtw["weekday"], dtw["season(days)"], dtw["number_of_day"], dtw["days_to_ny"]))
 
 # debug
 # sys.exit() # spyder_debug
