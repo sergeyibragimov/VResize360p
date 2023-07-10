@@ -549,7 +549,7 @@ async def fromdaytohny():
 
 	try:
 		mm, ss = divmod(d.seconds, 60)
-		hh, mm = dimvod(mm, 60)
+		hh, mm = divmod(mm, 60)
 	except:
 		return ""
 	else:
