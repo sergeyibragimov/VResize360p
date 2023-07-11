@@ -835,13 +835,14 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 										try:
 											desc = ";".join(parse_desc[0])
 
-											if any((desc.split(";")[0][0].isnumeric(), desc.split(";")[0][0].isalpha())):
-												desc = desc.replace(";;", ";") # clear_double(if_rus)
-												desc = desc.replace(";(", ";") # clear_first_quote(is_rus)
-												desc = desc.replace(");", ";") # clear_second_quote(is_rus)
+											# if any((desc.split(";")[0][0].isnumeric(), desc.split(";")[0][0].isalpha())): # skip_symb # debug
+											desc = desc.replace(";;", ";") # clear_double(if_rus)
+											desc = desc.replace(";(", ";") # clear_first_quote(is_rus)
+											desc = desc.replace(");", ";") # clear_second_quote(is_rus)
 										except:
 											desc = ""
-										else:
+
+										if all((desc, len(desc.split(";")) > 0)): # skip_if_null # debug
 											try:
 												desc_check = ";".join(desc.split(";")[1:])
 											except:
