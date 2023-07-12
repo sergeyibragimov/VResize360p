@@ -63,7 +63,7 @@ logging.info(f"debug start {str(datetime.now())}")
 
 mytime: dict = {"jobtime": [9, 18, 4], "dinnertime": [12, 13], "sleeptime": [0, 7], "anytime": [True]}
 
-                
+
 # 640x360 -> 1280x720 -> 1920x1080 # 16/9(hd)
 
 # @16/9(hd) # 8/16
@@ -527,7 +527,7 @@ async def month_to_seasdays(month: int = 0, year: int = 0) -> tuple:
 		elif month == 7:
 			days = 31
 		elif month == 8:
-			days = 30
+			days = 31
 		seas = "Summer"
 
 	elif month in [9, 10, 11]:
@@ -719,10 +719,6 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 		if folder_scan_full:
 			folder_scan_full.sort(reverse=False) # sort_by_abc
 
-			is_found: bool = False
-			is_not_found: bool = False
-			is_two_desc: bool = False
-
 			try:
 				with open(desc_base, encoding="utf-8") as dbf:
 					desc_dict = json.load(dbf)
@@ -766,12 +762,30 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 			for fsf in folder_scan_full:
 
+                try:
+                    assert folder_scan_full, ""
+                except AssertionError as err:
+                    raise err # logging
+                    break
+
+                try:
+                    assert fsf, ""
+                except AssertionError as err:
+                    raise err # logging
+                    continue
+
+                is_found: bool = False
+                is_not_found: bool = False
+                is_two_desc: bool = False
+
 				try:
 					list_files = os.listdir(fsf)
-				except BaseException: # as err:
-					list_files = [] 
+                    assert list_files, "Нет файлов в папке %s" % fsf # is_assert_debug
+				except AssertionError as err: # is_debug
+					# list_files = [] # BaseException
 					logging.warning("Нет файлов в папке %s" % fsf)
-					# raise err
+					raise err
+                    contniue
 				else:
 					is_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 1) # desc(1) / files(0/1)
 					is_not_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) == 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 0) # desc(0) / files(0)
@@ -866,8 +880,10 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 												assert any((is_upd, is_eq, is_new)), "[upd/eq/new] %s" % "x".join([str(is_upd), str(is_eq), str(is_new), fl]) # is_assert(debug)
 											except AssertionError as err:
 												is_skip = True
-												logging.warning("[upd/eq/new]! %s" % "x".join([str(is_upd), str(is_eq), str(is_new), fl]))
+												# logging.warning("[upd/eq/new]! %s" % "x".join([str(is_upd), str(is_eq), str(is_new), fl])) # debug_status(is_temp)
 												raise err
+                                            else:
+                                                logging.info("[upd/eq/new] %s" % "x".join([str(is_upd), str(is_eq), str(is_new), fl])) # ok_status
 
 											# @logging_all_descriptions # is_need_try_except(is_debug/is_error)
 											if is_skip == False:
@@ -898,7 +914,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 											elif is_skip == True:
 												print(Style.BRIGHT + Fore.WHITE + "Skipped description: %s" % str(parse_desc)) # original_desc # is_color
 
-												logging.info("is_skip/parse_dsec %s" % str(parse_desc)) # (7)
+												logging.info("is_skip/parse_desc %s" % str(parse_desc)) # (7)
 
 										# print(Style.BRIGHT + Fore.CYAN + "Info: %s" % str(parse_desc)) # original_desc
 										# print(Style.BRIGHT + Fore.CYAN + "%s" % desc_dict[parse_desc[0].strip()]) # "eng" / date
