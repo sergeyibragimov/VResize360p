@@ -835,10 +835,15 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 										try:
 											desc = ";".join(parse_desc[0])
 
+											logging.info("desc/parse_desc %s" % desc) # (1)
+
 											# if any((desc.split(";")[0][0].isnumeric(), desc.split(";")[0][0].isalpha())): # skip_symb # debug
-											desc = desc.replace(";;", ";") # clear_double(if_rus)
-											desc = desc.replace(";(", ";") # clear_first_quote(is_rus)
-											desc = desc.replace(");", ";") # clear_second_quote(is_rus)
+											if any((";;" in desc, ";(" in desc, ");" in desc)):
+												desc = desc.replace(";;", ";") # clear_double(if_rus)
+												desc = desc.replace(";(", ";") # clear_first_quote(is_rus)
+												desc = desc.replace(");", ";") # clear_second_quote(is_rus)
+
+												logging.info("desc/replace %s" % desc) # (2)
 										except:
 											desc = ""
 
@@ -848,6 +853,9 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 											except:
 												desc_check = None
 
+											if desk_check != None:
+												logging.info("desc_check/desc_split %s" % desc_check) # (3)
+
 											is_skip: bool = False
 
 											try:
@@ -855,9 +863,10 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 												is_eq = (desc_check != None and desc_dict[desc.split(";")[0].strip()] == desc_check)
 												is_new = (desc_check == None)
 
-												assert any((is_upd, is_eq, is_new)), "" # is_assert(debug)
+												assert any((is_upd, is_eq, is_new)), "[upd/eq/new] %s" % "x".join([str(is_upd), str(is_eq), str(is_new), fl]) # is_assert(debug)
 											except AssertionError as err:
 												is_skip = True
+												logging.warning("[upd/eq/new]! %s" % "x".join([str(is_upd), str(is_eq), str(is_new), fl]))
 												raise err
 
 											# @logging_all_descriptions # is_need_try_except(is_debug/is_error)
@@ -868,19 +877,28 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 													print(Style.BRIGHT + Fore.WHITE + "%s" % desc.split(";")[0].strip(),
 														Style.BRIGHT + Fore.YELLOW + "%s" % ";".join(desc.split(";")[1:]), "update")
 
+													logging.info("desc_dict/update %s" % desc_dict[desc.split(";")[0].strip()]) # (4)
+
 												if is_eq:# desc_check != None and desc_dict[desc.split(";")[0].strip()] == desc_check:
 													# desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]) # try_skip_desc
 
 													print(Style.BRIGHT + Fore.WHITE + "%s" % desc.split(";")[0].strip(),
 														Style.BRIGHT + Fore.CYAN + "%s" % ";".join(desc.split(";")[1:]), "equal")
 
+													logging.info("desc_dict/equal %s" % desc_dict[desc.split(";")[0].strip()]) # (5)
+
 												if is_new: # desc_check == None:
 													desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]) # add_desc
 
 													print(Style.BRIGHT + Fore.WHITE + "%s" % desc.split(";")[0].strip(),
 														Style.BRIGHT + Fore.GREEN + "%s" % ";".join(desc.split(";")[1:]), "new")
+
+													logging.info("desc_dict/new %s" % desc_dict[desc.split(";")[0].strip()]) # (6)
+
 											elif is_skip == True:
 												print(Style.BRIGHT + Fore.WHITE + "Skipped description: %s" % str(parse_desc)) # original_desc # is_color
+
+												logging.info("is_skip/parse_dsec %s" % str(parse_desc)) # (7)
 
 										# print(Style.BRIGHT + Fore.CYAN + "Info: %s" % str(parse_desc)) # original_desc
 										# print(Style.BRIGHT + Fore.CYAN + "%s" % desc_dict[parse_desc[0].strip()]) # "eng" / date
