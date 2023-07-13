@@ -762,30 +762,30 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 			for fsf in folder_scan_full:
 
-                try:
-                    assert folder_scan_full, ""
-                except AssertionError as err:
-                    raise err # logging
-                    break
+				try:
+					assert folder_scan_full, ""
+				except AssertionError as err:
+					raise err # logging
+					break
 
-                try:
-                    assert fsf, ""
-                except AssertionError as err:
-                    raise err # logging
-                    continue
+				try:
+					assert fsf, ""
+				except AssertionError as err:
+					raise err # logging
+					continue
 
-                is_found: bool = False
-                is_not_found: bool = False
-                is_two_desc: bool = False
+				is_found: bool = False
+				is_not_found: bool = False
+				is_two_desc: bool = False
 
 				try:
 					list_files = os.listdir(fsf)
-                    assert list_files, "Нет файлов в папке %s" % fsf # is_assert_debug
+					assert list_files, "Нет файлов в папке %s" % fsf # is_assert_debug
 				except AssertionError as err: # is_debug
 					# list_files = [] # BaseException
 					logging.warning("Нет файлов в папке %s" % fsf)
 					raise err
-                    contniue
+					continue
 				else:
 					is_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 1) # desc(1) / files(0/1)
 					is_not_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) == 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 0) # desc(0) / files(0)
@@ -882,8 +882,8 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 												is_skip = True
 												# logging.warning("[upd/eq/new]! %s" % "x".join([str(is_upd), str(is_eq), str(is_new), fl])) # debug_status(is_temp)
 												raise err
-                                            else:
-                                                logging.info("[upd/eq/new] %s" % "x".join([str(is_upd), str(is_eq), str(is_new), fl])) # ok_status
+											else:
+                                                						logging.info("[upd/eq/new] %s" % "x".join([str(is_upd), str(is_eq), str(is_new), fl])) # ok_status
 
 											# @logging_all_descriptions # is_need_try_except(is_debug/is_error)
 											if is_skip == False:
@@ -1023,9 +1023,14 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 								return no_prot_ext
 
 						dt = datetime.now()
+						
+						try:
+							dsize: int = disk_usage("d:\\").free
+						except:
+							dsize: int = 0						
 
 						is_backup: bool = False
-						is_backup = all((dt.hour % 3 == 0, dt.minute <= 15)) # every_3_hour's_between_in_15min # is_default(?)
+						is_backup = (dt.hour <= 21, dsize // (1024 ** 2) > 0) # debug # midnght-9pm # limit_1mb(ok) # is_default
 
 						try:
 							desc_list = [ld.strip() for ld in os.listdir(fsf) if ld.lower().endswith(".txt")]
