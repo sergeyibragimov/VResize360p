@@ -7511,6 +7511,15 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		if hours > 24:
 			hours = hours % 24 # debug # if_more_24hour_find_mod
+			
+		if minutes > 60:
+			minutes = minutes % 60 # debug # if_more_60minute_find_mod
+			
+		try:
+			assert hours or minutes, ""
+		except AssertionError as err:
+			hours, minutes = 2, 0
+			raise err # logging
 
 		# timing = [{"hh": hh_time, "mm": mm_time}] # one_record
 		timing = [{"hh": int(hours), "mm": int(minutes)}] # one_record
