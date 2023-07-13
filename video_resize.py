@@ -7509,6 +7509,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	# @log_error # get_time_if_have_ready_jobs_else_null_time
 	async def save_timing_to_xml(hours: int = 0, minutes: int = 0):
 
+		if hours > 24:
+			hours = hours % 24 # debug # if_more_24hour_find_mod
+
 		# timing = [{"hh": hh_time, "mm": mm_time}] # one_record
 		timing = [{"hh": int(hours), "mm": int(minutes)}] # one_record
 
