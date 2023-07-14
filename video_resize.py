@@ -7502,7 +7502,22 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			print(Style.BRIGHT + Fore.WHITE + "%s" % str(timing), Style.BRIGHT + Fore.GREEN + "Xml loaded")
 			write_log("debug timing[xml][load][%d]" % ind, "load ok [%s]" % str(datetime.now())) # xml_loaded
 
-			return (int(timing[0]["hh"]), int(timing[0]["mm"])) # [{'hh': '1', 'mm': '56'}] # true_calc
+			hours, minutes = int(timing[0]["hh"]), int(timing[0]["mm"])
+
+			if hours > 24:
+				hours = hours % 24
+
+			if minutes > 60:
+				minites = minutes % 60
+
+			try:
+				assert hours or minutes, "" # is_assert_debug
+			except AssertionError as err:
+				hours, minutes = 2, 0
+				raise err # logging
+
+			# return (int(timing[0]["hh"]), int(timing[0]["mm"])) # [{'hh': '1', 'mm': '56'}] # true_calc # old
+			return (hours, minutes) # debug # [{'hh': '1', 'mm': '56'}] # true_calc
 		elif not timing:
 			return (0, 0) # ok_but_null
 
@@ -7516,7 +7531,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			minutes = minutes % 60 # debug # if_more_60minute_find_mod
 			
 		try:
-			assert hours or minutes, ""
+			assert hours or minutes, "" # is_assert_debug
 		except AssertionError as err:
 			hours, minutes = 2, 0
 			raise err # logging
