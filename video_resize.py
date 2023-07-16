@@ -9,33 +9,33 @@
 
 # Проверить процедуры, классы, алгоритмы и т.п. которые можно убрать(почистить)
 
+# from mac_vendor_lookup import MacLookup # pip install -U mac_vendor_lookup # MacLookup().lookup("cc:32:e5:59:ae:12")
+# import argparse  # system # sys.argv -> argparse
 # import io
+# import multiprocessing
 from concurrent.futures import ThreadPoolExecutor  # Thread by pool # man+ / youtube
 from datetime import datetime, timezone # datetime
-import ntplib # pip install -U ntplib # server time
 from functools import reduce
+from getmac import get_mac_address # pip install -U getmac # mac_tools
 from os import getcwd  # current_folder
 from psutil import cpu_count  # Process # psutil (process and system utilities)
 from shutil import disk_usage, copy, move  # файлы
 from time import time, sleep  # ctime, perf_counter, strftime, localtime  # время-задержка
 from win10toast import ToastNotifier  # An easy-to-use Python library for displaying Windows 10 Toast Notifications
+import asyncio # TaskGroup(3.11+)
 import ctypes
 import json
 import logging
-# import multiprocessing
+import ntplib # pip install -U ntplib # server time
 import os  # система
 import psutil
 import pyttsx3  # files_dict
 import re  # regular_expression
-import sys  # system
-import zipfile  # zip archive # backup(job)/after(del/if_done) # UserWarning: Duplicate name
-# import argparse  # system # sys.argv -> argparse
-import sqlite3 as sql  # sqlite db-api
-import xml.etree.ElementTree as xml  # ?pip
-import asyncio # TaskGroup(3.11+)
-from getmac import get_mac_address # pip install -U getmac # mac_tools
 import socket # socket_commands
-# from mac_vendor_lookup import MacLookup # pip install -U mac_vendor_lookup # MacLookup().lookup("cc:32:e5:59:ae:12")
+import sqlite3 as sql  # sqlite db-api
+import sys  # system
+import xml.etree.ElementTree as xml  # ?pip
+import zipfile  # zip archive # backup(job)/after(del/if_done) # UserWarning: Duplicate name
 
 
 from threading import (  # Thread # Barrier # работа с потоками # mutli_async
@@ -857,7 +857,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 												desc = desc.replace(";(", ";") # clear_first_quote(is_rus)
 												desc = desc.replace(");", ";") # clear_second_quote(is_rus)
 
-												logging.info("desc/replace %s" % desc) # (2)
+												logging.info("desc/replace %s" % desc) # (2) # is_rus_only
 										except:
 											desc = ""
 
@@ -867,60 +867,47 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 											except:
 												desc_check = None
 
-											if desk_check != None:
-												logging.info("desc_check/desc_split %s" % desc_check) # (3)
+											logging.info("desc_check/desc_split %s" % str(desc_check)) # (3)
 
 											is_skip: bool = False
 
 											try:
 												is_upd = (desc_check != None and desc_dict[desc.split(";")[0].strip()] != desc_check)
 												is_eq = (desc_check != None and desc_dict[desc.split(";")[0].strip()] == desc_check)
-												is_new = (desc_check == None)
 
-												assert any((is_upd, is_eq, is_new)), "[upd/eq/new] %s" % "x".join([str(is_upd), str(is_eq), str(is_new), fl]) # is_assert(debug)
+												assert any((is_upd, is_eq)), "[upd/eq] %s" % "x".join([str(is_upd), str(is_eq), fl]) # is_assert(debug)
 											except AssertionError as err:
 												is_skip = True
-												# logging.warning("[upd/eq/new]! %s" % "x".join([str(is_upd), str(is_eq), str(is_new), fl])) # debug_status(is_temp)
+												# logging.warning("[upd/eq]! %s" % "x".join([str(is_upd), str(is_eq), fl])) # debug_status(is_temp)
 												raise err
 											else:
-                                                						logging.info("[upd/eq/new] %s" % "x".join([str(is_upd), str(is_eq), str(is_new), fl])) # ok_status
+                                                						logging.info("[upd/eq] %s" % "x".join([str(is_upd), str(is_eq), fl])) # ok_status
 
 											# @logging_all_descriptions # is_need_try_except(is_debug/is_error)
 											if is_skip == False:
-												if is_upd: # desc_check != None and desc_dict[desc.split(";")[0].strip()] != desc_check:
-													desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]) # update_desc
+												if any((is_upd, is_eq)):
+													desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:])
 
 													print(Style.BRIGHT + Fore.WHITE + "%s" % desc.split(";")[0].strip(),
-														Style.BRIGHT + Fore.YELLOW + "%s" % ";".join(desc.split(";")[1:]), "update")
+														Style.BRIGHT + Fore.YELLOW + "%s" % ";".join(desc.split(";")[1:]), "update/equal")
 
-													logging.info("desc_dict/update %s" % desc_dict[desc.split(";")[0].strip()]) # (4)
-
-												if is_eq:# desc_check != None and desc_dict[desc.split(";")[0].strip()] == desc_check:
-													# desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]) # try_skip_desc
-
-													print(Style.BRIGHT + Fore.WHITE + "%s" % desc.split(";")[0].strip(),
-														Style.BRIGHT + Fore.CYAN + "%s" % ";".join(desc.split(";")[1:]), "equal")
-
-													logging.info("desc_dict/equal %s" % desc_dict[desc.split(";")[0].strip()]) # (5)
-
-												if is_new: # desc_check == None:
-													desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]) # add_desc
-
-													print(Style.BRIGHT + Fore.WHITE + "%s" % desc.split(";")[0].strip(),
-														Style.BRIGHT + Fore.GREEN + "%s" % ";".join(desc.split(";")[1:]), "new")
-
-													logging.info("desc_dict/new %s" % desc_dict[desc.split(";")[0].strip()]) # (6)
+													logging.info("desc_dict/update(equal) %s" % desc_dict[desc.split(";")[0].strip()]) # (4)
 
 											elif is_skip == True:
 												print(Style.BRIGHT + Fore.WHITE + "Skipped description: %s" % str(parse_desc)) # original_desc # is_color
 
-												logging.info("is_skip/parse_desc %s" % str(parse_desc)) # (7)
+												logging.info("is_skip/parse_desc %s" % str(parse_desc)) # (5)
 
 										# print(Style.BRIGHT + Fore.CYAN + "Info: %s" % str(parse_desc)) # original_desc
 										# print(Style.BRIGHT + Fore.CYAN + "%s" % desc_dict[parse_desc[0].strip()]) # "eng" / date
 										# print(Style.BRIGHT + Fore.CYAN + "%s" % ";".join(parse_desc[0])) # string_desc
 							except: # skip_desc
 								continue
+
+				if desc_dict: # some_data # data
+
+					with open(desc_base, "w", encoding="utf-8") as dbf:
+						json.dump(desc_dict, dbf, ensure_ascii=False, indent=2, sort_keys=True)
 
 				# config = {"ff": fsf, "period": days, "is_dir": False, "is_less": False, "is_any": True} # **config # fsf(default) -> None(debug)
 				# ff_to_days(ff=fsf, period=days, is_dir=False, is_less=False, is_any=True)
@@ -1191,11 +1178,6 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 						else:
 							print(Style.BRIGHT + Fore.YELLOW + "Удаляю лишнее описание в папке", Style.BRIGHT + Fore.WHITE + "%s" % fsf, end = "\n") # is_color's
 							# write_log("debug fsf[is_two_desc_found][ok]", "%s" % fsf) # is_delete
-
-			if desc_dict: # some_data # data
-
-				with open(desc_base, "w", encoding="utf-8") as dbf:
-					json.dump(desc_dict, dbf, ensure_ascii=False, indent=2, sort_keys=True)
 
 			# x[0].isalpha() -> x[0] == x[0].upper()
 
@@ -2203,40 +2185,8 @@ async def my_args() -> list: #2
 	tmp: list = []
 	# some_list: list = []
 
-	# sys.argv -> "argparse"
+	# sys.argv -> "argparse" # hide_docstring
 
-	# list_arguments # new_command_line_arguments # manual(-h) # debug/test
-	"""
-	## python argparse_4.py -h
-	usage: argparse_4.py [-h] parent_names parent_names parent_names
-
-	positional arguments:
-	  parent_filter
-
-	optional arguments:
-	  -h, --help    show this help message and exit
-	"""
-
-	"""
-	## python argparse_4.py -parent_filter 0e # 0e
-
-	tmp: list = []
-	is_error: bool = False
-	parrent_filter: str = ""
-
-	parser = argparse.ArgumentParser()
-	# nargs for store actions must be > 0; if you have nothing to store, actions such as store true or store const may be more appropriate
-	try:
-		parser.add_argument("-parent_filter", type=str) # use_"one"_argument_input
-	except:
-		parent_filter = ""
-		is_error = True
-	else:
-		args = parser.parse_args()
-		parent_filter = args.parent_filter
-
-		tmp.append(parent_filter) # add_current_string_from_argument #["0e"]
-	"""
 
 	# abc_or_num_regex = re.compile(r"^[A-Z0-9].*", re.I)
 
@@ -8446,7 +8396,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 
 	# pass_x_of_4
-	async def project_update(is_debug: bool = False):  # update_downloaded_files(tvseries/cinema) # debug
+	async def project_update(is_debug: bool = False, is_copy_update: bool = False, is_skip_project: bool = False):  # update_downloaded_files(tvseries/cinema) # debug
 		# copy_src - tvseries(update_folder), copy_src2 - cinema(update_folder), move_dst - @path_for_folder1(local_project)
 
 		path1: str = copy_src
@@ -8633,7 +8583,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				if not lst:  # skip_if_nulllist
 					break
 
-				if os.path.exists(l):
+				if os.path.exists(l) and not is_skip_project:
 					os.remove(l)
 
 					print(Style.BRIGHT + Fore.CYAN + "Старый файл %s был удалён и оставлен более свежий" % l)
@@ -8658,7 +8608,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		except:
 			filter_date = []  # if_some_error
 		finally:
-			if filter_date:
+			if filter_date and not is_skip_project:
 				await filter_date_file(filter_date)  # 1>"3" # asyncio.run
 
 		# pass_2_of_2
@@ -8669,7 +8619,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		except:
 			filter_date = []  # if_some_error
 		finally:
-			if filter_date:
+			if filter_date and not is_skip_project:
 				await filter_date_file(filter_date)  # 2>"3" # asyncio.run
 
 		# print(files, copy_src_list3, "project_update", end="\n")
@@ -9048,6 +8998,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 								try:
 									await process_move(ffj, files2[ffj], False, True, avg_size) # no_asyncio.run # async_if_small #3
+									if is_copy_update:
+										await process_move(ffj, files2[ffj], True, True, avg_size)
 								except BaseException as e:
 									write_log("debug process_move[error][3]", ";".join([ffj, files2[ffj], str(e)]))
 								else:
