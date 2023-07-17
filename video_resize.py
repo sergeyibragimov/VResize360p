@@ -884,32 +884,25 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 											try:
 												is_upd = (desc_check != None and desc_dict[desc.split(";")[0].strip()] != desc_check)
 												is_eq = (desc_check != None and desc_dict[desc.split(";")[0].strip()] == desc_check)
+												is_unk = (is_upd == False and is_eq == False)
 
-												assert any((is_upd, is_eq)), "[upd/eq] %s" % "x".join([str(is_upd), str(is_eq), fl]) # is_assert(debug)
+												assert any((is_upd, is_eq, is_unk)), "[upd/eq/unk] %s" % "x".join([str(is_upd), str(is_eq), str(is_unk), fl]) # is_assert(debug)
 											except AssertionError as err:
 												is_skip = True
-												# logging.warning("[upd/eq]! %s" % "x".join([str(is_upd), str(is_eq), fl])) # debug_status(is_temp) # (4)
+												logging.warning("[upd/eq/unk]! %s" % "x".join([str(is_upd), str(is_eq), str(is_unk), fl])) # debug_status(is_temp) # (4)
 												raise err
-											# else:
-                                                						# logging.info("[upd/eq] %s" % "x".join([str(is_upd), str(is_eq), fl])) # ok_status
+											else:
+                                                						logging.info("[upd/eq/unk] %s" % "x".join([str(is_upd), str(is_eq), str(is_unk), fl])) # ok_status # (5)
 
 											# @logging_all_descriptions # is_need_try_except(is_debug/is_error)
 											if is_skip == False:
-												if any((is_upd, is_eq)) and is_rus == False:
-													desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]) # debug
+												if any((is_upd, is_eq, is_unknown)) and len(desc.split(";")) > 0:
+													desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:])
 
 													print(Style.BRIGHT + Fore.WHITE + "%s" % desc.split(";")[0].strip(),
-														Style.BRIGHT + Fore.YELLOW + "%s" % ";".join(desc.split(";")[1:]), "update/equal/is_eng")
+														Style.BRIGHT + Fore.YELLOW + "%s" % ";".join(desc.split(";")[1:]), "update/equal/unknown")
 
-													# logging.info("desc_dict/update(equal)/is_eng %s" % desc_dict[desc.split(";")[0].strip()]) # debug # (5)
-
-												elif any((is_upd, is_eq)) and is_rus == True:
-													desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[-1:]) # debug
-
-													print(Style.BRIGHT + Fore.WHITE + "%s" % desc.split(";")[0].strip(),
-														Style.BRIGHT + Fore.YELLOW + "%s" % desc.split(";")[-1], "update/equal/is_rus")
-
-													# logging.info("desc_dict/update(equal)/is_rus %s" % desc_dict[desc.split(";")[0].strip()]) # debug # (6)
+													# logging.info("desc_dict/update(equal)/unknown %s" % desc_dict[desc.split(";")[0].strip()]) # debug # (6)
 
 											elif is_skip == True:
 												print(Style.BRIGHT + Fore.WHITE + "Skipped description: %s" % str(parse_desc)) # original_desc # is_color
