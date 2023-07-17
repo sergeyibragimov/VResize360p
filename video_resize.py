@@ -778,18 +778,23 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 				is_not_found: bool = False
 				is_two_desc: bool = False
 
+				is_folder: bool = False
+
 				try:
-					list_files = os.listdir(fsf)
-					assert list_files, "Нет файлов в папке %s" % fsf # is_assert_debug
+					if not os.path.isfile(fsf):
+						list_files = os.listdir(fsf)
+						assert list_files, "Нет файлов в папке %s" % fsf # is_assert_debug
+						is_folder = True
 				except AssertionError as err: # is_debug
 					# list_files = [] # BaseException
 					logging.warning("Нет файлов в папке %s" % fsf)
 					raise err
 					continue
 				else:
-					is_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 1) # desc(1) / files(0/1)
-					is_not_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) == 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 0) # desc(0) / files(0)
-					is_two_desc = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 2) # desc(2) / files(0/1)
+					if is_folder:
+						is_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 1) # desc(1) / files(0/1)
+						is_not_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) == 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 0) # desc(0) / files(0)
+						is_two_desc = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 2) # desc(2) / files(0/1)
 
 				# path_to_description
 				try:
@@ -802,7 +807,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 					full_list.sort(reverse=False)
 
 				# descriptions
-				if len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 1 and full_list:
+				if len(list(filter(lambda x: "txt" in x, tuple(list_files)))) > 0 and full_list:
 
 					# "﻿10 причин моей ненависти": "﻿10 причин моей ненависти;(10 Things I Hate About You);7 Jul 2009"
 					# "Адаптация": "Адаптация;6 Feb 2017"
@@ -844,12 +849,16 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 									except:
 										parse_desc = []
 
+									is_rus: bool = False
+
 									# yes_description # desc(1)
 									if parse_desc:
 										try:
 											desc = ";".join(parse_desc[0])
 
-											logging.info("desc/parse_desc %s" % desc) # (1)
+											logging.info("desc/parse_desc %s" % desc) # debug # (1)
+
+											# desc = desc.replace("í", "i")
 
 											# if any((desc.split(";")[0][0].isnumeric(), desc.split(";")[0][0].isalpha())): # skip_symb # debug
 											if any((";;" in desc, ";(" in desc, ");" in desc)):
@@ -857,7 +866,9 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 												desc = desc.replace(";(", ";") # clear_first_quote(is_rus)
 												desc = desc.replace(");", ";") # clear_second_quote(is_rus)
 
-												logging.info("desc/replace %s" % desc) # (2) # is_rus_only
+												is_rus = True
+
+												logging.info("desc/replace %s" % desc) # debug # (2) # is_rus_only
 										except:
 											desc = ""
 
@@ -867,7 +878,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 											except:
 												desc_check = None
 
-											logging.info("desc_check/desc_split %s" % str(desc_check)) # (3)
+											# logging.info("desc_check/desc_split %s" % str(desc_check)) # debug # (3)
 
 											is_skip: bool = False
 
@@ -878,25 +889,33 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 												assert any((is_upd, is_eq)), "[upd/eq] %s" % "x".join([str(is_upd), str(is_eq), fl]) # is_assert(debug)
 											except AssertionError as err:
 												is_skip = True
-												# logging.warning("[upd/eq]! %s" % "x".join([str(is_upd), str(is_eq), fl])) # debug_status(is_temp)
+												# logging.warning("[upd/eq]! %s" % "x".join([str(is_upd), str(is_eq), fl])) # debug_status(is_temp) # (4)
 												raise err
-											else:
-                                                						logging.info("[upd/eq] %s" % "x".join([str(is_upd), str(is_eq), fl])) # ok_status
+											# else:
+                                                						# logging.info("[upd/eq] %s" % "x".join([str(is_upd), str(is_eq), fl])) # ok_status
 
 											# @logging_all_descriptions # is_need_try_except(is_debug/is_error)
 											if is_skip == False:
-												if any((is_upd, is_eq)):
-													desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:])
+												if any((is_upd, is_eq)) and is_rus == False:
+													desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]) # debug
 
 													print(Style.BRIGHT + Fore.WHITE + "%s" % desc.split(";")[0].strip(),
-														Style.BRIGHT + Fore.YELLOW + "%s" % ";".join(desc.split(";")[1:]), "update/equal")
+														Style.BRIGHT + Fore.YELLOW + "%s" % ";".join(desc.split(";")[1:]), "update/equal/is_eng")
 
-													logging.info("desc_dict/update(equal) %s" % desc_dict[desc.split(";")[0].strip()]) # (4)
+													# logging.info("desc_dict/update(equal)/is_eng %s" % desc_dict[desc.split(";")[0].strip()]) # debug # (5)
+
+												elif any((is_upd, is_eq)) and is_rus == True:
+													desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[-1:]) # debug
+
+													print(Style.BRIGHT + Fore.WHITE + "%s" % desc.split(";")[0].strip(),
+														Style.BRIGHT + Fore.YELLOW + "%s" % desc.split(";")[-1], "update/equal/is_rus")
+
+													# logging.info("desc_dict/update(equal)/is_rus %s" % desc_dict[desc.split(";")[0].strip()]) # debug # (6)
 
 											elif is_skip == True:
 												print(Style.BRIGHT + Fore.WHITE + "Skipped description: %s" % str(parse_desc)) # original_desc # is_color
 
-												logging.info("is_skip/parse_desc %s" % str(parse_desc)) # (5)
+												# logging.info("is_skip/parse_desc %s" % str(parse_desc)) # debug # (7)
 
 										# print(Style.BRIGHT + Fore.CYAN + "Info: %s" % str(parse_desc)) # original_desc
 										# print(Style.BRIGHT + Fore.CYAN + "%s" % desc_dict[parse_desc[0].strip()]) # "eng" / date
@@ -10290,17 +10309,16 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				except:
 					short_files: list = []
 
-				if short_files:  # try_update_before_save # debug/test
-					try:
-						# tmp = list(temp_gen()) # new(yes_gen)
-						tmp: list = [sf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) for sf in
-							   tuple(short_files) if all((lf, sf, lf.split("\\")[-1].startswith(sf)))]
-					except:
-						tmp: list = []  # old(no_gen) # sf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) for sf in tuple(short_files) if all((lf, sf, lf.split("\\")[-1].startswith(sf)))
+				try:
+					# tmp = list(temp_gen()) # new(yes_gen)
+					tmp: list = [sf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) for sf in
+						   tuple(short_files) if all((lf, sf, lf.split("\\")[-1].startswith(sf)))]
+				except:
+					tmp: list = []  # old(no_gen) # sf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) for sf in tuple(short_files) if all((lf, sf, lf.split("\\")[-1].startswith(sf)))
 
-					# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
-					short_files = sorted(tmp, reverse=False) if tmp else []  # re_sorted_before_save(by_string) # is_no_lambda
-					# short_files = sorted(tmp2, key=len, reverse=False) if tmp2 else []  # re_sorted_before_save(by_length)
+				# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
+				short_files = sorted(list(set(tmp)), reverse=False) if tmp else []  # re_sorted_before_save(by_string) # is_no_lambda
+				# short_files = sorted(tmp2, key=len, reverse=False) if tmp2 else []  # re_sorted_before_save(by_length)
 
 				if short_files:  # save_if_some_list
 					with open(short_folders, "w", encoding="utf-8") as sff:
