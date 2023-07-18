@@ -855,7 +855,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 										try:
 											desc = ";".join(parse_desc[0])
 
-											logging.info("desc/parse_desc %s" % desc) # debug # (1)
+											# logging.info("desc/parse_desc %s" % desc) # debug # (1)
 
 											# desc = desc.replace("í", "i")
 
@@ -868,50 +868,21 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 												is_rus = True
 
 												logging.info("desc/replace %s" % desc) # debug # (2) # is_rus_only
-										except:
-											desc = ""
 
-										if all((desc, len(desc.split(";")) > 0)): # skip_if_null # debug
-											try:
-												desc_check = ";".join(desc.split(";")[1:])
-											except:
-												desc_check = None
-
-											# logging.info("desc_check/desc_split %s" % str(desc_check)) # debug # (3)
-
-											is_skip: bool = False
-
-											try:
-												is_upd = (desc_check != None and desc_dict[desc.split(";")[0].strip()] != desc_check)
-												is_eq = (desc_check != None and desc_dict[desc.split(";")[0].strip()] == desc_check)
-												is_unk = (is_upd == False and is_eq == False)
-
-												assert any((is_upd, is_eq, is_unk)), "[upd/eq/unk] %s" % "x".join([str(is_upd), str(is_eq), str(is_unk), fl]) # is_assert(debug)
-											except AssertionError as err:
-												is_skip = True
-												logging.warning("[upd/eq/unk]! %s" % "x".join([str(is_upd), str(is_eq), str(is_unk), fl])) # debug_status(is_temp) # (4)
-												raise err
-											else:
-                                                						logging.info("[upd/eq/unk] %s" % "x".join([str(is_upd), str(is_eq), str(is_unk), fl])) # ok_status # (5)
-
-											# @logging_all_descriptions # is_need_try_except(is_debug/is_error)
-											if is_skip == False:
-												if any((is_upd, is_eq, is_unknown)) and len(desc.split(";")) > 0:
-													desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:])
-
-													print(Style.BRIGHT + Fore.WHITE + "%s" % desc.split(";")[0].strip(),
-														Style.BRIGHT + Fore.YELLOW + "%s" % ";".join(desc.split(";")[1:]), "update/equal/unknown")
-
-													# logging.info("desc_dict/update(equal)/unknown %s" % desc_dict[desc.split(";")[0].strip()]) # debug # (6)
-
-											elif is_skip == True:
-												print(Style.BRIGHT + Fore.WHITE + "Skipped description: %s" % str(parse_desc)) # original_desc # is_color
-
-												# logging.info("is_skip/parse_desc %s" % str(parse_desc)) # debug # (7)
-
-										# print(Style.BRIGHT + Fore.CYAN + "Info: %s" % str(parse_desc)) # original_desc
-										# print(Style.BRIGHT + Fore.CYAN + "%s" % desc_dict[parse_desc[0].strip()]) # "eng" / date
-										# print(Style.BRIGHT + Fore.CYAN + "%s" % ";".join(parse_desc[0])) # string_desc
+											assert desc, ""
+										except AssertionError as err:
+											raise err
+											logging.warning("desc/unknown %s" % fl) # debug # (3) # is_unknown
+										except BaseException as e:
+											logging.error("desc/error %s" % str(e)) # debug # (4) # is_error
+										else:
+											if desc.count(";") == 1:
+												desc_dict[desc.split(";")[0].strip()] = desc.split(";")[-1].strip() # is_rus
+												logging.info("desc/is_rus %s" % desc) # debug # (5) # is_rus(is_logging)
+											elif desc.count(";") == 2:
+												desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]).strip() # is_eng
+												logging.info("desc/is_eng %s" % desc) # debug # (6) # is_eng(logging)
+										
 							except: # skip_desc
 								continue
 
@@ -7474,7 +7445,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			try:
 				assert hours or minutes, "" # is_assert_debug
 			except AssertionError as err:
-				hours, minutes = 2, 0
+				hours, minutes = 3, 30 # +1 hour
 				raise err # logging
 
 			# return (int(timing[0]["hh"]), int(timing[0]["mm"])) # [{'hh': '1', 'mm': '56'}] # true_calc # old
@@ -7493,9 +7464,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			
 		try:
 			assert hours or minutes, "" # is_assert_debug
-		except AssertionError as err:
-			hours, minutes = 2, 0
-			raise err # logging
+		except AssertionError: # as err:
+			hours, minutes = 3, 30 # +1 hour
+			# raise err # logging
 
 		# timing = [{"hh": hh_time, "mm": mm_time}] # one_record
 		timing = [{"hh": int(hours), "mm": int(minutes)}] # one_record
@@ -10344,6 +10315,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		# open(path_for_queue + "another.lst", "w", encoding="utf-8").close() # is_csv(after_filter) # hide_if_not_need_another
 
 	elif all((not filter1, not filter2, not filter3, not filter4)):
+
+		some_files: list = []
 
 		# load_meta_jobs(filter) #7
 		try:
@@ -14901,6 +14874,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			diff_count: int = 0
 			err_count: int = 0
 
+			ok_bad_dict: dict = {}
+
 			for k, v in filecmdbase_dict.items(): # fcd.json -> cfcd.json
 				asyncio.run(save_job_to_xml(src=k, dst=v.split(" ")[-1])) # save_job_for_check(after_run/debug)
 
@@ -14949,9 +14924,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								print(Style.BRIGHT + Fore.CYAN + "Задача %s выполнена успешно, её можно сохранить" % full_to_short(cj["dst"])) # is_color
 								write_log("debug check_job[equal]", "Задача %s выполнена успешно, её можно сохранить" % cj["dst"])
 
-								is_ok, is_bad = True, False
+								# is_ok, is_bad = True, False
 
 								ok_count += 1
+								ok_bad_dict[0] = ok_bad_dict.get(0, 0) + 1
+								
 
 								if os.path.exists(cj["src"]) and os.path.exists(cj["dst"]):
 									try:
@@ -14973,12 +14950,18 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 											write_log("debug dst[save][xml]", "%s" % ">=->".join([cj["dst"], cj["src"]])) # status_save_ok_from_xml # is_logging(is_green)
 
 							elif all((is_clean == False, cj["src"].split("\\")[-1] == cj["dst"].split("\\")[-1])): # skip_to_update(check_length) # int(cj["leng"]) != MM.get_length(cj["dst"])
-								print(Style.BRIGHT + Fore.YELLOW + "Задача %s выполнена с разницей, её нельзя сохранять" % full_to_short(cj["dst"]))
-								write_log("debug check_job[diff]", "Задача %s выполнена с разницей, её нельзя сохранять" % cj["dst"])
 
-								is_ok, is_bad = False, True
+								# diff_save_status(short/full) # debug # dst <= src # src <= dst
+								diff_save_short = "Задача %s выполнена с разницей, её нельзя сохранять" % full_to_short(cj["dst"]) if os.path.exists(cj["src"]) else "Задача %s, файл отсутствует" % full_to_short(cj["src"])
+								diff_save_full = "Задача %s выполнена с разницей, её нельзя сохранять" % cj["dst"] if os.path.exists(cj["src"]) else "Задача %s, файл отсутствует" % cj["src"]
+								
+								print(Style.BRIGHT + Fore.YELLOW + "%s" % diff_save_short)
+								write_log("debug check_job[diff]", "%s" % diff_save_full)
+
+								# is_ok, is_bad = False, True
 
 								diff_count += 1
+								ok_bad_dict[1] = ok_bad_dict.get(1, 0) + 1
 
 								if os.path.exists(cj["dst"]):
 									try:
@@ -14993,11 +14976,25 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						write_log("debug check_job[error]", "%s" % str(e), is_error=True)
 
 						err_count += 1
+						ok_bad_dict[2] = ok_bad_dict.get(2, 0) + 1
 
 						continue # if_none_next_record(eof)
 					else:
-						answer_status = "Данные совпадают" if is_ok else "Данные не совпадают" # is_no_lambda
-						write_log("debug check_job[ok]", "%s" % answer_status)
+
+						answer_status: str = ""
+
+						try:
+							if ok_bad_dict[2] > 0:
+								answer_status = "Данные совпадают [%d]" % len(ok_bad_dict) if ok_bad_dict[0] == len(ok_bad_dict) else "Данные не совпадают [%d]" % ok_bad_dict[2] # is_no_lambda
+							elif ok_bad_dict[2] == 0:
+								answer_status = "Данные совпадают [%d]" % len(ok_bad_dict) if ok_bad_dict[0] == len(ok_bad_dict) else "Данные не совпадают" # is_no_lambda
+							assert answer_status, "" # is_assert_debug
+						except AssertionError as err:
+							raise err # logging
+							write_log("debug check_job[null]", "Данные не совпадают")
+						else:
+							if answer_status:
+								write_log("debug check_job[ok]", "%s" % answer_status)
 
 			del MM
 
