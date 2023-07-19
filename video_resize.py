@@ -327,9 +327,9 @@ big_process: list = []
 pid_process: list = []
 skip_process: list = []
 
-open("c:\\downloads\\mytemp\\overload.csv", "w", encoding="utf-8").close()
+open("c:\\downloads\\mytemp\\overload.csv", "w", encoding="utf-8", newline="").close()
 
-with open("c:\\downloads\\mytemp\\overload.csv", "a") as ocf:
+with open("c:\\downloads\\mytemp\\overload.csv", "a", newline="") as ocf:
 	ocf.write("pid;proc_name\n")
 
 
@@ -1405,7 +1405,7 @@ if curProcesses:
 					if not eachProcess.pid in pid_process:
 						pid_process.append(eachProcess.pid)
 
-				with open("c:\\downloads\\mytemp\\overload.csv", "a") as ocf:
+				with open("c:\\downloads\\mytemp\\overload.csv", "a", newline="") as ocf:
 					ocf.write(";".join([str(eachProcess.pid), str(eachProcess.name())]) + "\n")
 
 		except:
@@ -3350,8 +3350,22 @@ class MyMeta:
 		if os.path.exists(fdi):
 			os.remove(fdi)
 
+		# snapshot_at_end
+		"""
+		time = float(probe['streams'][0]['duration']) // 2 # 7529.731 //= 2 # 3764.8655
+
+		parts = 7 # 9
+
+		intervals = time // parts
+		intervals = int(intervals)
+		interval_list = [(i * intervals, (i + 1) * intervals) for i in range(parts)] # [(0, 537), (537, 1074), (1074, 1611), (1611, 2148), (2148, 2685), (2685, 3222), (3222, 3759)]
+
+		# ffmpeg.input(YOUR_FILE, ss=item[1]).filter('scale', width, -1).output('Image' + str(i) + '.jpg', vframes=1) # ffmpeg_script
+		# ffmpeg -hide_banner -y -i {filename} -ss {item[1]} -vf 'scale=width:-1' -vframes 1 image0%d.jpg # debug
+		"""
+
 		try:
-			duration_null: int = int(duration_list[0].split(".")[0])  # if duration_list # is_assert(debug)
+			duration_null: int = int(duration_list[0].split(".")[0])  # if duration_list # is_assert(debug) # duration_null //= 2 # is_true_time
 		except:
 			duration_null: int = 0
 		finally:
@@ -11417,6 +11431,13 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			flen: int = 0
 			favg: int = 0
 
+			flength_and_fname: list = []
+
+			try:
+				flength_and_fname: list = list(set([(MM.get_length(fd),fd) for fd in filter(lambda x: os.path.exists(x), tuple([*filecmdbase_dict]))]))
+			except:
+				flength_and_fname = []
+
 			try:
 				flength: list = list(set([MM.get_length(fd) for fd in filter(lambda x: os.path.exists(x), tuple([*filecmdbase_dict]))]))
 			except:
@@ -11443,6 +11464,33 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								write_log("debug favg_classify", "%s" % str(
 									{"big": favg_classify.count(1), "small": favg_classify.count(0)}))
 
+				async def crop_video_to_slices(splitLength: int = 5, flenname: list = flength_and_fname):
+
+					set_line = set()
+
+					try:
+						assert flenname, "" # is_assert_debug
+					except AssertionError as err:
+						raise err # logging
+						return
+					else:
+						# splitLength = 5
+						for fln in flenname:
+							for i in range(int(fln[0]/splitLength)):
+								start = i * 60
+								length= splitLength * 60 
+
+								script_line = f"ffmpeg -hide_banner -y -i {fln[1]} -ss {str(start)} -t {str(length)} clip{str(i)}.m4v"
+								# script_line = "ffmpeg -hide_banner -y -i %s -ss %s -t %s clip%s.m4v" % (fln[1], str(start), str(length), str(i))
+
+								# os.system("%s" % script_line) # run_script
+
+								if not script_line in set_line:
+									set_line.add(script_line)
+									write_log("debug video_split[%s]" % fln[1].split("\\")[-1], script_line) # logging_script
+
+				asyncio.run(crop_video_to_slices())
+
 			# Продолжить сравнив длину файлов(пропустить или обработать)
 
 			# --- Example ---
@@ -11451,6 +11499,41 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			# \"c:\\downloads\\new\\Gangs_Of_London_02s02e.mp4\" -map_metadata -1 -threads 2 -c:v libx264 -vf
 			# \"scale=640:360\" -profile:v main -movflags faststart -threads 2 -c:a aac -af \"dynaudnorm\"
 			# c:\\downloads\\Gangs_Of_London_02s02e.mp4"
+
+			# @metadata
+			"""
+			# First extract metadata # ffmpeg -i original.mov -f ffmetadata metadata.txt # import_metadata
+			# Next, transcode, including extracted metadata # ffmpeg -i original.mov -f ffmetadata -i metadata.txt compressed.mp4 # export_metadata
+
+			@metadata.txt
+			;FFMETADATA1
+			major_brand=isom
+			minor_version=512
+			compatible_brands=isomiso2avc1mp41
+			encoder=Lavf60.3.100
+			"""
+
+			# filename = r"c:\downloads\mytemp\hello.mp4"
+			def extract_metadata(filename: str = ""): # is_no_async
+
+				try:
+					assert filename and os.path.exists(filename), ""
+				except AssertionError as err:
+					raise err # logging
+				else:
+					cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -f ffmetadata \"%s\" " % (filename, ".".join([filename.split(".")[0],"txt"]))
+					os.system("%s" % cmd_file)
+
+				return ".".join([filename.split(".")[0],"txt"]) # metadata_by_source_in_folder_where_file
+
+			def import_metadata(inputfilename: str = "", metafilename: str = "", outputfilename: str = ""): # is_no_async
+				# ffmpeg -i original.mov -f ffmetadata -i metadata.txt compressed.mp4
+				# cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -f ffmetadata -i \"%s\" "%s" " % (inputfilename, metafilename, outputfilename)
+
+				# if os.path.exists(metafilename):
+					# os.remove(metafilename)
+
+				pass
 
 			maxcnt = len(filecmdbase_dict) if filecmdbase_dict else 0 # is_no_lambda
 
