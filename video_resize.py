@@ -97,11 +97,14 @@ async def hd_generate(from_w: int = 640, from_h: int = 360, to_max: int = 2500, 
 	try:
 		scales = list(set(["x".join([str(w), str(h)]) for w in range(from_w, to_max, bit) for h in range(from_h, to_max, bit) if w/h == (16/9)]))
 
-		assert scales, "Ошибка hd маштабов @hd_generate/scales" # is_assert(debug)
-	except AssertionError as err:
+		assert scales, "Ошибка hd маштабов @hd_generate/scales" # is_assert_debug
+	except AssertionError as err: # if_null
 		scales = []
 		logging.warning("Ошибка hd маштабов @hd_generate/scales")
 		raise err
+	except BaseException as e: # if_error
+		scales = []
+		logging.error("Ошибка hd маштабов @hd_generate/scales [%s]" % str(e))
 	else:
 		scales.sort(reverse=False)
 		# print(scales)
@@ -118,11 +121,14 @@ async def sd_generate(from_w: int = 640, from_h: int = 480, to_max: int = 2500, 
 	try:
 		scales = list(set(["x".join([str(w), str(h)]) for w in range(from_w, to_max, bit) for h in range(from_h, to_max, bit) if w/h == (4/3)]))
 
-		assert scales, "Ошибка sd маштабов @sd_generate/scales" # is_assert(debug)
-	except AssertionError as err:
+		assert scales, "Ошибка sd маштабов @sd_generate/scales" # is_assert_debug
+	except AssertionError as err: # if_null
 		scales = []
 		logging.warning("Ошибка sd маштабов @sd_generate/scales")
 		raise err
+	except BaseException as e: # is_error
+		scales = []
+		logging.error("Ошибка sd маштабов @sd_generate/scales [%s]" % str(e))
 	else:
 		scales.sort(reverse=False)
 		# print(scales)
@@ -388,10 +394,13 @@ async def group_by_age(people):
 async def dict_filter(dct: dict = {}, sort_index: int = -1) -> dict: # 1
 
 	try:
-		assert dct, "Пустой словарь @dict_filter/dct" # is_assert(debug)
-	except AssertionError as err:
+		assert dct, "Пустой словарь @dict_filter/dct" # is_assert_debug
+	except AssertionError as err: # if_null
 		logging.warning("Пустой словарь @dict_filter/dct")
 		raise err
+		return []
+	except BaseException as e: # if_error
+		logging.error("Пустой словарь @dict_filter/dct [%s]" % str(e))
 		return []
 
 	dct_new: dict = {}
@@ -425,10 +434,13 @@ async def dict_filter(dct: dict = {}, sort_index: int = -1) -> dict: # 1
 async def compare_list(lst: list = [], is_le: bool = False, is_ge: bool = False, is_e: bool = False, is_ne: bool = False) -> bool: #1
 
 	try:
-		assert lst and isinstance(lst, list), "Пустой список и другой формат списка @compare_list/lst" # is_assert(debug)
-	except AssertionError as err:
+		assert lst and isinstance(lst, list), "Пустой список и другой формат списка @compare_list/lst" # is_assert_debug
+	except AssertionError as err: # if_null
 		logging.warning("Пустой список и другой формат списка @compare_list/lst")
 		raise err
+		return False
+	except BaseException as e: # if_error
+		logging.error("Пустой список и другой формат списка @compare_list/lst [%s]" % str(e))
 		return False
 
 	if is_le:
@@ -513,10 +525,13 @@ async def calc_number_of_day(is_default: bool = True, day: int = 0, month: int =
 async def month_to_seasdays(month: int = 0, year: int = 0) -> tuple:
 
 	try:
-		assert 1 <= month <= 12, "Ошибка индекса месяца @month_to_seasdays/month" # is_assert(debug)
-	except AssertionError as err:
+		assert 1 <= month <= 12, "Ошибка индекса месяца @month_to_seasdays/month" # is_assert_debug
+	except AssertionError as err: # if_null
 		logging.warning("Ошибка индекса месяца @month_to_seasdays/month")
 		raise err
+		return ("", 0)
+	except BaseException as e: # if_error
+		logging.error("Ошибка индекса месяца @month_to_seasdays/month [%s]" % str(e))
 		return ("", 0)
 
 	seas: str = ""
@@ -629,10 +644,13 @@ async def date_to_week() -> dict:
 async def gcd_from_numbers(lst: list = []) -> list:
 
 	try:
-		assert lst, "Пустой список @gcd_from_numbers/lst" # is_assert(debug)
-	except AssertionError as err:
+		assert lst, "Пустой список @gcd_from_numbers/lst" # is_assert_debug
+	except AssertionError as err: # if_null
 		logging.warning("Пустой список @gcd_from_numbers/lst")
 		raise err
+		return []
+	except BaseException as e: # if_error
+		logging.error("Пустой список @gcd_from_numbers/lst [%s]" % str(e))
 		return []
 
 	equal_mod: list = []
@@ -655,11 +673,14 @@ async def gcd_from_numbers(lst: list = []) -> list:
 def ff_to_days(ff: str = "", period: int = 30, is_dir: bool = False, is_less: bool = True, is_any: bool = False) -> tuple: # count_is_after # default(month)
 
 	try:
-		assert ff and os.path.exists(ff), "Файл не существует @ff_to_days/ff" # is_assert(debug)
-	except AssertionError: # as err: # stay_or_hide
+		assert ff and os.path.exists(ff), "Файл не существует @ff_to_days/ff" # is_assert_debug
+	except AssertionError: # as err: # if_null
 		logging.warning("Файл не существует @ff_to_days/%s" % ff)
 		# raise err
 		return ("", -1, None) # null_filename / bad_status / unknown_type
+	except BaseException as e: # if_error
+		logging.error("Файл не существует @ff_to_days/%s [%s]" % (ff, str(e)))
+		return ("", -1, None)
 
 	if is_any:
 		is_less = False
@@ -680,11 +701,14 @@ def ff_to_days(ff: str = "", period: int = 30, is_dir: bool = False, is_less: bo
 		return ("", -1, is_dir) # null_filename / bad_status / is_dir
 	else:
 		try:
-			assert period >= 0, "Ошибка периода @ff_to_days/period" # is_assert(debug)
-		except AssertionError as err:
+			assert period >= 0, "Ошибка периода @ff_to_days/period" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Ошибка периода @ff_to_days/%s" % ff)
 			raise err
 			return ("", -1, is_dir) # default_result / bad_status / is_dir
+		except BaseException as e: # if_error
+			logging.error("Ошибка периода @ff_to_days/%s [%s]" % (ff, str(e)))
+			return ("", -1, is_dir)
 		else:
 			if period >= 0:
 				if (is_less and abs(today - ndate).days <= period or not is_less and abs(today - ndate).days >= period) and is_any == False:
@@ -787,15 +811,23 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 			for fsf in folder_scan_full:
 
 				try:
-					assert folder_scan_full, ""
-				except AssertionError as err:
-					raise err # logging
+					assert folder_scan_full, "Пустой список или нет папок @folders_from_path/folder_scan_full" # is_assert_debug
+				except AssertionError as err: # if_null
+					logging.warning("Пустой список или нет папок @folders_from_path/folder_scan_full")
+					raise err
+					break
+				except BaseException as e: # if_error
+					logging.error("Пустой список или нет папок @folders_from_path/folder_scan_full [%s]" % str(e))
 					break
 
 				try:
-					assert fsf, ""
-				except AssertionError as err:
-					raise err # logging
+					assert fsf, "Нет имени папки @folders_from_path/fsf" # is_assert_debug
+				except AssertionError as err: # if_null
+					logging.warning("Нет имени папки @folders_from_path/fsf")
+					raise err
+					continue
+				except BaseException as e: # if_error
+					logging.error("Нет имени папки @folders_from_path/fsf [%s]" % str(e))
 					continue
 
 				is_found: bool = False
@@ -809,10 +841,13 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 						list_files = os.listdir(fsf)
 						assert list_files, "Нет файлов в папке %s" % fsf # is_assert_debug
 						is_folder = True
-				except AssertionError as err: # is_debug
+				except AssertionError as err: # if_null
 					# list_files = [] # BaseException
 					logging.warning("Нет файлов в папке %s" % fsf)
 					raise err
+					continue
+				except BaseException as e: # if_error
+					logging.error("Нет файлов в папке %s [%s]" % (fsf, str(e)))
 					continue
 				else:
 					is_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 1) # desc(1) / files(0/1)
@@ -893,7 +928,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 												logging.info("desc/replace %s" % desc) # debug # (2) # is_rus_only
 
-											assert desc, ""
+											assert desc, "" # is_assert_debug
 										except AssertionError as err:
 											raise err
 											logging.warning("desc/unknown %s" % fl) # debug # (3) # is_unknown
@@ -950,17 +985,14 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 				for k, v in fad_dict.items():
 
 					try:
-						assert fad_dict, "Пустой словарь или нет отсортированных папок @folders_from_path/fad_dict" # is_assert(debug)
-					except AssertionError as err:
+						assert fad_dict, "Пустой словарь или нет отсортированных папок @folders_from_path/fad_dict" # is_assert_debug
+					except AssertionError as err: # if_null
 						logging.warning("Пустой словарь или нет отсортированных папок @folders_from_path/fad_dict")
 						raise err
 						break
-
-					# try:
-						# assert k and v, "" # is_assert(debug) # assert os.path.exists(k)
-					# except AssertionError as err:
-						# raise err
-						# continue
+					except BaseException as e: # if_error
+						logging.error("Пустой словарь или нет отсортированных папок @folders_from_path/fad_dict [%s]" % str(e))
+						break
 
 					print(Style.BRIGHT + Fore.WHITE + "%s %s" % (k, v)) # folder(file) / days_ago
 
@@ -992,10 +1024,13 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 							no_prot_ext: str = ""
 
 							try:
-								assert line, "Пустая строка @http_trace_to_soundtrack_parse/line" # is_assert(debug)
-							except AssertionError as err:
+								assert line, "Пустая строка @http_trace_to_soundtrack_parse/line" # is_assert_debug
+							except AssertionError as err: # if_null
 								logging.warning("Пустая строка @http_trace_to_soundtrack_parse/line")
 								raise err
+								return no_prot_ext
+							except BaseException as e:
+								logging.error("Пустая строка @http_trace_to_soundtrack_parse/line [%s]" % str(e))
 								return no_prot_ext
 
 							parse_regex = re.compile(r"http(.*)\.mp4", re.I)
@@ -1043,11 +1078,14 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 							try:
 								tmp = ["\\".join(["c:\\downloads\\combine\\original\\tvseries", ".".join([http_trace_to_soundtrack_parse(pl), "mp4"])]) for pl in filter(lambda x: x, tuple(parse_list)) if http_trace_to_soundtrack_parse(pl)] # http(s)...mp4
 
-								assert tmp, "Пустой список файлов @folders_from_path/tmp/#notvseries" # is_assert(debug)
+								assert tmp, "Пустой список файлов @folders_from_path/tmp/#notvseries" # is_assert_debug
 							except AssertionError: # as err:
 								tmp = []
 								logging.warning("Пустой список файлов @folders_from_path/tmp/#notvseries/%s" % str(datetime.now())) # when_null_folder
 								# raise err
+							except BaseException as e:
+								tmp = []
+								logging.error("Пустой список файлов @folders_from_path/tmp/#notvseries/%s [%s]" % (str(datetime.now()), str(e))) # when_null_folder
 							finally:
 								if tmp:
 									print("%d downloaded projects" % len(tmp)) #print(";".join(tmp)) #; print() # need_another_comment
@@ -1278,10 +1316,13 @@ all_list_status = "Общий список в %d папках" % len(all_list) i
 print(Style.BRIGHT + Fore.YELLOW + "%d" % len(all_list), Style.BRIGHT + Fore.WHITE + "%s" % all_list_status)
 
 try:
-	assert all_list, "Пустой список all_list" # is_assert(debug)
-except AssertionError as err:
+	assert all_list, "Пустой список all_list" # is_assert_debug
+except AssertionError as err: # if_null
 	logging.warning("Пустой список all_list")
 	raise err
+	exit()
+except BaseException as e: # if_error
+	logging.error("Пустой список all_list")
 	exit()
 
 abc_or_num_regex = re.compile(r"^[A-Z0-9].*", re.I)
@@ -1399,11 +1440,14 @@ async def memory_usage_psutil(proc_id) -> any:
 		process = psutil.Process(proc_id)  # os.getpid()
 		mem = process.memory_percent()
 
-		assert mem, "Ошибка сохранения значения памяти @memory_usage_psutil/mem" # is_assert(debug)
-	except AssertionError as err:
+		assert mem, "Ошибка сохранения значения памяти @memory_usage_psutil/mem" # is_assert_debug
+	except AssertionError as err: # if_null
 		mem = 0
 		logging.warning("Ошибка сохранения значения памяти @memory_usage_psutil/mem")
 		raise err
+	except BaseException as e: # if_error
+		mem = 0
+		logging.error("Ошибка сохранения значения памяти @memory_usage_psutil/mem [%s]" % str(e))
 
 	return mem
 
@@ -1492,10 +1536,13 @@ except:
 def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging: bool = False):  # event_log(is_all)
 
 	try:
-		assert desc and txt, "Пустое описание или комментарий @write_log/desc/txt" # is_assert(debug)
-	except AssertionError: # as err:
+		assert desc and txt, "Пустое описание или комментарий @write_log/desc/txt" # is_assert_debug
+	except AssertionError: # as err: # if_null
 		logging.warning("Пустое описание или комментарий @write_log/%s/%s" % (desc, txt))
 		# raise err # have_null
+		return
+	except BaseException as e: # if_error
+		logging.error("Пустое описание или комментарий @write_log/%s/%s [%s]" % (desc, txt, str(e)))
 		return
 
 	global log_dict
@@ -1542,15 +1589,21 @@ def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging:
 		for lp in filter(lambda x: x, tuple(lprint)):
 
 			try:
-				assert lprint, "" # is_assert(debug)
-			except AssertionError as err:
+				assert lprint, "" # is_assert_debug
+			except AssertionError as err: # if_null
 				raise err
+				break
+			except BaseException as e: # if_error
+				raise e
 				break
 
 			try:
-				assert len(lp.strip()) > 0, "" # is_assert(debug)
-			except AssertionError as err:
+				assert len(lp.strip()) > 0, "" # is_assert_debug
+			except AssertionError as err: # if_null
 				raise err
+				continue
+			except BaseException as e: # if_error
+				raise e
 				continue
 
 			if not lp in check_log:
@@ -1579,10 +1632,13 @@ def log_error(f):
 async def mp4_to_m3u8(filename: str = "", is_run: bool = False, is_stay: bool = False) -> tuple:
 
 	try:
-		assert filename and  os.path.exists(filename), "Файл отсутствует @mp4_to_m3u8/filename" # is_assert(debug)
-	except AssertionError as err:
+		assert filename and  os.path.exists(filename), "Файл отсутствует @mp4_to_m3u8/filename" # is_assert_debug
+	except AssertionError as err: # if_null
 		logging.warning("Файл отсутствует @mp4_to_m3u8/%s" % filename)
 		raise err
+		return (False, "", "no_run")
+	except BaseException as e: # if_error
+		logging.error("Файл отсутствует @mp4_to_m3u8/%s [%s]" % (filename, str(e)))
 		return (False, "", "no_run")
 
 	try:
@@ -1720,11 +1776,14 @@ async def myboottime() -> tuple:
 	try:
 		ddate: int = int(abs(mdate - dnow).seconds) // 3600 # different_by_hours
 
-		assert ddate >= 0, "Пустое количество часов или только включили PC @myboottime/ddate" # is_assert(debug)
-	except AssertionError as err:
+		assert ddate >= 0, "Пустое количество часов или только включили PC @myboottime/ddate" # is_assert_debug
+	except AssertionError as err: # if_null
 		ddate: int = 0
 		logging.warning("Пустое количество часов или только включили PC @myboottime/ddate")
 		raise err
+	except BaseException as e: # if_error
+		ddate: int = 0
+		logging.error("Пустое количество часов или только включили PC @myboottime/ddate [%s]" % str(e))
 
 	try:
 		if ddate > 24:  # more_day
@@ -1815,10 +1874,13 @@ async def hostname_and_ip() -> tuple: # get_hostname_and_ip
 			hostname = socket.getfqdn(IPAddr) #  DESKTOP-L7B4S7M (I'm in a windows machine)
 
 	try:
-		assert hostname and IPAddr, "Пустой Host или IP, @hostname_and_ip/hostname/IPAddr" # is_assert(debug)
-	except AssertionError as err:
+		assert hostname and IPAddr, "Пустой Host или IP, @hostname_and_ip/hostname/IPAddr" # is_assert_debug
+	except AssertionError as err: # if_null
 		logging.warning("Пустой Host или IP, @hostname_and_ip/%s/%s" % (hostname, IPAddr))
 		raise err
+		return ("", "")
+	except BaseException as e: # if_error
+		logging.error("Пустой Host или IP, @hostname_and_ip/%s/%s [%s]" % (hostname, IPAddr, str(e)))
 		return ("", "")
 
 	write_log("debug hostname_and_ip", ";".join([hostname, IPAddr, str(datetime.now())])) # positive
@@ -1834,11 +1896,14 @@ async def current_ip() -> tuple: # get_ip_by_current_lan
 		host = ip = ""
 
 	try:
-		assert ip, "Пустой ip адресс @current_ip/ip" # is_assert(debug)
-	except AssertionError as err:
+		assert ip, "Пустой ip адресс @current_ip/ip" # is_assert_debug
+	except AssertionError as err: # if_null
 		ip = ""
 		logging.warning("Пустой ip адресс @current_ip/ip")
 		raise err
+	except BaseException as e: # if_error
+		ip = ""
+		logging.error("Пустой ip адресс @current_ip/ip [%s]" % str(e))
 	else:
 		write_log("debug current_ip", "%s [%s]" % (";".join([ip, host]), str(datetime.now()))) # positive
 
@@ -1927,11 +1992,14 @@ def time_to_ms() -> int: # unixtime -> ms
 	try:
 		tim = int(time() * 1000) # time() - unixtime # * 1000 = ms
 
-		assert tim >= 0, "Ошибка конвертирования времени @time_to_ms/tim" # is_assert(debug)
-	except AssertionError as err:
+		assert tim >= 0, "Ошибка конвертирования времени @time_to_ms/tim" # is_assert_debug
+	except AssertionError as err: # if_null
 		tim = 0
 		logging.warning("Ошибка конвертирования времени @time_to_ms/tim")
 		raise err
+	except BaseException as e: # if_error
+		tim = 0
+		logging.error("Ошибка конвертирования времени @time_to_ms/tim [%s]" % str(e))
 
 	return int(tim) # ms # 1681467127489
 
@@ -1940,11 +2008,13 @@ def time_to_ms() -> int: # unixtime -> ms
 def full_to_short(filename) -> str:
 
 	try:
-		assert filename and os.path.exists(filename), "Файл отсутствует @full_to_short/filename" # is_assert(debug)
+		assert filename and os.path.exists(filename), "Файл отсутствует @full_to_short/filename" # is_assert_debug
 	except AssertionError: # as err:
 		logging.warning("Файл отсутствует @full_to_short/%s" % filename)
 		# raise err
 		# return filename # skip_result
+	except BaseException as e:
+		logging.error("Файл отсутствует @full_to_short/%s [%s]" % (filename, str(e)))
 
 	try:
 		short_filename: str = "".join([filename[0], ":\\...\\", filename.split("\\")[-1]]).strip() # is_ok
@@ -1961,10 +2031,13 @@ def full_to_short(filename) -> str:
 def count_level_from_full(filename) -> int:
 
 	try:
-		assert filename and os.path.exists(filename), "Файл отсуствует @count_level_from_full/filename" # is_assert(debug)
-	except AssertionError as err:
+		assert filename and os.path.exists(filename), "Файл отсуствует @count_level_from_full/filename" # is_assert_debug
+	except AssertionError as err: # if_null
 		logging.warning("Файл отсуствует @count_level_from_full/%s" % filename)
 		raise err
+		return 0
+	except BaseException as e: # if_error
+		logging.error("Файл отсуствует @count_level_from_full/%s [%s]" % (filename, str(e)))
 		return 0
 
 	try:
@@ -1989,10 +2062,13 @@ def count_level_from_full(filename) -> int:
 def slugify(s: str = "") -> str:
 
 	try:
-		assert s, "Пустая строка @slugify/s" # is_assert(debug)
-	except AssertionError as err:
+		assert s, "Пустая строка @slugify/s" # is_assert_debug
+	except AssertionError as err: # if_null
 		logging.warning("Пустая строка @slugify/s")
 		raise err
+		return ""
+	except BaseException as e: # if_error
+		logging.error("Пустая строка @slugify/s [%s]" % str(e))
 		return ""
 
 	# if not s:
@@ -2077,11 +2153,14 @@ async def utc_time(dt = datetime.now()):
 	try:
 		gmt = abs(cur_gmt - gmt).seconds // 3600 # 5
 
-		assert gmt in range(-12, 12), "Ошибка часового пояса или отрицательный часовой пояс @utc_time/gmt" # is_assert(debug)
-	except AssertionError as err:
+		assert gmt in range(-12, 12), "Ошибка часового пояса или отрицательный часовой пояс @utc_time/gmt" # is_assert_debug
+	except AssertionError as err: # if_null
 		gmt = 999
 		logging.warning("Ошибка часового пояса или отрицательный часовой пояс @utc_time/gmt")
 		raise err
+	except BaseException as e: # if_error
+		gmt = 999
+		logging.error("Ошибка часового пояса или отрицательный часовой пояс @utc_time/gmt [%s]" % str(e))
 
 	return gmt
 
@@ -2260,10 +2339,13 @@ async def battery_info():
 def mdate_by_days(filename, period: int = 30, is_select: bool = False, is_dir: bool = False, is_less: bool = False, is_any: bool = False) -> any: # default(month) #14
 
 	try:
-		assert filename and os.path.exists(filename), "Файл отсутствует @mdate_by_days/filename" # is_assert(debug)
-	except AssertionError as err:
+		assert filename and os.path.exists(filename), "Файл отсутствует @mdate_by_days/filename" # is_assert_debug
+	except AssertionError as err: # if_null
 		logging.warning("Файл отсутствует @mdate_by_days/%s" % filename)
 		raise err
+		return None
+	except BaseException as e: # if_error
+		logging.error("Файл отсутствует @mdate_by_days/%s [%s]" % (filename, str(e)))
 		return None
 
 	# debug_for_folder
@@ -2376,10 +2458,13 @@ async def datetime_from_file(filename) -> tuple: #4
 async def days_by_list(lst: list = [], is_avg: bool = False): #8
 
 	try:
-		assert lst and isinstance(lst, list), "Пустой список или другой формат списка @days_by_list/lst" # is_assert(debug)
-	except AssertionError as err:
+		assert lst and isinstance(lst, list), "Пустой список или другой формат списка @days_by_list/lst" # is_assert_debug
+	except AssertionError as err: # if_null
 		logging.warning("Пустой список или другой формат списка @days_by_list/lst")
 		raise err
+		return None
+	except BaseException as e: # if_error
+		logging.error("Пустой список или другой формат списка @days_by_list/lst [%s]" % str(e))
 		return None
 
 	avg_list: list = []
@@ -2398,10 +2483,13 @@ async def days_by_list(lst: list = [], is_avg: bool = False): #8
 		for l in lst:
 
 			try:
-				assert lst, "Пустой список или нет файлов @days_by_list/lst" # is_assert(debug)
-			except AssertionError as err:
+				assert lst, "Пустой список или нет файлов @days_by_list/lst" # is_assert_debug
+			except AssertionError as err: # if_null
 				logging.warning("Пустой список или нет файлов @days_by_list/lst")
 				raise err
+				break
+			except BaseException as e: # if_error
+				logging.error("Пустой список или нет файлов @days_by_list/lst [%s]" % str(e))
 				break
 
 			try:
@@ -2445,22 +2533,29 @@ async def days_by_list(lst: list = [], is_avg: bool = False): #8
 def fspace(src: str = "", dst: str = "", is_Log: bool = False) -> bool: #11
 
 	try:
-		assert src and os.path.exists(src), "Файл отсутствует @fspace/src" # is_assert(debug)
-	except AssertionError: # as err:
+		assert src and os.path.exists(src), "Файл отсутствует @fspace/src" # is_assert_debug
+	except AssertionError: # as err: # if_null
 		logging.warning("Файл отсутствует @fspace/%s" % src)
 		# raise err
+		return False
+	except BaseException as e: # if_error
+		logging.error("Файл отсутствует @fspace/%s [%s]" % (src, str(e)))
 		return False
 
 	try:
 		fsize: int = os.path.getsize(src)
 		dsize: int = disk_usage(dst[0] + ":\\").free
 
-		assert fsize and dsize, "Нет размера файла или размера диска @fspace/fsize/dsize" # is_assert(debug)
-	except AssertionError as err:
+		assert fsize and dsize, "Нет размера файла или размера диска @fspace/fsize/dsize" # is_assert_debug
+	except AssertionError as err: # if_null
 		fsize: int = 0
 		dsize: int = 0
 		logging.warning("Нет размера файла или размера диска @fspace/%s" % src)
 		raise err
+	except BaseException as e: # if_error
+		fsize: int = 0
+		dsize: int = 0
+		logging.error("Нет размера файла или размера диска @fspace/%s [%s]" % (src, str(e)))
 
 	fspace_status: bool = False
 
@@ -2476,19 +2571,25 @@ def fspace(src: str = "", dst: str = "", is_Log: bool = False) -> bool: #11
 def split_filename(filename) -> tuple: #19
 
 	try:
-		assert filename and os.path.exists(filename), "Файл отсутствует @split_filename/filename" # is_assert(debug)
-	except AssertionError as err:
+		assert filename and os.path.exists(filename), "Файл отсутствует @split_filename/filename" # is_assert_debug
+	except AssertionError as err: # if_null
 		logging.warning("Файл отсутствует @split_filename/%s" % filename)
 		raise err
+		return ("", "")
+	except BaseException as e: # if_error
+		logging.error("Файл отсутствует @split_filename/%s [%s]" % (filename, str(e)))
 		return ("", "")
 
 	try:
 		file_path, file_name = os.path.split(filename)
-		assert file_path and file_name, "Имя папки или имя файла не указано @split_filename/file_path/file_name" # is_assert(debug)
-	except AssertionError as err:
+		assert file_path and file_name, "Имя папки или имя файла не указано @split_filename/file_path/file_name" # is_assert_debug
+	except AssertionError as err: # if_null
 		file_path = file_name = ""
 		logging.warning("Имя папки или имя файла не указано @split_filename/%s" % filename)
 		raise err
+	except BaseException as e: # if_error
+		file_path = file_name = ""
+		logging.error("Имя папки или имя файла не указано @split_filename/%s [%s]" % (filename, str(e)))
 
 	return (file_path.strip(), file_name.strip()) # return os.path.split(filename) # ('c:\\downloads', 'hello.wolrd')
 
@@ -2520,11 +2621,14 @@ def MyNotify(txt: str = "", icon: str = "", sec: int = 10): #13
 	error: bool = False
 
 	try:
-		assert icon and os.path.exists(icon), "Файл отсутствует @MyNotify/icon" # is_assert(debug)
-	except AssertionError as err:
+		assert icon and os.path.exists(icon), "Файл отсутствует @MyNotify/icon" # is_assert_debug
+	except AssertionError as err: # if_null
 		error = True
 		logging.warning("Файл отсутствует @MyNotify/%s" % icon)
 		raise err
+	except BaseException as e: # if_error
+		error = True
+		logging.error("Файл отсутствует @MyNotify/%s [%s]" % (icon, str(e)))
 
 	# ---- init(show) notify ----
 	try:
@@ -2689,13 +2793,18 @@ def hms(seconds: int = 0): #37
 		h: int = seconds // 3600
 		m: int = seconds % 3600 // 60
 		s: int = seconds % 3600 % 60
-		assert any((h, m, s)), "Нет какой-то величины времени @hms/h/m/s" # is_assert(debug)
-	except AssertionError as err:
+		assert any((h, m, s)), "Нет какой-то величины времени @hms/h/m/s" # is_assert_debug
+	except AssertionError as err: # if_null
 		h: int = 0
 		m: int = 0
 		s: int = 0
 		logging.warning("Нет какой-то величины времени @hms/%d" % seconds)
 		raise err
+	except BaseException as e: # if_error
+		h: int = 0
+		m: int = 0
+		s: int = 0
+		logging.error("Нет какой-то величины времени @hms/%d [%s]" % (seconds, str(e)))
 
 	if any((h, m, s)):
 		return '{:02d}:{:02d}:{:02d}'.format(
@@ -2713,12 +2822,13 @@ async def avg_lst(lst: list = []) -> int:  # default_list / in_arg_is_filesizes_
 	try:
 		avg_size: int = (lambda s, l: s // l)(sum_lst, len_lst) # by_lambda
 
-		assert avg_size, "Пустая сумма или длина списка нулевая @avg_list/avg_size" # is_assert(debug)
+		assert avg_size, "Пустая сумма или длина списка нулевая @avg_list/avg_size" # is_assert_debug
 	except AssertionError as err: # if_null
 		avg_size: int = 0
 		logging.warning("Пустая сумма или длина списка нулевая @avg_list/avg_size")
 		raise err
-	except BaseException: # if_error
+	except BaseException as e: # if_error
+		logging.error("Пустая сумма или длина списка нулевая @avg_list/avg_size [%s]" % str(e))
 		try:
 			avg_size = sum(lst) / len(lst)
 		except:
@@ -2782,10 +2892,13 @@ class Get_AR:
 	def width_to_ar(self, width: int = 0, height: int = 0, owidth: int = 640) -> tuple:  # width=640,height=360
 
 		try:
-			assert width and height, "Ширина или высота пустая @width_to_ar/width/height" # is_assert(debug)
-		except AssertionError: # as err:
+			assert width and height, "Ширина или высота пустая @width_to_ar/width/height" # is_assert_debug
+		except AssertionError: # as err: # if_null
 			logging.warning("Ширина или высота пустая @width_to_ar/%d/%d" % (width, height))
 			# raise err
+			return (0, 0, 0)
+		except BaseException as e: # if_error
+			logging.error("Ширина или высота пустая @width_to_ar/%d/%d [%s]" % (width, height, str(e)))
 			return (0, 0, 0)
 
 		"""Specify the Width To Retain the Aspect Ratio"""
@@ -2842,10 +2955,13 @@ class Get_AR:
 					 oheight: int = 360) -> tuple:  # width=640,height=360 # islogic=(False, 640)
 
 		try:
-			assert width and height, "Высота пустая @height_to_ar/width/height" # is_assert(debug)
-		except AssertionError as err:
+			assert width and height, "Высота пустая @height_to_ar/width/height" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Высота пустая @height_to_ar/%d/%d" % (width, height))
 			raise err
+			return (0, 0, 0)
+		except BaseException as e: # if_error
+			logging.error("Высота пустая @height_to_ar/%d/%d [%s]" % (width, height, str(e)))
 			return (0, 0, 0)
 
 		"""Specify the Height To Retain the Aspect Ratio"""
@@ -2903,10 +3019,13 @@ class Get_AR:
 		self.filename: str = filename
 
 		try:
-			assert self.filename and os.path.exists(self.filename) and width and height, "Файл отствует, высота или ширина пустые @spd_ar/filename/width/height" # is_assert(debug)
-		except AssertionError as err:
+			assert self.filename and os.path.exists(self.filename) and width and height, "Файл отствует, высота или ширина пустые @spd_ar/filename/width/height" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Файл отствует, высота или ширина пустые @spd_ar/%s" % self.filename)
 			raise err
+			return ("", "", "")
+		except BaseException as e: # if_error
+			logging.error("Файл отствует, высота или ширина пустые @spd_ar/%s [%s]" % (self.filename, str(e)))
 			return ("", "", "")
 
 		# aspect ratio list(display/scale/pixel)
@@ -3092,10 +3211,13 @@ class MyMeta:
 		self.filename: str = filename
 
 		try:
-			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_meta/filename" # is_assert(debug)
-		except AssertionError as err:
+			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_meta/filename" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Файл отсутствует @get_meta/%s" % self.filename)
 			raise err
+			return False
+		except BaseException as e: # if_error
+			logging.error("Файл отсутствует @get_meta/%s [%s]" % (self.filename, str(e)))
 			return False
 
 		metacmd = path_for_queue + "ffprobe.exe -v quiet -print_format json -show_format -show_streams %s > %s" % (
@@ -3119,10 +3241,13 @@ class MyMeta:
 		self.filename: str = filename
 
 		try:
-			assert self.filename.split(".").lower() == "mkv", "Выбран другой формат @get_mkv_audio/filename" # is_assert(debug)
-		except AssertionError as err:
+			assert self.filename.split(".").lower() == "mkv", "Выбран другой формат @get_mkv_audio/filename" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Выбран другой формат @get_mkv_audio/%s" % self.filename)
 			raise err
+			return []
+		except BaseException as e: # if_error
+			logging.error("Выбран другой формат @get_mkv_audio/%s [%s]" % (self.filename, str(e)))
 			return []
 
 		lst: list = []
@@ -3166,10 +3291,13 @@ class MyMeta:
 		lst: list = []
 
 		try:
-			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_codecs/filename" # is_assert(debug)
-		except AssertionError as err:
+			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_codecs/filename" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Файл отсутствует @get_codecs/%s" % self.filename)
 			raise err
+			return lst
+		except BaseException as e: # if_error
+			logging.error("Файл отсутствует @get_codecs/%s [%s]" % (self.filename, str(e)))
 			return lst
 
 		# ffprobe -v error -show_entries stream=codec_name -of csv=p=0:s=x input.m4v
@@ -3222,10 +3350,13 @@ class MyMeta:
 		self.filename: str = filename
 
 		try:
-			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_width_height/filename" # is_assert(debug)
-		except AssertionError as err:
+			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_width_height/filename" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Файл отсутствует @get_width_height/%s" % self.filename)
 			raise err
+			return (0, 0, False)
+		except BaseException as e: # if_error
+			logging.error("Файл отсутствует @get_width_height/%s [%s]" % (self.filename, str(e)))
 			return (0, 0, False)
 
 		# is_owidth, is_change = 0, False
@@ -3284,7 +3415,7 @@ class MyMeta:
 
 		if any((is_hd, is_sd)):
 			try:
-				sar, par, dar = ga.spd_ar(filename=self.filename, width=ga.width, height=ga.height, is_hd=is_hd, is_sd=is_sd) #calc_ar # is_assert(debug)
+				sar, par, dar = ga.spd_ar(filename=self.filename, width=ga.width, height=ga.height, is_hd=is_hd, is_sd=is_sd) #calc_ar # is_assert_debug
 			except:
 				sar = par = dar = "" # skip_null
 			finally: # else
@@ -3307,10 +3438,12 @@ class MyMeta:
 		try:
 			w, h, ar = ga.width_to_ar(width=ga.width, height=ga.height, owidth=640)
 
-			assert w and h and ar, "Ошибка высоты, ширины и маштаба видео или файл уже обработан @get_width_height/w/h/ar" # is_assert(debug)
-		except AssertionError: # as err:
+			assert w and h and ar, "Ошибка высоты, ширины и маштаба видео или файл уже обработан @get_width_height/w/h/ar" # is_assert_debug
+		except AssertionError: # as err: # if_null
 			logging.warning("Ошибка высоты, ширины и маштаба видео или файл уже обработан @get_width_height/%s/%s" % (self.filename, "x".join([str(w), str(h), str(ar)])))
 			# raise err
+		except BaseException as e: # if_error
+			logging.error("Ошибка высоты, ширины и маштаба видео или файл уже обработан @get_width_height/%s/%s [%s]" % (self.filename, "x".join([str(w), str(h), str(ar)]), str(e)))
 		else:
 			if all((w >= h, w, h, ar, is_calc)):  # need_resize(rescale) # 1:1_by_stream_scale
 
@@ -3356,11 +3489,14 @@ class MyMeta:
 		# debug # @get_width_height # 0x0x640
 
 		try:
-			assert is_nwidth and is_nheight and width, "Нет данных для обновления маштаба или файл уже обработан @get_width_height/is_nwidth/is_nheight/width" # is_calc(T/F) # is_assert(debug)
-		except AssertionError: # as err:
+			assert is_nwidth and is_nheight and width, "Нет данных для обновления маштаба или файл уже обработан @get_width_height/is_nwidth/is_nheight/width" # is_calc(T/F) # is_assert_debug
+		except AssertionError: # as err: # if_null
 			logging.warning("Нет данных для обновления маштаба или файл уже обработан @get_width_height/%s/%s" % (self.filename, "x".join([str(is_nwidth), str(is_nheight), str(width)])))
 			# raise err
 			return (int(width), int(height), False)  # logic2 # owidth/oheight/error(no_calc)
+		except BaseException as e: # if_error
+			logging.error("Нет данных для обновления маштаба или файл уже обработан @get_width_height/%s/%s [%s]" % (self.filename, "x".join([str(is_nwidth), str(is_nheight), str(width)]), str(e)))
+			return (int(width), int(height), False)
 		else:
 			logging.info("Данные по маштабу получены @get_width_height/%s/%s" % (self.filename, "x".join([str(width), str(height), str(width > is_nwidth)])))
 			return (int(is_nwidth), int(is_nheight), width > is_nwidth)  # logic1 # nwidth/nheight/calced(vwidth > owidth)
@@ -3373,10 +3509,13 @@ class MyMeta:
 		self.filename: str = filename
 
 		try:
-			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_length/filename" # is_assert(debug)
-		except AssertionError as err:
+			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_length/filename" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Файл отсутствует @get_length/%s" % self.filename)
 			raise err
+			return duration_null
+		except BaseException as e: # if_error
+			logging.error("Файл отсутствует @get_length/%s [%s]" % (self.filename, str(e)))
 			return duration_null
 
 		cmd_fd: list = [path_for_queue + "ffprobe.exe", "-v", "error", "-show_entries", "format=duration", "-of",
@@ -3406,7 +3545,7 @@ class MyMeta:
 		"""
 
 		try:
-			duration_null: int = int(duration_list[0].split(".")[0])  # if duration_list # is_assert(debug) # duration_null //= 2 # is_true_time
+			duration_null: int = int(duration_list[0].split(".")[0])  # if duration_list # is_assert_debug # duration_null //= 2 # is_true_time
 		except:
 			duration_null: int = 0
 		finally:
@@ -3424,10 +3563,13 @@ class MyMeta:
 		self.filename: str = filename
 
 		try:
-			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_profile_and_level/filename" # is_assert(debug)
-		except AssertionError as err:
+			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_profile_and_level/filename" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Файл отсутствует @get_profile_and_level/%s" % self.filename)
 			raise err
+			return ("", "")
+		except BaseException as e: # if_error
+			logging.error("Файл отсутствует @get_profile_and_level/%s [%s]" % (self.filename, str(e)))
 			return ("", "")
 
 		cmd_pl: list = [path_for_queue + "ffprobe.exe", "-v", "error", "-show_entries", "stream=profile,level", "-of",
@@ -3467,10 +3609,13 @@ class MyMeta:
 		self.filename: str = filename
 
 		try:
-			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_fps/self.filename" # is_assert(debug)
-		except AssertionError as err:
+			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_fps/self.filename" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Файл отсутствует @get_fps/%s" % self.filename)
 			raise err
+			return 0
+		except BaseException as e: # if_error
+			logging.error("Файл отсутствует @get_fps/%s [%s]" % (self.filename, str(e)))
 			return 0
 
 		fps_list: list = []
@@ -3539,11 +3684,14 @@ class MyMeta:
 		try:
 			fps = fps_value if fps_value else 0 # is_no_lambda
 
-			assert fps, "Не могу получить скорость кадров @get_fps/fps" # is_assert(debug)
-		except AssertionError as err:
+			assert fps, "Не могу получить скорость кадров @get_fps/fps" # is_assert_debug
+		except AssertionError as err: # if_null
 			fps: int = 0
 			logging.warning("Не могу получить скорость кадров @get_fps/%s" % self.filename)
 			raise err
+		except BaseException as e: # if_error
+			fps: int = 0
+			logging.error("Не могу получить скорость кадров @get_fps/%s [%s]" % (self.filename, str(e)))
 
 		try:
 			with open(fps_base, encoding="utf-8") as fbf:
@@ -3664,31 +3812,40 @@ class MyMeta:
 		try:
 			ar = width / height
 
-			assert ar, "Не верное значения ширины или высоты видео @calc_vbr/ar" # is_assert(debug)
-		except AssertionError as err:
+			assert ar, "Не верное значения ширины или высоты видео @calc_vbr/ar" # is_assert_debug
+		except AssertionError as err: # if_null
 			ar = 0
 			logging.warning("Не верное значения ширины или высоты видео @calc_vbr/%s" % self.filename)
 			raise err
+		except BaseException as e: # if_error
+			ar = 0
+			logging.error("Не верное значения ширины или высоты видео @calc_vbr/%s [%s]" % (self.filename, str(e)))
 
 		# width(640) # scale # 1:1
 
 		try:
 			width: float = 640 if owidth > 640 else owidth # 640(if_width_more) # is_no_lambda
 
-			assert width, "Ширина видео не должно быть пустым @calc_vbr/width" # is_assert(debug)
-		except AssertionError as err:
+			assert width, "Ширина видео не должно быть пустым @calc_vbr/width" # is_assert_debug
+		except AssertionError as err: # if_null
 			width: float = 0
 			logging.warning("Ширина видео не должно быть пустым @calc_vbr/%s" % self.filename)
 			raise err
+		except BaseException as e: # if_error
+			width: float = 0
+			logging.error("Ширина видео не должно быть пустым @calc_vbr/%s [%s]" % (self.filename, str(e)))
 
 		try:
 			height: float = width / ar  # 360p
 
-			assert height, "Высота видео не должно быть пустым @calc_vbr/height" # is_assert(debug)
-		except AssertionError as err:
+			assert height, "Высота видео не должно быть пустым @calc_vbr/height" # is_assert_debug
+		except AssertionError as err: # if_null
 			height: float = 0  # 360p
 			logging.warning("Высота видео не должно быть пустым @calc_vbr/%s" % self.filename)
 			raise err
+		except BaseException as e: # if_error
+			height: float = 0  # 360p
+			logging.error("Высота видео не должно быть пустым @calc_vbr/%s [%s]" % (self.filename, str(e)))
 
 		if not isinstance(height, int):
 			height = int(height)  # 360.000
@@ -3729,20 +3886,26 @@ class MyMeta:
 		try:
 			height: float = 360 if oheight > 360 else oheight # 360(if_height_more) # is_no_lambda
 
-			assert height, "Пустое значение высоты видео @calc_vbr/height" # is_assert(debug)
-		except AssertionError as err:
+			assert height, "Пустое значение высоты видео @calc_vbr/height" # is_assert_debug
+		except AssertionError as err: # if_null
 			height: float = 0
 			logging.warning("Пустое значение высоты видео @calc_vbr/%s" % self.filename)
 			raise err
+		except BaseException as e: # if_error
+			height: float = 0
+			logging.error("Пустое значение высоты видео @calc_vbr/%s [%s]" % (self.filename, str(e)))
 
 		try:
 			width: float = height * ar  # 640.000
 
-			assert width, "Пустое значение ширины видео @calc_vbr/width" # is_assert(debug)
-		except AssertionError as err:
+			assert width, "Пустое значение ширины видео @calc_vbr/width" # is_assert_debug
+		except AssertionError as err: # if_null
 			width: float = 0
 			logging.warning("Пустое значение ширины видео @calc_vbr/%s" % self.filename)
 			raise err
+		except BaseException as e: # if_error
+			width: float = 0
+			logging.error("Пустое значение ширины видео @calc_vbr/%s [%s]" % (self.filename, str(e)))
 
 		if not isinstance(height, int):
 			height = int(height)  # 360.000
@@ -3821,11 +3984,14 @@ class MyMeta:
 					vbr_list: list = [i for i in range(1, height * 2) if
 								((i * gl) / 8) * 1000 >= fsize and i % 16 == 0 and i >= height]
 
-					assert vbr_list, "Пустой список частоты видео @calc_vbr/vbr_list" # is_assert(debug)
-				except AssertionError: # as err:
+					assert vbr_list, "Пустой список частоты видео @calc_vbr/vbr_list" # is_assert_debug
+				except AssertionError: # as err: # if_null
 					vbr_list: list = []  # old(no_gen) # i for i in range(1, height*2) if ((i * gl) / 8) * 1000 >= fsize and i % 16 == 0 and i >= height
 					logging.warning("Пустой список частоты видео @calc_vbr/vbr_list")
 					# raise err
+				except BaseException as e: # if_error
+					vbr_list: list = []
+					logging.error("Пустой список частоты видео @calc_vbr/vbr_list [%s]" % str(e))
 
 				tmp = list(set([vl for vl in filter(lambda x: x, tuple(vbr_list))]))
 				vbr_list = sorted(tmp, reverse=False)
@@ -3848,10 +4014,13 @@ class MyMeta:
 		'''
 
 		try:
-			assert vbr_var, "Пустое значение частоты видео @calc_vbr/vbr_var" # find_some_vbr # is_assert(debug)
-		except AssertionError: # as err: # null_vbr
+			assert vbr_var, "Пустое значение частоты видео @calc_vbr/vbr_var" # find_some_vbr # is_assert_debug
+		except AssertionError: # as err: # null_vbr # if_null
 			logging.warning("Пустое значение частоты видео @calc_vbr/%s" % self.filename)
 			# raise err
+			return 0
+		except BaseException as e: # if_error
+			logging.error("Пустое значение частоты видео @calc_vbr/%s [%s]" % (self.filename, str(e)))
 			return 0
 		else:
 			return max(vbr_var)  # use_max_vbr
@@ -3869,7 +4038,7 @@ class MyMeta:
 	"""
 	def some_bitrate(self, filename, K: int = 0.25, width: int = 640, height: int = 480, fps: float = 15, ms: int = 1200):
 		try:
-			sb = (K * width * height * fps) // 1024 # ?kbps # is_assert(debug)
+			sb = (K * width * height * fps) // 1024 # ?kbps # is_assert_debug
 		except:
 			sb = 0 # if_error
 
@@ -3881,10 +4050,13 @@ class MyMeta:
 		self.filename: str = filename
 
 		try:
-			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_gop/self.filename" # is_assert(debug)
-		except AssertionError as err:
+			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_gop/self.filename" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Файл отсутствует @get_gop/%s" % self.filename)
 			raise err
+			return 0
+		except BaseException as e: # if_error
+			logging.error("Файл отсутствует @get_gop/%s [%s]" % (self.filename, str(e)))
 			return 0
 
 		try:
@@ -3920,10 +4092,13 @@ class MyMeta:
 		self.filename: str = filename
 
 		try:
-			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @calc_cbr/self.filename" # is_assert(debug)
-		except AssertionError as err:
+			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @calc_cbr/self.filename" # is_assert_debug
+		except AssertionError as err: # is_null
 			logging.warning("Файл отсутствует @calc_cbr/%s" % self.filename)
 			raise err
+			return 0
+		except BaseException as e: # if_error
+			logging.error("Файл отсутствует @calc_cbr/%s [%s]" % (self.filename, str(e)))
 			return 0
 
 		if not abitrate:
@@ -3932,22 +4107,28 @@ class MyMeta:
 		try:
 			fsize: int = os.path.getsize(self.filename)
 
-			assert fsize, "Не могу определить размер файла @calc_cbr/fsize" # is_assert(debug)
-		except AssertionError as err:
+			assert fsize, "Не могу определить размер файла @calc_cbr/fsize" # is_assert_debug
+		except AssertionError as err: # if_null
 			fsize: int = 0
 			logging.warning("Не могу определить размер файла @calc_cbr/%s" % self.filename)
 			raise err
+		except BaseException as e: # if_error
+			fsize: int = 0
+			logging.error("Не могу определить размер файла @calc_cbr/%s [%s]" % (self.filename, str(e)))
 		else:
 			fsize /= (1024 ** 2)
 
 		try:
 			dur: int = self.get_length(filename=filename)
 
-			assert dur, "Не могу определить длину видео @calc_cbr/dur" # is_assert(debug)
-		except AssertionError as err:
+			assert dur, "Не могу определить длину видео @calc_cbr/dur" # is_assert_debug
+		except AssertionError as err: # if_null
 			dur: int = 0
 			logging.warning("Не могу определить длину видео @calc_cbr/%s" % self.filename)
 			raise err
+		except BaseException as e: # if_error
+			dur: int = 0
+			logging.error("Не могу определить длину видео @calc_cbr/%s [%s]" % (self.filename, str(e)))
 
 		if any((not fsize, not dur)):
 			return 0
@@ -4018,10 +4199,13 @@ class MyMeta:
 		self.filename: str = filename
 
 		try:
-			assert self.filename and os.path.exists(self.filename), "Файл отсуствует @lossy_audio/filename" # is_assert(debug)
-		except AssertionError as err:
+			assert self.filename and os.path.exists(self.filename), "Файл отсуствует @lossy_audio/filename" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Файл отсуствует @lossy_audio/%s" % self.filename)
 			raise err
+			return 0
+		except BaseException as e: # if_error
+			logging.error("Файл отсуствует @lossy_audio/%s [%s]" % (self.filename, str(e)))
 			return 0
 
 		# abitrate # channels
@@ -4037,11 +4221,14 @@ class MyMeta:
 		try:
 			abr: int = int(round(abitrate * (channels / def_channels), 1))
 
-			assert abr, "Немогу определить частоту аудио @lossy_audio/abr" # is_assert(debug)
-		except AssertionError as err:
+			assert abr, "Немогу определить частоту аудио @lossy_audio/abr" # is_assert_debug
+		except AssertionError as err: # if_null
 			abr: int = 0
 			logging.warning("Немогу определить частоту аудио @lossy_audio/%s" % self.filename)
 			raise err
+		except BaseException as e: # if_error
+			abr: int = 0
+			logging.error("Немогу определить частоту аудио @lossy_audio/%s [%s]" % (self.filename, str(e)))
 
 		return abr  # -b:a XXXk
 
@@ -4050,10 +4237,13 @@ class MyMeta:
 		self.filename: str = filename
 
 		try:
-			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_channels/self.filename" # is_assert(debug)
-		except AssertionError as err:
+			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_channels/self.filename" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Файл отсутствует @get_channels/%s" % self.filename)
 			raise err
+			return 0
+		except BaseException as e: # if_error
+			logging.error("Файл отсутствует @get_channels/%s [%s]" % (self.filename, str(e)))
 			return 0
 
 		clcmd: list = [path_for_queue + "ffprobe.exe", "-v", "error", "-show_entries", "stream=channels", "-of",
@@ -4655,10 +4845,13 @@ class MyTime:
 	def seconds_to_time(self, seconds: int) -> tuple:
 
 		try:
-			assert seconds, "Не указано время в ms для конвертации @seconds_to_time/seconds" # is_assert(debug)
-		except AssertionError as err:
+			assert seconds, "Не указано время в ms для конвертации @seconds_to_time/seconds" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Не указано время в ms для конвертации @seconds_to_time/seconds")
 			raise err
+			return (0, 0, 0, 0)
+		except BaseException as e: # if_error
+			logging.error("Не указано время в ms для конвертации @seconds_to_time/seconds [%s]" % str(e))
 			return (0, 0, 0, 0)
 
 		"""
@@ -4713,11 +4906,14 @@ class MyTime:
 		# 5000 # 0, 1, 23, 83 # 5000 ~ hh=1/mm=23min/ss=83
 
 		try:
-			assert delta.days >= 0 and delta.seconds >= 0, "Нет количества дней или секунд @seconds_to_hms/delta/*" # is_assert(debug)
-		except AssertionError as err:
+			assert delta.days >= 0 and delta.seconds >= 0, "Нет количества дней или секунд @seconds_to_hms/delta/*" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Нет количества дней или секунд @seconds_to_hms/delta/*")
 			raise err
 			return (0, 0, 0, 0)
+		except BaseException as e: # if_error
+			logging.error("Нет количества дней или секунд @seconds_to_hms/delta/* [%s]" % str(e))
+			return (0, 0, 0, )
 		else:
 			# print(delta.days, delta.seconds // 3600, (delta.seconds // 60) % 60, delta.seconds % 60)
 			return (delta.days, delta.seconds // 3600, (delta.seconds // 60) % 60, delta.seconds % 60)
@@ -4887,10 +5083,13 @@ def clear_null_data_list(lst: list = []) -> list:
 	temp: list = []
 
 	try:
-		assert lst, "Пустой список @clear_null_data_list/lst" # is_assert(debug)
-	except AssertionError as err:
+		assert lst, "Пустой список @clear_null_data_list/lst" # is_assert_debug
+	except AssertionError as err: # if_null
 		logging.warning("Пустой список @clear_null_data_list/lst")
 		raise err
+		return temp
+	except BaseException as e: # if_error
+		logging.error("Пустой список @clear_null_data_list/lst [%s]" % str(e))
 		return temp
 
 	try:
@@ -5018,16 +5217,21 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 			for ff2 in full_folder2:
 
 				try:
-					assert full_folder2, "Пустой список или нет списка папок @folders_filter/full_folder2" # is_assert(debug)
-				except AssertionError as err:
+					assert full_folder2, "Пустой список или нет списка папок @folders_filter/full_folder2" # is_assert_debug
+				except AssertionError as err: # if_null
 					logging.warning("Пустой список или нет списка папок @folders_filter/full_folder2")
 					raise err
 					break
+				except BaseException as e: # if_error
+					logging.error("Пустой список или нет списка папок @folders_filter/full_folder2 [%s]" % str(e))
+					break
 
 				try:
-					assert ff2, "" # is_assert(debug) # assert os.path.exists(ff2)
-				except AssertionError as err:
+					assert ff2, "" # is_assert_debug # assert os.path.exists(ff2)
+				except AssertionError as err: # if_null
 					raise err
+					continue
+				except BaseException: # if_error
 					continue
 
 				if os.path.exists(ff2):
@@ -5129,17 +5333,23 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 						for cf in check_folders:
 
 							try:
-								assert check_folders, "Пустой список или нет списка папок @folders_filter/check_folders" # is_assert(debug)
-							except AssertionError as err:
+								assert check_folders, "Пустой список или нет списка папок @folders_filter/check_folders" # is_assert_debug
+							except AssertionError as err: # if_null
 								logging.warning("Пустой список или нет списка папок @folders_filter/check_folders")
 								raise err
 								break
+							except BaseException as e: # if_error
+								logging.error("Пустой список или нет списка папок @folders_filter/check_folders [%s]" % str(e))
+								break
 
 							try:
-								assert cf and os.path.exists(cf), "Папка не существует @folders_filter/cf" # is_assert(debug)
-							except AssertionError as err:
+								assert cf and os.path.exists(cf), "Папка не существует @folders_filter/cf" # is_assert_debug
+							except AssertionError as err: # if_null
 								logging.warning("Папка не существует @folders_filter/%s" % cf)
 								raise err
+								continue
+							except BaseException as e: # if_error
+								logging.error("Папка не существует @folders_filter/%s [%s]" % (cf, str(e)))
 								continue
 
 							if not os.path.exists(cf):
@@ -5536,10 +5746,13 @@ async def process_move(file1: str = "", file2: str = "", is_copy: bool = False, 
 	global move_files_list
 
 	try:
-		assert file1 and file2 and os.path.exists(file1), "Не указан один из файлов или нет откуда копировать @process_move/file1/file2" # is_assert(debug)
-	except AssertionError as err:
+		assert file1 and file2 and os.path.exists(file1), "Не указан один из файлов или нет откуда копировать @process_move/file1/file2" # is_assert_debug
+	except AssertionError as err: # if_null
 		logging.warning("Не указан один из файлов или нет откуда копировать @process_move/%s/%s" % (file1, file2))
 		raise err
+		return
+	except BaseException as e: # if_error
+		logging.error("Не указан один из файлов или нет откуда копировать @process_move/%s/%s [%s]" % (file1, file2, str(e)))
 		return
 
 	if os.path.exists(file1):
@@ -5547,8 +5760,8 @@ async def process_move(file1: str = "", file2: str = "", is_copy: bool = False, 
 
 	try:
 		normal_fname: bool = (file1.split("\\")[-1] == file2.split("\\")[-1])
-		# assert normal_fname, "Имя файла при копировании или переносе уникально @process_move/normal_fname" # is_assert(debug)
-	except: # AssertionError: # as err:
+		# assert normal_fname, "Имя файла при копировании или переносе уникально @process_move/normal_fname" # is_assert_debug
+	except: # AssertionError: # as err: # BaseException: # as e: # is_need_except
 		normal_fname: bool = False
 		logging.warning("Имя файла при копировании или переносе уникально @process_move/%s/%s" % (file1.split("\\")[-1], file2.split("\\")[-1]))
 		# raise err
@@ -5654,10 +5867,13 @@ async def process_move(file1: str = "", file2: str = "", is_copy: bool = False, 
 async def process_delete(file1: str = ""): #17
 
 	try:
-		assert file1 and os.path.exists(file1), "Файл отсутствует @process_delete/file1" # is_assert(debug)
-	except AssertionError as err:
+		assert file1 and os.path.exists(file1), "Файл отсутствует @process_delete/file1" # is_assert_debug
+	except AssertionError as err: # if_null
 		logging.warning("Файл отсутствует @process_delete/%s" % file1)
 		raise err
+		return
+	except BaseException as e: # if_error
+		logging.error("Файл отсутствует @process_delete/%s [%s]" % (file1, str(e)))
 		return
 
 	try:
@@ -5700,10 +5916,13 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 	write_log("debug start[seasonvar_parse]", "%s [%s]" % (filename, str(datetime.now())))
 
 	try:
-		assert filename and os.path.exists(filename), "Файл отсутствует @seasonvar_parse/filename" # is_assert(debug)
-	except AssertionError as err:
+		assert filename and os.path.exists(filename), "Файл отсутствует @seasonvar_parse/filename" # is_assert_debug
+	except AssertionError as err: # if_null
 		logging.warning("Файл отсутствует @seasonvar_parse/%s" % filename)
 		raise err
+		return None
+	except BaseException as err: # if_error
+		logging.error("Файл отсутствует @seasonvar_parse/%s [%s]" % (filename, str(e)))
 		return None
 
 	# temp: list = []
@@ -5745,11 +5964,14 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 		old_filename = filename if os.path.exists(filename) else "" # is_no_lambda
 
 		try:
-			assert old_filename, "Возможно файл отсутствует @trouble_autorename/old_filename" # is_assert(debug)
-		except AssertionError: # as err:
+			assert old_filename, "Возможно файл отсутствует @trouble_autorename/old_filename" # is_assert_debug
+		except AssertionError: # as err: # if_null
 			logging.warning("Возможно файл отсутствует @trouble_autorename/old_filename")
 			# raise err
 			return # return None
+		except BaseException as e: # if_error
+			logging.error("Возможно файл отсутствует @trouble_autorename/old_filename [%s]" % str(e))
+			return
 
 		# if not old_filename:  # exit_if_nullname
 			# return None
@@ -7468,9 +7690,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			try:
 				assert hours or minutes, "" # is_assert_debug
-			except AssertionError as err:
+			except AssertionError as err: # if_null
 				hours, minutes = 3, 30 # +1 hour
 				raise err # logging
+			except BaseException: # if_error
+				hours, minutes = 3, 30 # +1 hour
 
 			# return (int(timing[0]["hh"]), int(timing[0]["mm"])) # [{'hh': '1', 'mm': '56'}] # true_calc # old
 			return (hours, minutes) # debug # [{'hh': '1', 'mm': '56'}] # true_calc
@@ -7488,9 +7712,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			
 		try:
 			assert hours or minutes, "" # is_assert_debug
-		except AssertionError: # as err:
+		except AssertionError: # as err: # if_null
 			hours, minutes = 3, 30 # +1 hour
 			# raise err # logging
+		except BaseException: # if_error
+			hours, minutes = 3, 30 # +1 hour
 
 		# timing = [{"hh": hh_time, "mm": mm_time}] # one_record
 		timing = [{"hh": int(hours), "mm": int(minutes)}] # one_record
@@ -7662,17 +7888,23 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		for pf in proj_files:
 
 			try:
-				assert proj_files, "Пустой список или нет файлов @project_done/proj_files" # is_assert(debug)
-			except AssertionError as err:
+				assert proj_files, "Пустой список или нет файлов @project_done/proj_files" # is_assert_debug
+			except AssertionError as err: # if_null
 				logging.warning("Пустой список или нет файлов @project_done/proj_files")
 				raise err
 				break
+			except BaseException as e: # if_error
+				logging.error("Пустой список или нет файлов @project_done/proj_files [%s]" % str(e))
+				break
 
 			try:
-				assert pf and os.path.exists(pf), "Файл отсутствует @project_done/pf" # is_assert(debug)
-			except AssertionError as err:
+				assert pf and os.path.exists(pf), "Файл отсутствует @project_done/pf" # is_assert_debug
+			except AssertionError as err: # if_null
 				logging.warning("Файл отсутствует @project_done/%s" % pf)
 				raise err
+				continue
+			except BaseException as err: # if_error
+				logging.warning("Файл отсутствует @project_done/%s [%s]" % (pf, str(e)))
 				continue
 
 			try:
@@ -7689,18 +7921,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		for k, v in fcmd.items():
 
 			try:
-				assert fcmd, "Пустой словарь или нет задач @project_done/fcmd" # is_assert(debug)
-			except AssertionError as err:
+				assert fcmd, "Пустой словарь или нет задач @project_done/fcmd" # is_assert_debug
+			except AssertionError as err: # if_null
 				logging.warning("Пустой словарь или нет задач @project_done/fcmd")
 				raise err
 				break
-
-			# try:
-				# assert k and os.path.exists(k), "Файл отсутствует @project_done/k" # is_assert(debug) # assert k and v
-			# except AssertionError as err:
-				# logging.warning("Файл отсутствует @project_done/%s" % k)
-				# raise err
-				# continue
+			except BaseException as e: # if_error
+				logging.error("Пустой словарь или нет задач @project_done/fcmd [%s]" % str(e))
+				break
 
 			try:
 				gl = MM.get_length(k)
@@ -7760,7 +7988,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		if proj_and_fcmd_filter:
 			for k, v in proj_and_fcmd_filter.items():
 
-				if os.path.exists(k): # is_assert(debug)
+				if os.path.exists(k): # is_assert_debug
 					print(Style.BRIGHT + Fore.CYAN + "Подготовка обработки файла", Style.BRIGHT + Fore.YELLOW + "%s" % k,
 							Style.BRIGHT + Fore.CYAN + "добавление или обновление файла", Style.BRIGHT + Fore.YELLOW + "%s" % full_to_short(v))
 
@@ -7934,10 +8162,13 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					continue
 
 				try:
-					assert last_file, "Нет выбранного файла @project_done/last_file" # is_assert(debug)
-				except AssertionError as err:
+					assert last_file, "Нет выбранного файла @project_done/last_file" # is_assert_debug
+				except AssertionError as err: # if_null
 					logging.warning("Нет выбранного файла @project_done/last_file")
 					raise err
+					continue
+				except BaseException as e: # if_error
+					logging.error("Нет выбранного файла @project_done/last_file [%s]" % str(e))
 					continue
 
 				dt = datetime.now()
@@ -7976,13 +8207,16 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				for dl in datelist:
 
 					try:
-						assert datelist, "Пустой список или нет файлов для справнения @project_done/datelist" # is_assert(debug)
-					except AssertionError as err:
+						assert datelist, "Пустой список или нет файлов для справнения @project_done/datelist" # is_assert_debug
+					except AssertionError as err: # if_null
 						logging.warning("Пустой список или нет файлов для сравнения @project_done/datelist")
 						raise err
 						break
+					except BaseException as e: # if_error
+						logging.error("Пустой список или нет файлов для сравнения @project_done/datelist [%s]" % str(e))
+						break
 
-					if not os.path.exists(dl["file"][3]): # is_assert(debug)
+					if not os.path.exists(dl["file"][3]): # is_assert_debug
 						continue
 
 					try:
@@ -8035,13 +8269,16 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					# print(dl["file"], "1", end="\n")
 
 					try:
-						assert datelist, "Пустой список или нет файлов для сравнения @project_done/datelist" # is_assert(debug)
-					except AssertionError as err:
+						assert datelist, "Пустой список или нет файлов для сравнения @project_done/datelist" # is_assert_debug
+					except AssertionError as err: # if_null
 						logging.warning("Пустой список или нет файлов для сравнения @project_done/datelist")
 						raise err
 						break
+					except BaseException as e: # if_error
+						logging.error("Пустой список или нет файлов для сравнения @project_done/datelist [%s]" % str(e))
+						break
 
-					if not os.path.exists(dl["file"][3]): # is_assert(debug)
+					if not os.path.exists(dl["file"][3]): # is_assert_debug
 						continue
 
 					try:
@@ -8311,16 +8548,21 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						for pf in proj_files:
 
 							try:
-								assert proj_files, "Пустой список или нет файлов @project_done/proj_files" # is_assert(debug)
-							except AssertionError as err:
+								assert proj_files, "Пустой список или нет файлов @project_done/proj_files" # is_assert_debug
+							except AssertionError as err: # if_null
 								logging.warning("Пустой список или нет файлов @project_done/proj_files")
 								raise err
 								break
+							except BaseException as e: # if_error
+								logging.error("Пустой список или нет файлов @project_done/proj_files [%s]" % str(e))
+								break
 
 							try:
-								assert pf, "" # is_assert(debug) # assert os.path.exists(pf)
-							except AssertionError as err:
+								assert pf, "" # is_assert_debug # assert os.path.exists(pf)
+							except AssertionError as err: # if_null
 								raise err
+								continue
+							except BaseException: # if_error
 								continue
 
 							try:
@@ -8377,10 +8619,13 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	async def hh_mm_ss(legth: int = 0) -> str:
 
 		try:
-			assert length, "Ну указано сколько время ms надо конвертировать @hh_mm_ss/length" # is_assert(debug)
-		except AssertionError as err:
+			assert length, "Ну указано сколько время ms надо конвертировать @hh_mm_ss/length" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Ну указано сколько время ms надо конвертировать @hh_mm_ss/length")
 			raise err
+			return (0, 0, 0, False)
+		except BaseException as e: # if_error
+			logging.error("Ну указано сколько время ms надо конвертировать @hh_mm_ss/length [%s]" % str(e))
 			return (0, 0, 0, False)
 
 		try:
@@ -8790,17 +9035,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				for fl in copy_src_list3:  # new_files(project) # dont_check_exists
 
 					try:
-						assert copy_src_list3, "Пустой список или нет файлов @project_update/copy_src_list3" # is_assert(debug)
-					except AssertionError as err:
+						assert copy_src_list3, "Пустой список или нет файлов @project_update/copy_src_list3" # is_assert_debug
+					except AssertionError as err: # if_null
 						logging.warning("Пустой список или нет файлов @project_update/copy_src_list3")
 						raise err
 						break
-
-					# try:
-						# assert fl, "" # is_assert(debug) # assert os.path.exists(fl)
-					# except AssertionError as err:
-						# raise err
-						# continue
+					except BaseException as e: # if_error
+						logging.error("Пустой список или нет файлов @project_update/copy_src_list3 [%s]" % str(e))
+						break
 
 					try:
 						fname = fl.split("\\")[-1].strip()
@@ -8826,16 +9068,21 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				for fl in copy_src_list3:  # dont_check_exists
 
 					try:
-						assert copy_src_list3, "Пустой список или нет файлов @project_update/copy_src_list3" # is_assert(debug)
-					except AssertionError as err:
+						assert copy_src_list3, "Пустой список или нет файлов @project_update/copy_src_list3" # is_assert_debug
+					except AssertionError as err: # if_null
 						logging.warning("Пустой список или нет файлов @project_update/copy_src_list3")
 						raise err
 						break
+					except BaseException as e: # if_error
+						logging.error("Пустой список или нет файлов @project_update/copy_src_list3 [%s]" % str(e))
+						break
 
 					try:
-						assert fl, "" # is_assert(debug) # assert os.path.exists(fl)
-					except AssertionError as err:
+						assert fl, "" # is_assert_debug # assert os.path.exists(fl)
+					except AssertionError as err: # if_null
 						raise err
+						continue
+					except BaseException: # if_error
 						continue
 
 					try:
@@ -8888,16 +9135,21 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		for ffj in files2:  # is_dict
 
 			try:
-				assert files2, "Пустой список или нет файлов files2" # is_assert(debug)
-			except AssertionError as err:
+				assert files2, "Пустой список или нет файлов files2" # is_assert_debug
+			except AssertionError as err: # if_null
 				logging.warning("Пустой список или нет файлов files2")
 				raise err
 				break
+			except BaseException as e: # if_error
+				logging.error("Пустой список или нет файлов files2 [%s]" % str(e))
+				break
 
 			try:
-				assert ffj, "" # is_assert(debug) # assert os.path.exists(ffj)
-			except AssertionError as err:
+				assert ffj, "" # is_assert_debug # assert os.path.exists(ffj)
+			except AssertionError as err: # if_null
 				raise err
+				continue
+			except BaseException: # if_error
 				continue
 
 			try:
@@ -9090,10 +9342,13 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		some_files: list = []
 
 		try:
-			assert lst, "Пустой список @filter_from_list/lst" # is_assert(debug)
-		except AssertionError as err:
+			assert lst, "Пустой список @filter_from_list/lst" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Пустой список @filter_from_list/lst")
 			raise err
+			return temp
+		except BaseException as e: # if_error
+			logging.error("Пустой список @filter_from_list/lst [%s]" % str(e))
 			return temp
 
 		# load_meta_jobs(filter) #4
@@ -9286,18 +9541,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for k, v in move_dict.items():
 
 				try:
-					assert move_dict or big_cinema, "Нет файлов для переноса @update_bigcinema/move_dict/big_cinema" # is_assert(debug)
-				except AssertionError as err:
+					assert move_dict or big_cinema, "Нет файлов для переноса @update_bigcinema/move_dict/big_cinema" # is_assert_debug
+				except AssertionError as err: # if_null
 					logging.warning("Нет файлов для переноса @update_bigcinema/move_dict/big_cinema")
 					raise err
 					break
-
-				# try:
-					# assert k and os.path.exists(k), "Файл отсутствует @update_bigcinema/k" # is_assert(debug) # assert k and v
-				# except AssertionError as err:
-					# logging.warning("Файл отсутствует @update_bigcinema/%s" % k)
-					# raise err
-					# continue
+				except BaseException as e: # if_error
+					logging.error("Нет файлов для переноса @update_bigcinema/move_dict/big_cinema [%s]" % str(e))
+					break
 
 				try:
 					fname1 = k.split("\\")[-1].strip()  # project(v) -> ready(k)
@@ -9521,16 +9772,21 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					for l1 in list1:
 
 						try:
-							assert list1, "Пустой список list1" # is_assert(debug)
-						except AssertionError as err:
+							assert list1, "Пустой список list1" # is_assert_debug
+						except AssertionError as err: # if_null
 							logging.warning("Пустой список list1")
 							raise err
 							break
+						except BaseException as e: # if_error
+							logging.error("Пустой список list1 [%s]" % str(e))
+							break
 
 						try:
-							assert l1, "" # is_assert(debug) # assert os.path.exists(l1)
-						except AssertionError as err:
+							assert l1, "" # is_assert_debug # assert os.path.exists(l1)
+						except AssertionError as err: # if_null
 							raise err
+							continue
+						except BaseException: # if_error
 							continue
 
 						try:
@@ -9626,10 +9882,13 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		# return
 
 		try:
-			assert folder and os.path.exists(folder), "Папка отсутствует @true_project_rename/folder" # is_assert(debug)
-		except AssertionError as err:
+			assert folder and os.path.exists(folder), "Папка отсутствует @true_project_rename/folder" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Папка отсутствует @true_project_rename/%s" % folder)
 			raise err
+			return
+		except BaseException as e: # if_error
+			logging.error("Папка отсутствует @true_project_rename/%s [%s]" % (folder, str(e)))
 			return
 
 		write_log("debug start[true_project_rename]", "%s" % str(datetime.now()))
@@ -9736,17 +9995,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					for k, v in filter_dict2.items():
 
 						try:
-							assert filter_dict2, "Пустой словарь filter_dict2" # is_assert(debug)
-						except AssertionError as err:
+							assert filter_dict2, "Пустой словарь filter_dict2" # is_assert_debug
+						except AssertionError as err: # if_null
 							logging.warning("Пустой словарь filter_dict2")
 							raise err
 							break
-
-						# try:
-							# assert k and v, "" # is_assert(debug) # assert os.path.exists(k)
-						# except AssertionError as err:
-							# raise err
-							# continue
+						except BaseException as e: # if_error
+							logging.error("Пустой словарь filter_dict2 [%s]" % str(e))
+							break
 
 						try:
 							fname1 = k.split("\\")[-1].strip()
@@ -9792,17 +10048,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					for k, v in filter_dict2.items():
 
 						try:
-							assert filter_dict2, "Пустой словарь filter_dict2" # is_assert(debug)
-						except AssertionError as err:
+							assert filter_dict2, "Пустой словарь filter_dict2" # is_assert_debug
+						except AssertionError as err: # if_null
 							logging.warning("Пустой словарь filter_dict2")
 							raise err
 							break
-
-						# try:
-							# assert k and v, "" # is_assert(debug) # assert os.path.exists(k)
-						# except AssertionError as err:
-							# raise err
-							# continue
+						except BaseException as e: # if_error
+							logging.error("Пустой словарь filter_dict2 [%s]" % str(e))
+							break
 
 						# Надо заменить c:\downloads\new\Reginald_the_Vampire_01s07e.mp4 на c:\downloads\new\Reginald_The_Vampire_01s07e.mp4 # write_log
 						# Надо заменить c:\...\Reginald_the_Vampire_01s07e.mp4 на c:\...\Reginald_The_Vampire_01s07e.mp4 # print
@@ -10645,17 +10898,23 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for lf in filter(lambda x: x, tuple(lfiles)):  # filter(lambda x: os.path.exists(x), tuple(lfiles)):  # new(yes_gen)
 
 				try:
-					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert(debug)
-				except AssertionError as err:
+					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
+				except AssertionError as err: # if_null
 					logging.warning("Пустой список или нет файлов lfiles")
 					raise err
 					break
+				except BaseException as e: # if_error
+					logging.error("Пустой список или нет файлов lfiles [%s]" % str(e))
+					break
 
 				try:
-					assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert(debug)
-				except AssertionError: # as err:
+					assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert_debug
+				except AssertionError: # as err: # if_null
 					logging.warning("Файл отсутствует %s" % lf)
 					# raise err
+					continue
+				except BaseException as e: # if_error
+					logging.error("Файл отсутствует %s [%s]" % (lf, str(e)))
 					continue
 
 				cnt += 1
@@ -10677,11 +10936,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[1]" # 1 # is_assert(debug)
-				except AssertionError: # as err:
+					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[1]" # 1 # is_assert_debug
+				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[1]")
 					hour = 2 # limit_hour
 					# raise err
+				except BaseException as e: # if_error
+					logging.error("Меньше установленого лимита по времени hour[1] [%s]" % str(e))
+					hour = 2
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # all((mm >= l_avg, l_avg >= 30)): # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -10828,17 +11090,23 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for lf in filter(lambda x: x, tuple(lfiles)):  # filter(lambda x: os.path.exists(x), tuple(lfiles)):  # new(yes_gen)
 
 				try:
-					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert(debug)
-				except AssertionError as err:
+					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
+				except AssertionError as err: # if_null
 					logging.warning("Пустой список или нет файлов lfiles")
 					raise err
+					break
+				except BaseException as e: # if_error
+					logging.error("Пустой список или нет файлов lfiles [%s]" % str(e))
 					break
 
 				try:
 					assert lf and os.path.exists(lf), "Файл отсутствует lf"
-				except AssertionError: # as err:
+				except AssertionError: # as err: # if_null
 					logging.warning("Файл отсутствует %s" % lf)
 					# raise err
+					continue
+				except BaseException as e: # if_error
+					logging.error("Файл отсутствует %s [%s]" % (lf, str(e)))
 					continue
 
 				cnt += 1
@@ -10861,10 +11129,13 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				try:
 					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[2]" # 2
-				except AssertionError: # as err:
+				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[2]")
 					hour = 2 # limit_hour
 					# raise err
+				except BaseException as e: # if_error
+					logging.error("Меньше установленого лимита по времени hour[2] [%s]" % str(e)) 
+					hour = 2
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >=h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -11133,16 +11404,21 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for f in ff:
 
 				try:
-					assert ff, "Пустой список или нет файлов ff" # is_assert(debug)
-				except AssertionError as err:
+					assert ff, "Пустой список или нет файлов ff" # is_assert_debug
+				except AssertionError as err: # if_null
 					logging.warning("Пустой список или нет файлов ff")
 					raise err
 					break
+				except BaseException as e: # if_error
+					logging.error("Пустой список или нет файлов ff [%s]" % str(e))
+					break
 
 				try:
-					assert f, "" # is_assert(debug) # assert os.path.exists(f)
-				except AssertionError as err:
+					assert f, "" # is_assert_debug # assert os.path.exists(f)
+				except AssertionError as err: # if_null
 					raise err
+					continue
+				except BaseException: # if_error
 					continue
 
 				if not f in job_set:
@@ -11306,17 +11582,23 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		for lf in lfiles:  # filter(lambda x: os.path.exists(x), tuple(lfiles)):
 
 			try:
-				assert lfiles, "Пустой список или нет файлов lfiles" # is_assert(debug)
-			except AssertionError as err:
+				assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
+			except AssertionError as err: # if_null
 				logging.warning("Пустой список или нет файлов lfiles")
 				raise err
 				break
+			except BaseException as e: # if_error
+				logging.error("Пустой список или нет файлов lfiles [%s]" % str(e))
+				break
 
 			try:
-				assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert(debug)
-			except AssertionError: # as err:
+				assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert_debug
+			except AssertionError: # as err: # if_null
 				logging.warning("Файл отсутствует %s" % lf)
 				# raise err
+				continue
+			except BaseException as e: # if_error
+				logging.error("Файл отсутствует %s [%s]" % (lf, str(e)))
 				continue
 
 			cnt += 1
@@ -11336,11 +11618,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				hour = hour[0] // 60
 
 			try:
-				assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[3]" # 3 # is_assert(debug)
-			except AssertionError: # as err:
+				assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[3]" # 3 # is_assert_debug
+			except AssertionError: # as err: # if_null
 				logging.warning("Меньше установленого лимита по времени hour[3]")
 				hour = 2 # limit_hour
 				# raise err
+			except BaseException as e: # if_error
+				logging.error("Меньше установленого лимита по времени hour[3] [%s]" % str(e))
+				hour = 2
 
 			# time_is_limit_1hour_50min # all((h >= 0, m, hh >=h, mm >= m)) # all((hh > hour, mm >= m))
 			if all((hh > hour, hour)): # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -11496,8 +11781,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 					try:
 						assert flenname, "" # is_assert_debug
-					except AssertionError as err:
+					except AssertionError as err: # if_null
 						raise err # logging
+						return
+					except BaseException: # if_error
 						return
 					else:
 						# splitLength = 5
@@ -11544,7 +11831,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				try:
 					assert filename and os.path.exists(filename), ""
-				except AssertionError as err:
+				except AssertionError as err: # if_null # BaseException
 					raise err # logging
 				else:
 					cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -f ffmetadata \"%s\" " % (filename, ".".join([filename.split(".")[0],"txt"]))
@@ -11635,18 +11922,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for k, v in filecmdbase_dict.items():
 
 				try:
-					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # skip_maxint # is_assert(debug)
-				except AssertionError as err:
+					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # skip_maxint # is_assert_debug
+				except AssertionError as err: # if_null
 					logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 					raise err
 					break
-
-				# try:
-					# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-				# except AssertionError as err:
-					# logging.warning("Файл отсутствует %s" % k)
-					# raise err
-					# continue
+				except BaseException as e: # if_error
+					logging.error("Пустой словарь или нет задач filecmdbase_dict [%s]" % str(e))
+					break
 
 				cnt += 1
 
@@ -11673,11 +11956,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[4]" # 4 # is_assert(debug)
-				except AssertionError: # as err:
+					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[4]" # 4 # is_assert_debug
+				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[4]")
 					hour = 2 # limit_hour
 					# raise err
+				except BaseException as e: # if_error
+					logging.error("Меньше установленого лимита по времени hour[4] [%s]" % str(e))
+					hour = 2
 
 				# # time_is_limit_1hour_or_30min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)): # stop_if_more_30min # mm[0] // 60 >= limit_hour:  # stop_if_more_"2"hour
@@ -12016,17 +12302,23 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for lf in filter(lambda x: x, tuple(lfiles)):  # filter(lambda x: os.path.exists(x), tuple(lfiles))
 
 				try:
-					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert(debug)
-				except AssertionError as err:
+					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
+				except AssertionError as err: # if_null
 					logging.warning("Пустой список или нет файлов lfiles")
 					raise err
 					break
+				except BaseException as e: # if_error
+					logging.error("Пустой список или нет файлов lfiles [%s]" % str(e))
+					break
 
 				try:
-					assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert(debug)
-				except AssertionError: # as err:
+					assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert_debug
+				except AssertionError: # as err: # if_null
 					logging.warning("Файл отсутствует %s" % lf)
 					# raise err
+					continue
+				except BaseException as e: # if_error
+					logging.error("Файл отсутствует %s [%s]" % (lf, str(e)))
 					continue
 
 				cnt += 1
@@ -12048,11 +12340,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[5]" # 5 # is_assert(debug)
-				except AssertionError: # as err:
+					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[5]" # 5 # is_assert_debug
+				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[5]")
 					hour = 2 # limit_hour
 					# raise err
+				except BaseException as e: # if_error
+					logging.error("Меньше установленого лимита по времени hour[5] [%s]" % str(e))
+					hour = 2
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)): # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -12212,17 +12507,23 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for lf in filter(lambda x: x, tuple(lfiles)):  # filter(lambda x: os.path.exists(x), tuple(lfiles)):
 
 				try:
-					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert(debug)
-				except AssertionError as err:
+					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
+				except AssertionError as err: # if_null
 					logging.warning("Пустой список или нет файлов lfiles")
 					raise err
 					break
+				except BaseException as e: # if_error
+					logging.error("Пустой список или нет файлов lfiles [%s]" % str(e))
+					break
 
 				try:
-					assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert(debug)
-				except AssertionError as err:
+					assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert_debug
+				except AssertionError as err: # if_null
 					logging.warning("Файл отсутствует %s" % lf)
 					raise err
+					continue
+				except BaseException as e: # if_error
+					logging.error("Файл отсутствует %s [%s]" % (lf, str(e)))
 					continue
 
 				try:
@@ -12254,11 +12555,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[6]" # 6 # is_assert(debug)
-				except AssertionError: # as err:
+					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[6]" # 6 # is_assert_debug
+				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[6]")
 					hour = 2 # limit_hour
 					# raise err
+				except BaseException as e: # if_error
+					logging.warning("Меньше установленого лимита по времени hour[6] [%s]" % str(e))
+					hour = 2
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -12366,17 +12670,23 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	for lf in lfiles:
 
 		try:
-			assert lfiles, "Пустой список или нет файлов lfiles" # is_assert(debug)
-		except AssertionError as err:
+			assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Пустой список или нет файлов lfiles")
 			raise err
 			break
+		except BaseException as e: # if_error
+			logging.error("Пустой список или нет файлов lfiles [%s]" % str(e))
+			break
 
 		try:
-			assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert(debug)
-		except AssertionError as err:
+			assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert_debug
+		except AssertionError as err: # if_null
 			logging.warning("Файл отсутствует %s" % lf)
 			raise err
+			continue
+		except BaseException as e: # if_error
+			logging.error("Файл отсутствует %s [%s]" % (lf, str(e)))
 			continue
 
 		cnt += 1
@@ -12413,11 +12723,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			hour = hour[0] // 60
 
 		try:
-			assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[7]" # 7 # is_assert(debug)
-		except AssertionError: # as err:
+			assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[7]" # 7 # is_assert_debug
+		except AssertionError: # as err: # if_null
 			logging.warning("Меньше установленого лимита по времени hour[7]")
 			hour = 2 # limit_hour
 			# raise err
+		except BaseException as e: # if_error
+			logging.error("Меньше установленого лимита по времени hour[7] [%s]" % str(e))
+			hour = 2
 
 		# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 		if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -12446,9 +12759,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		fext = lf.split(".")[-1].lower().strip() if os.path.exists(lf) else ""  # extention # is_no_lambda
 
 		try:
-			assert lf and os.path.exists(lf) and fname and fext, "" # is_assert(debug) # is_no_except(no_logging)
-		except AssertionError: # as err:
+			assert lf and os.path.exists(lf) and fname and fext, "" # is_assert_debug # is_no_except(no_logging)
+		except AssertionError: # as err: # if_null
 			# raise err
+			continue
+		except BaseException: # if_error
 			continue
 
 		ofilename = newfilename = ""
@@ -12605,7 +12920,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		optimal_height: int = 0
 
 		try:
-			sb_calc = MM.some_bitrate(filename=lf, width=width, height=height, fps=MM.get_fps(lf), ms=MM.get_length(lf)) # check_assert # is_assert(debug)
+			sb_calc = MM.some_bitrate(filename=lf, width=width, height=height, fps=MM.get_fps(lf), ms=MM.get_length(lf)) # check_assert # is_assert_debug
 		except BaseException as e:
 			sb_calc = ()
 
@@ -13210,18 +13525,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		for k, v in filecmdbase_dict.items():
 
 			try:
-				assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert(debug)
-			except AssertionError as err:
+				assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert_debug
+			except AssertionError as err: # if_null
 				logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 				raise err
 				break
-
-			# try:
-				# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-			# except AssertionError as err:
-				# logging.warning("Файл отсутствует %s" % k)
-				# raise err
-				# continue
+			except BaseException as e:
+				logging.error("Пустой словарь или нет задач filecmdbase_dict [%s]" % str(e))
+				break
 
 			try:
 				fileinfo = (k, MM.get_length(MM))
@@ -13269,17 +13580,23 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				for jl in jobs_list:
 
 					try:
-						assert jobs_list, "Пустой список или нет задач jobs_list" # is_assert(debug)
-					except AssertionError as err:
+						assert jobs_list, "Пустой список или нет задач jobs_list" # is_assert_debug
+					except AssertionError as err: # if_null
 						logging.warning("Пустой список или нет задач jobs_list")
 						raise err
 						break
+					except BaseException as e: # if_error
+						logging.error("Пустой список или нет задач jobs_list [%s]" % str(e))
+						break
 
 					try:
-						assert jl and os.path.exists(jl), "Файл отсутствует jl" # is_assert(debug)
-					except AssertionError as err:
+						assert jl and os.path.exists(jl), "Файл отсутствует jl" # is_assert_debug
+					except AssertionError as err: # if_null
 						logging.warning("Файл отсутствует %s" % jl)
 						raise err
+						continue
+					except BaseException as e: # if_error
+						logging.error("Файл отсутствует %s [%s]" % (jl, str(e)))
 						continue
 
 					try:
@@ -13335,18 +13652,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		for k, v in filecmdbase_dict.items():
 
 			try:
-				assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert(debug)
-			except AssertionError as err:
+				assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert_debug
+			except AssertionError as err: # if_null
 				logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 				raise err
 				break
-
-			# try:
-				# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-			# except AssertionError as err:
-				# logging.warning("Файл отсутствует %s" % k)
-				# raise err
-				# continue
+			except BaseException as e: # if_error
+				logging.error("Пустой словарь или нет задач filecmdbase_dict [%s]" % str(e))
+				break
 
 			write_log("debug filecmdbase_dict[job][index]", "%s" % "x".join(
 				[k.strip(), str(v.count("scale")), str(v.count("profile")), str(v.count("level"))]))
@@ -13512,18 +13825,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		for k, v in filecmdbase_dict.items():
 
 			try:
-				assert filecmdbase_dict, "Пустой список или нет задач filecmdbase_dict" # is_assert(debug)
-			except AssertionError as err:
+				assert filecmdbase_dict, "Пустой список или нет задач filecmdbase_dict" # is_assert_debug
+			except AssertionError as err: # if_null
 				logging.warning("Пустой список или нет задач filecmdbase_dict")
 				raise err
 				break
-
-			# try:
-				# assert k and os.path.exists(k), "Файл не найден k" # is_assert(debug) # assert k and v
-			# except AssertionError as err:
-				# logging.warning("Файл не найден %s" % k)
-				# raise err
-				# continue
+			except BaseException as e: # if_error
+				logging.error("Пустой список или нет задач filecmdbase_dict [%s]" % str(e))
+				break
 
 			try:
 				fname1 = v.split(" ")[-1].split("\\")[-1].strip()
@@ -13844,18 +14153,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for k, v in filecmdbase_dict.items():
 
 				try:
-					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert(debug)
-				except AssertionError as err:
+					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert_debug
+				except AssertionError as err: # if_null
 					logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 					raise err
 					break
-
-				# try:
-					# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-				# except AssertionError as err:
-					# logging.warning("Файл отсутствует %s" % k)
-					# raise err
-					# continue
+				except BaseException as e: # if_error
+					logging.error("Пустой словарь или нет задач filecmdbase_dict [%s]" % str(e))
+					break
 
 				try:
 					fname = k.split("\\")[-1].strip()
@@ -14033,8 +14338,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				try:
 					assert lst and isinstance(lst, list), "" # is_assert_debug
-				except AssertionError as err:
+				except AssertionError as err: # if_null
 					raise err # logging
+					return files_lst
+				except BaseException: # if_error
 					return files_lst
 
 				try:
@@ -14123,18 +14430,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for k, v in filecmdbase_dict.items(): # somebase_dict # cbf_dict
 
 				try:
-					assert filecmdbase_dict, "Пустой вловарь или нет задач filecmdbase_dict" # is_assert(debug)
-				except AssertionError as err:
+					assert filecmdbase_dict, "Пустой вловарь или нет задач filecmdbase_dict" # is_assert_debug
+				except AssertionError as err: # if_null
 					logging.warning("Пустой вловарь или нет задач filecmdbase_dict")
 					raise err
 					break
-
-				# try:
-					# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-				# except AssertionError as err:
-					# logging.warning("Файл отсутствует %s" % k)
-					# raise err
-					# continue
+				except BaseException as e: # if_error
+					logging.error("Пустой вловарь или нет задач filecmdbase_dict [%s]" % str(e))
+					break
 
 				try:
 					fileinfo = (k.strip(), os.path.getsize(k), str(datetime.now())) # file / filesize / daterun
@@ -14244,18 +14547,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				for k, v in filecmdbase_dict.items():
 
 					try:
-						assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert(debug)
-					except AssertionError as err:
+						assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert_debug
+					except AssertionError as err: # if_null
 						logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 						raise err
 						break
-
-					# try:
-						# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-					# except AssertionError as err:
-						# logging.warning("Файл отсутствует %s" % k)
-						# raise err
-						# continue
+					except BaseException as e: # if_error
+						logging.error("Пустой словарь или нет задач filecmdbase_dict [%s]" % str(e))
+						break
 
 					try:
 						gl = MM.get_length(k)
@@ -14340,18 +14639,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				for k, v in filecmdbase_dict.items():
 
 					try:
-						assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert(debug)
-					except AssertionError as err:
+						assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert_debug
+					except AssertionError as err: # if_null
 						logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 						raise err
 						break
-
-					# try:
-						# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-					# except AssertionError as err:
-						# logging.warning("Файл отсутствует %s" % k)
-						# raise err
-						# continue
+					except BaseException as e: # if_error
+						logging.error("Пустой словарь или нет задач filecmdbase_dict [%s]" % str(e))
+						break
 
 					if os.path.exists(k):
 						try:
@@ -14395,18 +14690,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for k, v in filecmdbase_dict.items():
 
 				try:
-					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert(debug)
-				except AssertionError as err:
+					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert_debug
+				except AssertionError as err: # if_null
 					logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 					raise err
 					break
-
-				# try:
-					# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-				# except AssertionError as err:
-					# logging.warning("Файл отсутствует %s" % k)
-					# raise err
-					# continue
+				except BaseException as e: # if_error
+					logging.error("Пустой словарь или нет задач filecmdbase_dict [%s]" % str(e))
+					break
 
 				try:
 					fname = k.split("\\")[-1]
@@ -14522,25 +14813,22 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for k, v in filecmdbase_dict.items():
 
 				try:
-					assert filecmdbase_dict, "" # is_assert(debug)
-				except AssertionError as err:
+					assert filecmdbase_dict, "" # is_assert_debug
+				except AssertionError as err: # if_null
 					raise err
 					break
-
-				# try:
-					# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v, ""
-				# except AssertionError as err:
-					# logging.warning("Файл отсутствует %s" % k)
-					# raise err
-					# continue
+				except BaseException: # if_error
+					break
 
 				try:
 					fsize = os.path.getsize(k)
-					assert fsize, "Файл k пустой или не содержит информации" # is_assert(debug) # is_another_except
-				except AssertionError as err:
+					assert fsize, "Файл k пустой или не содержит информации" # is_assert_debug # is_another_except
+				except AssertionError as err: # if_null
 					logging.warning("Файл %s пустой или не содержит информации" % k)
 					raise err
 					# continue
+				except BaseException as e: # if_error
+					logging.error("Файл %s пустой или не содержит информации [%s]" % (k, str(e)))
 				else:
 					fsizes_list.append(fsize) # pass_1_of_2
 
@@ -14585,29 +14873,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for k, v in filecmdbase_dict.items():
 
 				try:
-					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert(debug)
-				except AssertionError as err:
+					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert_debug
+				except AssertionError as err: # if_null
 					logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 					raise err
 					break
-
-				# try:
-					# assert k and os.path.exists(k), "Файл отсутствует k" # is_assert(debug) # assert k and v
-				# except AssertionError as err:
-					# logging.warning("Файл отсутствует %s" % k)
-					# raise err
-					# continue
-
-				'''
-				write_log("debug classify_files[skip]", "Файл %s был пропущен т.к. он не классифицирован [%s]" % (k, str(datetime.now()))) # logging_if_not_classify
-				MyNotify(txt="debug classify_files[skip] \"Файл %s был пропущен т.к. он не классифицирован [%s]\"" % (full_to_short(k), str(datetime.now())) , icon=icons["skip"])
-
-				write_log("debug classify_files[ok]", "Файл %s классифицирован [%s]" % (k, str(datetime.now()))) # logging_if_classify
-				MyNotify(txt="debug classify_files[ok] \"Файл %s классифицирован [%s]\"" % (full_to_short(k), str(datetime.now())) , icon=icons["work"])
-
-				write_log("debug classify_files[null]", "Нет классификаций для текущих задач [%s]" % str(datetime.now())) # logging_if_classify
-				MyNotify(txt="debug classify_files[null] \"Нет классификаций для текущих задач [%s]\"" % str(datetime.now()) , icon=icons["work"])
-				'''
+				except BaseException as e: # if_error
+					logging.error("Пустой словарь или нет задач filecmdbase_dict [%s]" % str(e))
+					break
 
 				lastfile.append(v.split(" ")[-1]) # save_to_xml_for_backup(clear_last) # @last.xml
 
@@ -14832,11 +15105,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[8]" # 8 # is_assert(debug)
-				except AssertionError: # as err:
+					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[8]" # 8 # is_assert_debug
+				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[8]")
 					hour = 2 # limit_hour
 					# raise err
+				except BaseException as e: # if_error
+					logging.error("Меньше установленого лимита по времени hour[8] [%s]" % str(e))
+					hour = 2
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 2:  # stop_if_more_2hour
@@ -14927,11 +15203,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[9]" # 9 # is_assert(debug)
-				except AssertionError: # as err:
+					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[9]" # 9 # is_assert_debug
+				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[9]")
 					hour = 2 # limit_hour
 					# raise err
+				except BaseException as e: # if_error
+					logging.error("Меньше установленого лимита по времени hour[9] [%s]" % str(e))
+					hour = 2
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # prc >= 75 # stop_by_progress(1/3) ~ 75% (debug)
@@ -14977,7 +15256,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				if ff_last_no_file: # what_not_exists
 					for k, _ in ff_last_no_file.items():
 
-						if not os.path.exists(k): # is_assert(debug)
+						if not os.path.exists(k): # is_assert_debug
 							print(Style.BRIGHT + Fore.CYAN + "Файл %s не найден и его надо удалить из базы" % k)
 							write_log("debug ff_last[nofile]", "Файл %s не найден и его надо удалить из базы" % k)
 							# os.remove(k) # need_delete_m3u8_by_filename
@@ -15035,15 +15314,18 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						for cj in check_job:
 
 							try:
-								assert check_job, "Пустой список или нет задач check_job" # is_assert(debug)
-							except AssertionError as err:
+								assert check_job, "Пустой список или нет задач check_job" # is_assert_debug
+							except AssertionError as err: # if_null
 								logging.warning("Пустой список или нет задач check_job")
 								raise err
 								break
+							except BaseException as e: # if_error
+								logging.error("Пустой список или нет задач check_job [%s]" % str(e))
+								break
 
 							try:
-								assert cj, "" # is_assert(debug) # assert os.path.exists(cj)
-							except AssertionError as err:
+								assert cj, "" # is_assert_debug # assert os.path.exists(cj)
+							except AssertionError as err: # if_null # BaseException
 								raise err
 								# continue
 
@@ -15133,9 +15415,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							elif ok_bad_dict[2] == 0:
 								answer_status = "Данные совпадают [%d]" % len(ok_bad_dict) if ok_bad_dict[0] == len(ok_bad_dict) else "Данные не совпадают" # is_no_lambda
 							assert answer_status, "" # is_assert_debug
-						except AssertionError as err:
+						except AssertionError as err: # if_null
 							raise err # logging
-							write_log("debug check_job[null]", "Данные не совпадают")
+							write_log("debug check_job[null]", "Данные не совпадают") # logging.warning
+						except BaseException as e: # if_error
+							write_log("debug check_job[null]", "Данные не совпадают [%s]" % str(e)) # logging.error
 						else:
 							if answer_status:
 								write_log("debug check_job[ok]", "%s" % answer_status)
@@ -15205,11 +15489,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				try:
 					# if any((hh, mm, ss)): # limit_scan_time
-					assert any((hh, mm, ss)), "Ошибка значения единицы времени hh/mm/ss" # is_assert(debug)
-				except AssertionError as err:
+					assert any((hh, mm, ss)), "Ошибка значения единицы времени hh/mm/ss" # is_assert_debug
+				except AssertionError as err: # if_null
 					full_time = None
 					logging.warning("Ошибка значения единицы времени %d/%d/%d" % (hh, mm, ss))
 					raise err
+				except BaseException as e: # if_error
+					full_time = None
+					logging.error("Ошибка значения единицы времени %d/%d/%d [%s]" % (hh, mm, ss, str(e)))
 				else:
 					full_time = "{hh}:{mm}:{ss}" % (hh, mm, ss)
 
@@ -15326,11 +15613,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				# """
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[10]" # 10 # is_assert(debug)
-				except AssertionError: # as err:
+					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[10]" # 10 # is_assert_debug
+				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[10]")
 					hour = 2 # limit_hour
 					# raise err
+				except BaseException as e: # if_error
+					logging.error("Меньше установленого лимита по времени hour[10] [%s]" % str(e))
+					hour = 2
 				# """
 
 				# all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
@@ -15496,11 +15786,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 						# """
 						try:
-							assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[11]" # 11 # is_assert(debug)
-						except AssertionError: # as err:
+							assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[11]" # 11 # is_assert_debug
+						except AssertionError: # as err: # if_null
 							logging.warning("Меньше установленого лимита по времени hour[11]")
 							hour = 2 # limit_hour
 							# raise err
+						except BaseException as e: # if_error
+							logging.error("Меньше установленого лимита по времени hour[11] [%s]" % str(e))
+							hour = 2
 						# """
 
 						# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
