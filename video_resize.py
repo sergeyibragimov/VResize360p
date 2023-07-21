@@ -36,6 +36,8 @@ import sqlite3 as sql  # sqlite db-api
 import sys  # system
 import xml.etree.ElementTree as xml  # ?pip
 import zipfile  # zip archive # backup(job)/after(del/if_done) # UserWarning: Duplicate name
+from tempfile import NamedTemporaryFile # pip install -U tempfile
+from contextlib import contextmanager
 
 
 from threading import (  # Thread # Barrier # работа с потоками # mutli_async
@@ -62,6 +64,28 @@ logging.basicConfig(handlers=[logging.FileHandler("".join([script_path, "\\video
 logging.info(f"debug start {str(datetime.now())}")
 
 mytime: dict = {"jobtime": [9, 18, 4], "dinnertime": [12, 13], "sleeptime": [0, 7], "anytime": [True]}
+
+
+@contextmanager
+def atomic_writes(path, mode="w", encoding="utf-8"):
+	mode = mode if mode == "wb" else "w"
+
+	temp_file = NamedTemporaryFile(mode, encoding=encoding, delete=False)
+
+	try:
+		yield temp_file
+	except Exception as e:
+		temp_file.close()
+		os.unlink(temp_file.name)
+		print(f"Ошибка {e}!")
+	else:
+		temp_file.close()
+
+		try:
+			os.rename(temp_file.name, path)
+		except OSError as e:
+			os.unlink(temp_file.name)
+			print(f"Ошибка {e}!")
 
 
 # 640x360 -> 1280x720 -> 1920x1080 # 16/9(hd)
@@ -2210,10 +2234,20 @@ async def battery_info():
 		pass
 	else:
 		if plugged:
-			print(f"Зарядка подключена, заряд батареи: {percent}%")
+			if percent == 0: # 0
+				print(Style.BRIGHT + Fore.RED + f"Зарядка подключена, заряд батареи: {percent}%")
+			elif percent >= 75: # 75-100
+				print(Style.BRIGHT + Fore.GREEN + f"Зарядка подключена, заряд батареи: {percent}%")
+			elif percent in range(20, 50): # 20-50
+				print(Style.BRIGHT + Fore.YELLOW + f"Зарядка подключена, заряд батареи: {percent}%")
+			else: # other
+				print(f"Зарядка подключена, заряд батареи: {percent}%") # is_no_color
+
 			write_log("debug battery_info[plugged]", f"Зарядка подключена, заряд батареи: {percent}% [{str(datetime.now())}]")
 		elif not plugged:
-			print(f"Зарядка отключена, заряд батареи: {percent}%")
+			if all((percent != None, isinstance(int(percent), int))): # float -> int
+				print(f"Зарядка отключена, заряд батареи: {percent}%")
+
 			write_log("debug battery_info[unplugged]", f"Зарядка отключена, заряд батареи: {percent}% [{str(datetime.now())}]")
 
 	return (plugged, percent) # battery
@@ -2677,13 +2711,18 @@ async def avg_lst(lst: list = []) -> int:  # default_list / in_arg_is_filesizes_
 	len_lst: int = len(lst)
 
 	try:
-		avg_size: int = (lambda s, l: s // l)(sum_lst, len_lst)
+		avg_size: int = (lambda s, l: s // l)(sum_lst, len_lst) # by_lambda
 
 		assert avg_size, "Пустая сумма или длина списка нулевая @avg_list/avg_size" # is_assert(debug)
-	except AssertionError as err:
+	except AssertionError as err: # if_null
 		avg_size: int = 0
 		logging.warning("Пустая сумма или длина списка нулевая @avg_list/avg_size")
 		raise err
+	except BaseException: # if_error
+		try:
+			avg_size = sum(lst) / len(lst)
+		except:
+			avg_size = 0
 	finally:
 		return avg_size
 
@@ -2736,6 +2775,7 @@ class Get_AR:
 	__slots__ = ["width", "height"]
 
 	def __init__(self, width, height):
+		self.__time = time() # unix_time # hidden_attribute # self._GET_AR__time
 		self.width = width
 		self.height = height
 
@@ -3040,8 +3080,9 @@ class Get_AR:
 class MyMeta:
 
 
-	def __init__(self):
-		pass
+	def __init__(self): # self -> self, filename # init_attribute
+		self.__time = time() # unix_time # hidden_attribute # self._MyMeta__time
+		pass # self.filename = filename
 
 	"""@unique_data.json"""
 
@@ -4606,8 +4647,8 @@ class MyTime:
 
 	__slots__ = ["seconds"]
 
-
-	def __init__(self, seconds: int = 2):
+	def __init__(self, seconds: int = 2): # init_attribute
+		# self.__time = time() # unix_time # hidden_attribute # self._MyTime__time
 		self.seconds = seconds
 
 
@@ -4727,12 +4768,9 @@ class MyString:
 
 	# __slots__ = ["maintext", "endtext", "count", "kw"]
 
-	def __init___(self): # maintext, endtext, count, kw
-		# self.maintext = maintext
-		# self.endtext = endtext
-		# self.count = count
-		# self.kw = kw
-		pass
+	def __init___(self): # self -> self, maintext, endtext, count, kw # init_attribute
+		self.__time = time() # unix_time # hidden_attribute # self._MyString__time
+		pass # self.maintext, self.endtext, self.count, self.kw = maintext, endtext, count, kw
 
 	def last2str(self, maintxt: str = "", endtxt: str = "", count: int = 1, kw: str = "") -> str: # hide_args_use_slots
 		"""
@@ -7393,34 +7431,6 @@ def okay_parse(filename, is_log: bool = True):  # convert_parsefile_to_normal_fi
 
 	return None  # pass
 
-
-# try_to_find_file_by_time(time >= midnight)
-
-"""
-@modified
-some_file = "C:\\Downloads\\Books\\2022-03-26_16h55_42.png".lower().strip()
-
-# from datetime import datetime as dt
-# from os.path import getctime, getmtime
-# @csv
-# 2022-03-26_16h55_42.png;91494;31.03.22;11:36
-
-# print(dt.fromtimestamp(getctime(some_file)).strftime('%Y-%m-%dT%H:%M')) # 2022-03-31T11:36 # <class 'str'>
-
-# today = dt.today() # datetime # datetime.datetime(2022, 4, 6, 7, 39, 20, 536132) # <class 'datetime.datetime'>
-# fdate = getmtime(some_file) # unixdate # 1648708605.2300806 # <class 'float'>
-# ndate = datetime.fromtimestamp(fdate) # datetime.datetime(2022, 3, 31, 11, 36, 45, 230081) # <class 'datetime.datetime'>
-# print(abs(today - ndate)) # 5 days, 20:02:35.306051 # <class 'datetime.timedelta'>
-# print(abs(today - ndate).days) # 5 # <class 'int'>
-
-# difference strftime vs fromtimestamp
-
-@change_time
-# from datetime import datetime, timedelta
-# clock_in_half_hour = datetime.now() + timedelta(minutes=30)
-# print(clock_in_half_hour) # datetime.datetime(2023, 1, 27, 19, 34, 55, 530315)
-"""
-
 if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 	# @optimial_time_for_jobs_by_xml(load)
@@ -8006,10 +8016,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				fsizes_list.sort(reverse=False)
 
 			try:
-				avg_size = await avg_lst(list(set(fsizes_list))) # asyncio.run(
-			except:
+				avg_size = await avg_lst(list(set(fsizes_list))) # async(avg_size)
+				assert avg_size, "" # is_assert_debug
+			except AssertionError as err: # if_null
+				avg_size = 0
+				raise err # logging				
+			except BaseException: # if_error
 				try:
-					avg_size = sum(fsizes_list) // len(fsizes_list)
+					avg_size = (lambda s, l: s / l)(sum(fsizes_list), len(fsizes_list)) # by_lambda
 				except:
 					avg_size = 0
 
@@ -8917,10 +8931,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				fsizes_list.sort(reverse=False)
 
 			try:
-				avg_size = await avg_lst(list(set(fsizes_list))) # asyncio.run
-			except:
+				avg_size = await avg_lst(list(set(fsizes_list))) # async(avg_size)
+				assert avg_size, "" # is_assert_debug
+			except AssertionError as err: # if_null
+				avg_size: int = 0
+				raise err # logging
+			except BaseException: # if_error
 				try:
-					avg_size = sum(fsizes_list) // len(fsizes_list)
+					avg_size = (lambda s, l: s / l)(sum(fsizes_list), len(fsizes_list)) # by_lambda
 				except:
 					avg_size = 0
 
@@ -9488,10 +9506,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					fsizes.sort(reverse=False)
 
 				try:
-					avg_size = await avg_lst(list(set(fsizes)))
-				except:
+					avg_size = await avg_lst(list(set(fsizes))) # async(avg_size)
+					assert avg_size, "" # is_assert_debug
+				except AssertionError as err: # if_null
+					avg_size: int = 0
+					raise err # logging
+				except BaseException: # if_error
 					try:
-						avg_size = (lambda s, l: s // l)(sum(fsizes), len(fsizes))
+						avg_size = (lambda s, l: s // l)(sum(fsizes), len(fsizes)) # by_lambda
 					except:
 						avg_size = 0
 
@@ -11096,10 +11118,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			fsizes_list.sort(reverse=False)
 
 		try:
-			avg_size = asyncio.run(avg_lst(list(set(fsizes_list)))) # avg_value
-		except:
+			avg_size = asyncio.run(avg_lst(list(set(fsizes_list)))) # async(avg_value)
+			assert avg_size, "" # is_assert_debug
+		except AssertionError as err: # if_null
+			avg_size: int = 0
+			raise err # logging
+		except BaseException:
 			try:
-				avg_size = sum(fsizes_list) // len(fsizes_list)
+				avg_size = (lambda s, l: s / l)(sum(fsizes_list), len(fsizes_list)) # by_lambda
 			except:
 				avg_size = 0
 
@@ -11586,9 +11612,16 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				fsizes.sort(reverse=False)
 
 			try:
-				avg_size = asyncio.run(avg_lst(list(set(fsizes))))
-			except:
-				avg_size = 0
+				avg_size = asyncio.run(avg_lst(list(set(fsizes)))) # async(avg_size)
+				assert avg_size, "" # is_assert_debug
+			except AssertionError as err: # if_null
+				avg_size: int = 0
+				raise err # logging
+			except BaseException: # if_error
+				try:
+					avg_size = (lambda s, l: s / l)(sum(fsizes), len(fsizes)) # by_lambda
+				except:
+					avg_size = 0
 
 			MT = MyTime(seconds=2)
 
@@ -13990,6 +14023,34 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			with conn:
 				cur.executemany("INSERT INTO filebase VALUES (?, ?, ?);", multiple_data)
 					conn.commit()
+			'''
+
+			# @create_function_for_sql(mutiple_data) # is_debug
+			'''
+			def logging_files(lst=multiple_data):
+
+				files_lst = []
+
+				try:
+					assert lst and isinstance(lst, list), "" # is_assert_debug
+				except AssertionError as err:
+					raise err # logging
+					return files_lst
+
+				try:
+					for d1, d2, d3 in lst:
+						if os.path.exists(d1):
+							files_lst.append(d1) # append_exists_files
+				except:
+					files_lst = [] # if_error_null_list
+
+				return files_lst
+
+			with conn:
+				conn.create_function("logging_files", -1, logging_files)
+				cur = conn.cursor()
+				cur.execute("select logging_files()")
+				print(cur.fetchall()) # print(cur.fetchone())[0]
 			'''
 
 			# avg / classify / is_max / count_jobs(max/20)
