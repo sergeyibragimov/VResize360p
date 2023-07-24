@@ -961,7 +961,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 				try:
 					#ftd = ff_to_days(ff=fsf, period=days, is_dir=False, is_less=False, is_any=True) # period=30(is_month) # period=days(is_year) # by_Year
-					ftd = ff_to_days(ff=fsf, period=12*days, is_dir=False, is_less=False, is_any=True) # period=30(is_month) # period=days(is_year) # 12_Year
+					ftd = ff_to_days(ff=fsf, period=12*days, is_dir=False, is_less=True, is_any=False) # period=30(is_month) # period=days(is_year) # 12_Year_and_less
 				except:
 					ftd = (None, ) # if_error2(None)
 
@@ -1396,7 +1396,7 @@ if all((filter_top_list, len(somebase_dict) >= 0)):
 
 	# new # no_folders / only_backup # is_count_equal_template # default(30_days)
 	# filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = 0, is_dir=False, is_less=False, is_any=True)[0] != None])) # by_Year
-	filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period =12*days, is_dir=False, is_less=False, is_any=True)[0] != None])) # 12_year
+	filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period =12*days, is_dir=False, is_less=True, is_any=False)[0] != None])) # 12_year_and_less
 
 	filter_get1000 = filter_for_new_backup[0:1000] if len(filter_for_new_backup) > 1000 else filter_for_new_backup # only_1000(for_fast) # top_1000
 	if all((filter_get1000, len(filter_get1000) <= len(filter_for_new_backup))):
@@ -2219,12 +2219,12 @@ async def shutdown_if_time(utcnow: int = utc):
 
 # cpu_overload(try_stop_SysMain/Superfetch)
 
-# dspace(reserve) # no_projects # midnight - 6am # 1
-# is_status: tuple = (any((not dsize2, not os.listdir(path_for_folder1))), ctme.hour < mytime["sleeptime"][1])
-# dspace(reserve) # midnight - 6am # skip_overload # 2
-is_status: tuple = (not dsize2, ctme.hour < mytime["sleeptime"][1], ctme.hour > 21) # use_default # dspace / less_7am_or_more_9pm
-# skip_dspace(reverve) # midnight - 6am # overload_cpu(80) # 3
-# is_status: tuple = (ctme.hour < mytime["sleeptime"][1], mem >= 80) # no_use_for_pycharm(overload)
+# dspace(reserve) # midnight - 6am # 9pm - 11pm # overload(85) # 1
+# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour >= 23)), mem >= 85) # dspace / less_7am_or_more_11pm / overload(80->85)
+# dspace(reserve) # midnight - 6am # 9pm - 11pm # no_overload # default # 2
+is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour >= 23))) # dspace / less_7am_or_more_11pm
+# no_dspace # midnight - 6am # 9pm - 11pm # no_overload # 3
+# is_status: tuple = (ctme.hour < mytime["sleeptime"][1], ctme.hour >= 23) # less_7am_or_more_11pm
 
 if is_status.count(True) > 0:
 	print("0[1431] %s" % str(is_status), mem)
@@ -2277,7 +2277,7 @@ async def my_args() -> list: #2
 
 	# old_command_line_arguments
 	try:
-		tmp = [str(sys.argv[i]) for i in range(0, len(sys.argv))]  # old(no_gen) #
+		tmp = [str(sys.argv[i]) for i in range(0, len(sys.argv))]
 	except:
 		tmp = []
 	else:
@@ -2477,7 +2477,7 @@ async def days_by_list(lst: list = [], is_avg: bool = False): #8
 		# lst = list(days_by_list_gen()) # new(yes_gen)
 		lst: list = sorted([l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lst)) and l], reverse=False)
 	except:
-		lst: list = []  # old(no_gen) # l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lst))
+		lst: list = []
 
 	with unique_semaphore:
 		for l in lst:
@@ -2885,7 +2885,7 @@ class Get_AR:
 	__slots__ = ["width", "height"]
 
 	def __init__(self, width, height):
-		self.__time = time() # unix_time # hidden_attribute # self._GET_AR__time
+		# self.__time = time() # unix_time # hidden_attribute # self._GET_AR__time
 		self.width = width
 		self.height = height
 
@@ -3127,7 +3127,7 @@ class Get_AR:
 			sar_list2 = [(width, height, sl) for sl in sar_list if
 							width / height == sl]
 		except:
-			sar_list2 = []  # old(no_gen) # (width, height, l) for l in sar_list if width/height == l
+			sar_list2 = []
 
 		if sar_list2:
 			for sl2 in sar_list2:
@@ -3327,7 +3327,7 @@ class MyMeta:
 						tmp = list(codecs_gen()) # new(yes_gen)
 					# tmp = [l.strip() for l in filter(lambda l: l, tuple(lst))]
 					except:
-						tmp = []  # old(no_gen) # l.strip() for l in filter(lambda l: l, tuple(lst))
+						tmp = []
 					else:  # finally
 						lst = [t.strip() for t in filter(lambda x: x, tuple(tmp))]
 						lst = lst[0:2]  # vcodec/acodec
@@ -3986,7 +3986,7 @@ class MyMeta:
 
 					assert vbr_list, "Пустой список частоты видео @calc_vbr/vbr_list" # is_assert_debug
 				except AssertionError: # as err: # if_null
-					vbr_list: list = []  # old(no_gen) # i for i in range(1, height*2) if ((i * gl) / 8) * 1000 >= fsize and i % 16 == 0 and i >= height
+					vbr_list: list = []
 					logging.warning("Пустой список частоты видео @calc_vbr/vbr_list")
 					# raise err
 				except BaseException as e: # if_error
@@ -5127,7 +5127,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 		full_folder: list = ["".join([main_folder, fl]) for fl in folder_list if
 							os.path.exists("".join([main_folder, fl]))]
 	except BaseException as e:
-		full_folder: list = []  # old(no_gen) # "".join([main_folder, fl]) for fl in folder_list if os.path.exists("".join([main_folder, fl]))
+		full_folder: list = []
 		if is_log:
 			write_log("debug move[folder][error][1]", "Ошибка генерации списка основных папок [%s]" % str(e), is_error=True)
 
@@ -5149,7 +5149,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 		folder_with_files: list = [ff.strip() for ff in filter(lambda x: os.path.exists(x), tuple(full_folder)) if
 								all((len(os.listdir(ff)) >= 1, ff))]  # 1_description # >1_videos
 	except BaseException as e:
-		folder_with_files: list = []  # old(no_gen) # ff.strip() for ff in filter(lambda x: os.path.exists(x), tuple(full_folder)) if all((len(os.listdir(ff)) >= 1, ff))
+		folder_with_files: list = []
 		# Ошибка генерации списка папок с файлами [[WinError 267] Неверно задано имя папки: 'd:\\multimedia\\video\\serials_conv\\01s01e.txt']
 		write_log("debug move[folder][error][2]", "Ошибка генерации списка папок с файлами [%s]" % str(e), is_error=True)
 	else:
@@ -5208,7 +5208,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 			# tmp = list(ff2_gen()) # new(yes_gen)
 			tmp: list = [ff2.strip() for ff2 in filter(lambda x: os.path.exists(x), tuple(full_folder2))]
 		except:
-			tmp: list = []  # old(no_gen) # ff2.strip() for ff2 in filter(lambda x: os.path.exists(x), tuple(full_folder2))
+			tmp: list = []
 
 		tmp2 = list(set([ff2.strip() for ff2 in filter(lambda x: x, tuple(full_folder2))]))
 		full_folder2 = sorted(tmp2, reverse=False)
@@ -5244,7 +5244,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 							# temp = list(fullname_gen()) # new(yes_gen)
 							temp: list = ["\\".join([ff2, mf]).strip() for mf in filter(lambda x: x, tuple(myfiles))]
 						except:
-							temp: list = []  # old(no_gen) # "\\".join([ff2, mf]).strip() for mf in filter(lambda x: x, tuple(myfiles))
+							temp: list = []
 
 						tmp = list(set([t.strip() for t in filter(lambda x: x, tuple(temp))]))
 						files += sorted(tmp, reverse=False)
@@ -5301,7 +5301,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 			# full_folder2 = list(folder_gen21()) # new(yes_gen) # is_all_folders(with/without)_files_for_descriptions
 			full_folder2: list = ["\\".join(f.split("\\")[0:-1]).strip() for f in filter(lambda x: os.path.exists("\\".join(x.split("\\")[0:-1])), tuple(files)) if all((len(os.listdir("\\".join(f.split("\\")[0:-1]))) >= 0, f))]
 		except:
-			full_folder2: list = []  # old(no_gen) # "\\".join(f.split("\\")[0:-1]).strip() for f in filter(lambda x: os.path.exists("\\".join(x.split("\\")[0:-1])), tuple(files)) if all((os.listdir("\\".join(f.split("\\")[0:-1])), f))
+			full_folder2: list = []
 
 		tmp = [ff2.strip() for ff2 in filter(lambda x: x, tuple(full_folder2))]
 		full_folder2 = sorted(tmp, reverse=False)
@@ -6009,12 +6009,16 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 		# 'The_White_Lotus_S02E01.mp4' # need_examples
 		try:
 			seep_str: str = "\\".join(filename.split("\\")[:-1]) + "\\" + "_".join([crop_filename_regex3.findall(filename.split("\\")[-1])[0].replace(".", "_"), seep_str]) + "".join([".", filename.split("\\")[-1].split(".")[-1]])  # ; print(seep_str)
-		except BaseException as e:
+			assert seep_str, "" # is_assert_debug
+		except AssertionError as err: # if_null
 			seep_str: str = ""
-
-			write_log("debug seep_str[notemp]!", "Not found same filenames [%s] [%s]" % (filename, str(e)), is_error=True)
-
-			return None
+			logging.warning("Null templated filename [%s] [%s]" % (filename, str(err)))
+			raise err
+			# write_log("debug seep_str[notemp]!", "Null templated filename [%s] [%s]" % (filename, str(err)), is_error=True) # hidden
+		except BaseException as e: # if_error
+			seep_str: str = ""
+			logging.error("Error templated filename [%s] [%s]" % (filename, str(e)))
+			write_log("debug seep_str[notemp]!", "Error templated filename [%s] [%s]" % (filename, str(e)), is_error=True) # is_hidden(debug)
 
 		# (filename_by_template, short_by_base)
 		tmp = list(set([(seep_str.strip(), v) for k, v in vf.items() if	all((v, seep_str, v in seep_str))]))
@@ -7859,7 +7863,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				# tmp = list(pf_gen()) # new(yes_gen)
 				tmp: list = [pf.strip() for pf in filter(lambda x: os.path.exists(x), tuple(proj_files))]
 			except:
-				tmp: list = []  # old(no_gen) # pf.strip() for pf in filter(lambda x: os.path.exists(x), tuple(proj_files))
+				tmp: list = []
 
 			tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
 			proj_files = sorted(tmp2, reverse=False)
@@ -8086,7 +8090,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					# dub_list = list(dub_list_gen()) # new(yes_gen)
 					dub_list: list = [t.strip() for t in filter(lambda x: x.split("\\")[-1] == fname, tuple(ff_last))]
 				except:
-					dub_list: list = []  # old(no_gen) # t.strip() for t in filter(lambda x: x.split("\\")[-1] == fname, tuple(ff_last))
+					dub_list: list = []
 
 				tmp = list(set([dl.strip() for dl in filter(lambda x: x, tuple(dub_list))]))
 				dub_list = sorted(tmp, reverse=False)
@@ -8110,7 +8114,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					# tmp = list(ff_gen()) # new(yes_gen)
 					tmp: list = [ff.strip() for ff in filter(lambda x: os.path.exists(x), tuple(ff_last))]
 				except:
-					tmp: list = []  # old(no_gen) # ff.strip() for ff in filter(lambda x: os.path.exists(x), tuple(ff_last))
+					tmp: list = []
 
 				tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
 				ff_last = sorted(tmp2, reverse=False)
@@ -8535,7 +8539,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						# temp2 = list(pf_gen()) # new(yes_gen)
 						temp2: list = [pf.strip() for pf in filter(lambda x: os.path.exists(x), tuple(proj_files))]
 					except:
-						temp2: list = []  # old(no_gen) # pf.strip() for pf in filter(lambda x: os.path.exists(x), tuple(proj_files))
+						temp2: list = []
 
 					tmp = list(set([t2.strip() for t2 in filter(lambda x: x, tuple(temp2))]))
 					proj_files = sorted(tmp, reverse=False)
@@ -8828,7 +8832,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				# tmp = list(l_gen()) # new(yes_gen)
 				tmp: list = [l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lst))]
 			except:
-				tmp: list = []  # old(no_gen) # l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lst))
+				tmp: list = []
 
 			tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
 			lst = sorted(tmp2, reverse=False)
@@ -8900,7 +8904,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				# tmp = list(lt_gen()) # new(yes_gen)
 				tmp = [lt.strip() for lt in filter(lambda x: os.path.exists(x), tuple(list_total))]
 			except:
-				tmp = []  # old(no_gen) # lt.strip() for lt in filter(lambda x: os.path.exists(x), tuple(list_total))
+				tmp = []
 
 			tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
 			list_total = sorted(tmp2, reverse=False)
@@ -9381,7 +9385,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					if keyword_list:
 						short_list += keyword_list[0]
 		except:
-			short_list: list = []  # old(no_gen) # crop_filename_regex.sub("", f.split("\\")[-1]).strip() for f in filter(lambda x: os.path.exists(x), tuple(some_files))
+			short_list: list = []
 		else:
 			if short_list:
 				tmp: list = []
@@ -9568,7 +9572,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					tmp = list(bc_gen())  # new(yes_gen)
 				# tmp = [bc.strip() for bc in filter(lambda x: x, tuple(big_cinema))]
 				except:
-					tmp = []  # old(no_gen) # bc.strip() for bc in filter(lambda x: x, tuple(big_cinema))
+					tmp = []
 
 				big_cinema = tmp
 				if big_cinema:
@@ -10201,7 +10205,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			# "_") > 0 else crop_filename_regex.sub("", f.split("\\")[-1]).strip() for f in
 				# filter(lambda x: x, tuple(short_files))]))  # match_or_equal
 	except:
-		filter2 = []  # old(no_gen) # crop_filename_regex.sub("", f).strip() for f in filter(lambda x: x, tuple(short_files))
+		filter2 = []
 
 	temp = list(set(filter2))
 
@@ -10516,7 +10520,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			# short_files = list(short_files_gen()) # new(yes_gen)
 			short_files: list = list(set([crop_filename_regex.sub("", lf.split("\\")[-1]).strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if all((lf, lf.count(".") == 1, video_regex.findall(lf.split("\\")[-1])))]))
 		except:
-			short_files: list = []  # old(no_gen) # crop_filename_regex.sub("",lf.split("\\")[-1]).strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if all((lf, lf.count(".") == 1, video_regex.findall(lf.split("\\")[-1])))
+			short_files: list = []
 		else:
 			if short_files:
 
@@ -10552,7 +10556,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						short_files = list(short_files_gen()) # new(yes_gen)
 					# short_files = [s.strip() for s in filter(lambda x: x, tuple(sfl))]
 					except:
-						short_files = []  # old(no_gen) # s.strip() for s in filter(lambda x: x, tuple(sfl))
+						short_files = []
 
 				temp = list(set(short_files))
 
@@ -10566,7 +10570,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					tmp: list = [sf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) for sf in
 						   tuple(short_files) if all((lf, sf, lf.split("\\")[-1].startswith(sf)))]
 				except:
-					tmp: list = []  # old(no_gen) # sf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) for sf in tuple(short_files) if all((lf, sf, lf.split("\\")[-1].startswith(sf)))
+					tmp: list = []
 
 				# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
 				short_files = sorted(list(set(tmp)), reverse=False) if tmp else []  # re_sorted_before_save(by_string) # is_no_lambda
@@ -10671,7 +10675,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						  filter(lambda x: os.path.exists(x), tuple(lfiles)) if
 						  all((lf, lf.count(".") == 1, video_regex.findall(lf.split("\\")[-1])))]))
 		except:
-			short_list = []  # old(no_gen) # crop_filename_regex.sub("", lf.split("\\")[-1]).strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if all((lf, lf.count(".") == 1, video_regex.findall(lf.split("\\")[-1])))
+			short_list = []
 
 		# tmp: list = []
 		# tmp = list(set([sl.strip() for sl in short_list if len(sl) >= 2])) # if_yes_gen(is_debug)
@@ -10707,7 +10711,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					short_exists: list = [sl.strip() for sl in filter(lambda x: x, tuple(short_list)) if
 										all((short_regex.findall(sl), short_string))]
 				except:
-					short_exists: list = []  # old(no_gen) # sl.strip() for sl in filter(lambda x: x, tuple(short_list)) if all((short_regex.findall(sl), short_string))
+					short_exists: list = []
 
 				tmp = list(set([se.strip() for se in filter(lambda x: x, tuple(short_exists))]))
 
@@ -10777,7 +10781,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		# tmp = list(update_files_gen()) # new(yes_gen)
 		tmp: list = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]
 	except:
-		tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
+		tmp: list = []
 
 	tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
 	lfiles = sorted(tmp2, reverse=False)
@@ -10861,7 +10865,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		try:
 			tmp: list = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]
 		except:
-			tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
+			tmp: list = []
 
 		tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
 		lfiles = sorted(tmp2, reverse=False)
@@ -10976,7 +10980,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		try:
 			tmp: list = list(files_to_short_by_full()) # new(yes_gen)
 		except:
-			tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if all((lf, crop_filename_regex.sub("", lf.split("\\")[-1])))
+			tmp: list = []
 
 		tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
 		lfiles = sorted(tmp2, reverse=False)
@@ -11005,7 +11009,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					"_") > 0 else crop_filename_regex.sub("", sm.split("\\")[-1]).strip() for sm in
 				filter(lambda x: os.path.exists(x), tuple(some_files))]  # match_or_equal
 		except:
-			filter_list: list = []  # old(no_gen) # crop_filename_regex.sub("", sm.split("\\")[-1]).strip() for sm in filter(lambda x: os.path.exists(x), tuple(some_files))
+			filter_list: list = []
 
 		temp = list(set([f.strip() for f in filter(lambda x: x, tuple(filter_list))]))
 
@@ -11068,7 +11072,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		try:
 			tmp: list = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]
 		except:
-			tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
+			tmp: list = []
 
 		# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
 
@@ -11562,7 +11566,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		# tmp = list(lf_gen()) # new(yes_gen)
 		tmp: list = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))
 	except:
-		tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
+		tmp: list = []
 
 	# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
 
@@ -11815,15 +11819,35 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			# @metadata
 			"""
-			# First extract metadata # ffmpeg -i original.mov -f ffmetadata metadata.txt # import_metadata
+			# First extract metadata # ffmpeg -i original.mov -f ffmetadata metadata.txt # import_metadata(1)
+			# exiftool original.mov > metadata.txt # import_metadata(2)
+			# ffprobe -show_frames "original.mov" > metadata.txt # import_metadata(3) # all_streams(is_Mb)
+
 			# Next, transcode, including extracted metadata # ffmpeg -i original.mov -f ffmetadata -i metadata.txt compressed.mp4 # export_metadata
 
-			@metadata.txt
+			@metadata.txt(1) @need_fields
 			;FFMETADATA1
 			major_brand=isom
 			minor_version=512
 			compatible_brands=isomiso2avc1mp41
+			title=С разбитым Хартом
+			artist=Крепкий Харт
+			album_artist=Крепкий Харт
+			album=Крепкий Харт, Сезон 2
+			date=2023
+			disc=2
+			comment=Актер понял, что ему надоело быть персонажем-шутом на побегушках у главного героя.
+			genre=Action
+			copyright=LostFilm.TV(c)
+			show=Крепкий Харт
+			episode_id=201
+			episode_sort=1
+			season_number=2
+			media_type=10
+			compilation=0
+			track=1
 			encoder=Lavf60.3.100
+			...
 			"""
 
 			# filename = r"c:\downloads\mytemp\hello.mp4"
@@ -12284,7 +12308,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			# tmp = list(lf_gen()) # new(yes_gen)
 			tmp: list = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]
 		except:
-			tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
+			tmp: list = []
 
 		tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
 		lfiles = sorted(tmp2, reverse=False)
@@ -12384,7 +12408,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		try:
 			tmp: list = list(files_to_short_by_full()) # new(yes_gen)
 		except:
-			tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if all((lf, crop_filename_regex.sub("", lf.split("\\")[-1])))
+			tmp: list = []
 
 		tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
 		lfiles = sorted(tmp2, reverse=False)
@@ -12423,7 +12447,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					"_") > 0 else crop_filename_regex.sub("", lf.split("\\")[-1]).strip() for lf in
 				filter(lambda x: os.path.exists(x), tuple(some_files))]  # match_or_equal
 		except:
-			filter_lis: list = []  # old(no_gen) # crop_filename_regex.sub("", sm.split("\\")[-1]).strip() for sm in filter(lambda x: os.path.exists(x), tuple(some_files))
+			filter_lis: list = []
 
 		temp = list(set([fl for fl in filter(lambda x: x, tuple(filter_list))]))
 		filter_list = sorted(temp, reverse=False)
@@ -12485,7 +12509,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			# tmp = list(lf_gen()) # new(yes_gen)
 			tmp: list = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))
 		except:
-			tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
+			tmp: list = []
 
 		# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
 
@@ -12616,7 +12640,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			try:
 				tmp: list = list(files_by_sizes()) # new(yes_gen)
 			except:
-				tmp: list = []  # old(no_gen) # lf.strip() for ls in lfiles_sizes for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if all((lf, os.path.getsize(lf) == ls, os.path.getsize(lf)))
+				tmp: list = []
 
 			tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
 
@@ -12644,7 +12668,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		# tmp = list(lf_gen()) # new(yes_gen)
 		tmp: list = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))
 	except:
-		tmp: list = []  # old(no_gen) # lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
+		tmp: list = []
 
 	# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
 
@@ -13392,6 +13416,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		# no_change_high_to_main(is_profile)_for_high # optimal_level(is_level)_for_30 # -profile:v high -level 30 # is_manual_run
 
+		# map_metadata -1(hide_metadata) # optimal_hide_all_attributes 
+		
+		# map_metadata 0(edit_or_hide_tags_by_keys) # ffmpeg -i test.mp4 -map_metadata 0 -metadata creation_time="2020-07-30 12:59:20" -c copy C.mp4
+
+		# map_metadata 1(insert_metadata_attributes(m4a->mp3) #  ffmpeg -i "02 Napali.m4a" -i metadata.txt -map_metadata 1 -c:a libmp3lame -ar 44100 -b:a 192k -id3v2_version 3 -f mp3 "02 Napali.mp3"
+
 		if all((is_change, width, height, vfile, afile,
 				bitrate_data)):  # optimize_width # width*height # vcodec(acodec) # is_bitrate
 			if all((is_profile, is_level)):
@@ -13506,7 +13536,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					"_") > 0 else crop_filename_regex.sub("", lf.split("\\")[-1]).strip() for lf in
 				filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))  # match_or_equal
 		except:
-			short_list = []  # old(no_gen) # crop_filename_regex.sub("", lf.split("\\")[-1]) for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))
+			short_list = []
 
 		tmp: list = []
 		tmp = list(set([sl.strip() for sl in short_list if len(sl) >= 2]))
@@ -13754,7 +13784,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			# tmp = list(sf_gen()) # new(yes_gen)
 			tmp: list = [sf.strip() for sf in filter(lambda x: os.path.exists(x), tuple(sorted_files))]
 		except:
-			tmp: list = []  # old(no_gen) # sf.strip() for sf in filter(lambda x: os.path.exists(x) , tuple(sorted_files))
+			tmp: list = []
 
 		tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
 		sorted_files = sorted(tmp2, reverse=False)
@@ -13795,7 +13825,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		try:
 			tmp: list = list(files_to_short_by_full()) # new(yes_gen)
 		except:
-			tmp: list = []  # old(no_gen) # sf.strip() for sf in filter(lambda x: os.path.exists(x), tuple(sorted_files)) if all((sf, crop_filename_regex.sub("", sf.split("\\")[-1])))
+			tmp: list = []
 
 		tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
 		sorted_files = sorted(tmp2, reverse=False)
