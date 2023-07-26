@@ -854,6 +854,18 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 					is_not_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) == 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 0) # desc(0) / files(0)
 					is_two_desc = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 2) # desc(2) / files(0/1)
 
+					some_find: int = 0
+
+					for lf in list_files:
+						try:
+							ap = (os.path.abspath(lf))
+							isfile = (not os.path.isdir(lf))
+						except:
+							continue # skip_if_some_error(next)
+						else:
+							# current_file(no_path) / is_abspath(is_full_path) / is_file(is_no_dir) # is_color
+							print(Style.BRIGHT + Fore.WHITE + "%s %s" % (lf, "<->".join([str(ap), str(isfile)]))) # logging_file(abs_path/file)
+
 				# path_to_description
 				try:
 					full_list = list(set(["\\".join([fsf, ol]).strip() for ol in filter(lambda x: "txt" in x, tuple(list_files)) if ol]))
