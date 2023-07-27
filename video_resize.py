@@ -2234,7 +2234,7 @@ async def shutdown_if_time(utcnow: int = utc):
 # dspace(reserve) # midnight - 6am # 9pm - 11pm # overload(85) # 1
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour >= 23)), mem >= 85) # dspace / less_7am_or_more_11pm / overload(80->85)
 # dspace(reserve) # midnight - 6am # 9pm - 11pm # no_overload # default # 2
-is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour >= 23))) # dspace / less_7am_or_more_11pm
+is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour >= 23, ctme.hour + dayago > 23))) # dspace / less_7am_or_more_11pm_or_optimal_run_hours
 # no_dspace # midnight - 6am # 9pm - 11pm # no_overload # 3
 # is_status: tuple = (ctme.hour < mytime["sleeptime"][1], ctme.hour >= 23) # less_7am_or_more_11pm
 
