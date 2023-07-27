@@ -863,8 +863,11 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 						except:
 							continue # skip_if_some_error(next)
 						else:
-							# current_file(no_path) / is_abspath(is_full_path) / is_file(is_no_dir) # is_color
-							print(Style.BRIGHT + Fore.WHITE + "%s %s" % (lf, "<->".join([str(ap), str(isfile)]))) # logging_file(abs_path/file)
+							if all((ap, isfile)):
+								# current_file(no_path) / is_abspath(is_full_path) / is_file(is_no_dir) # is_color
+								print(Style.BRIGHT + Fore.WHITE + "%s %s" % (lf, "<->".join([str(ap), str(isfile)]))) # logging_file(abs_path/file) # all_true
+							else:
+								print(Style.BRIGHT + Fore.YELLOW + "%s %s" % (lf, "<->".join([str(ap), str(isfile)]))) # another # is_some_false
 
 				# path_to_description
 				try:
@@ -887,16 +890,21 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 					desc_regex = re.compile(r"(.*)\s\((.*)\)\s(?:([\d+]{1,2}\s[A-Za-z]{3}\s[\d+]{4}|[\d+]{1,2}\.[\d+]{1,2}\.[\d+]{4}))", re.I) # rus / eng / date
 					# se_or_year = re.compile(r"(?:([\d+]{2}s[\d+]e|\([\d+]{4}\)))", re.I)
 
-					for fl in full_list:
+					for fl in filter(lambda x: x.lower().endswith("txt"), tuple(full_list)): # filtred_by_ext # full_list: # no_filter
 
-						if fl.lower().endswith("txt"):
+						if fl: # fl.lower().endswith("txt"): # manual_filter
 
 							dlist: list = []
 
 							try:
 								with open(fl, encoding="utf-8") as df:
 									dlist = df.readlines()
-							except:
+
+								assert dlist, "" # is_assert_debug
+							except AssertionError: # if_null
+								logging.info("Нет описания для \'%s\'" % fl)
+								continue # if_null_description
+							except BaseException: # if_error
 								dlist = []
 
 							try:
@@ -5439,7 +5447,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 				# filter_trends_by_today
 				try:
 					first_len: int = len(trends_dict)
-					trends_dict = {k: v for k, v in trends_dict.items() if str(datetime.today()).split(" ")[0].strip() >= v.split(" ")[0].strip()} # fitler_by_date(some_trends)
+					trends_dict = {k: v for k, v in trends_dict.items() if str(datetime.today()).split(" ")[0].strip() >= v.split(" ")[0].strip()} # filter_by_date(some_trends)
 				except:
 					trends_dict = {k: v for k, v in trends_dict.items() if all((k, v))} # all_data_exists(all_trends)
 				finally:
@@ -10840,7 +10848,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		is_any = True if dbl != 30 else False # is_no_lambda
 
 		temp = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if
-					all((lf, mdate_by_days(filename=lf, period=dbl, is_any=is_any) != None))]  # fitler_by_all_days
+					all((lf, mdate_by_days(filename=lf, period=dbl, is_any=is_any) != None))]  # filter_by_all_days
 
 		if temp:
 			write_log("debug files[allmonth]", "Найдено: %d" % len(temp))  # allmonth(dbl >= 30)
@@ -10856,7 +10864,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			is_any = True if dbl != 365 else False # is_no_lambda
 
 			temp = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if
-						all((lf, mdate_by_days(filename=lf, period=dbl, is_any=is_any) != None))]  # fitler_by_all_days
+						all((lf, mdate_by_days(filename=lf, period=dbl, is_any=is_any) != None))]  # filter_by_all_days
 
 			if temp:
 				write_log("debug files[alldays]",
@@ -12267,7 +12275,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		# if not temp:
 		# dbl = asyncio.run(days_by_list(lfiles)) # full_days
 
-		# temp = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if all((lf, mdate_by_days(filename=lf, period=dbl) != None))] # fitler_by_all_days
+		# temp = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if all((lf, mdate_by_days(filename=lf, period=dbl) != None))] # filter_by_all_days
 		# write_log("debug files[maxdays]", "Найдено: %d" % len(temp))
 
 		tmp = list(set(temp))
@@ -12288,7 +12296,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		is_any = True if dbl != 30 else False # is_no_lambda
 
 		temp = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if
-					all((lf, mdate_by_days(filename=lf, period=dbl, is_any=is_any) != None))]  # fitler_by_all_days
+					all((lf, mdate_by_days(filename=lf, period=dbl, is_any=is_any) != None))]  # filter_by_all_days
 		if temp:
 			write_log("debug files[allmonth]", "Найдено: %d" % len(temp))  # allmonth(dbl >= 30)
 
