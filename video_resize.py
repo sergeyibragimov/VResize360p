@@ -1383,7 +1383,7 @@ top_list: list = []
 with open(top_folder, encoding="utf-8") as tff:
 	top_list = tff.readlines()
 
-filter_top_list = [tl.strip() for tl in filter(lambda x: x, tuple(top_list))] # shorts
+filter_top_list = [tl.strip() for tl in filter(lambda x: x, tuple(top_list)) if len(tl.strip()) > 2] # shorts_by_length
 
 # load_meta_base(fitler) #1
 try:
@@ -10562,7 +10562,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					sfl = []
 
 				with unique_semaphore:
-					for sf in short_files:
+					for sf in filter(lambda x: len(x.strip()) > 2, tuple(short_files)): # short_by_length(sf)
 						if all((not sf in sfl, sf)):
 							sfl.append(sf.strip())
 
@@ -10693,15 +10693,15 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			# short_list = list(short_list_gen()) # new(yes_gen)
 			short_list = list(set([crop_filename_regex.sub("", lf.split("\\")[-1]).strip() for lf in
 						  filter(lambda x: os.path.exists(x), tuple(lfiles)) if
-						  all((lf, lf.count(".") == 1, video_regex.findall(lf.split("\\")[-1])))]))
+						  all((lf, 2, lf.count(".") == 1, video_regex.findall(lf.split("\\")[-1])))]))
 		except:
 			short_list = []
 
-		# tmp: list = []
-		# tmp = list(set([sl.strip() for sl in short_list if len(sl) >= 2])) # if_yes_gen(is_debug)
+		tmp: list = []
+		tmp = list(set([sl.strip() for sl in filter(lambda x: len(x.strip()) > 2, tuple(short_list))])) # short_by_length(sl)
 
-		short_list = sorted(short_list, reverse=False) # re_sort_before_save(by_string)
-		# short_list = sorted(tmp, key=len, reverse=False) # re_sort_before_save(by_length)
+		# short_list = sorted(short_list, reverse=False) # re_sort_before_save(by_string)
+		short_list = sorted(tmp, key=len, reverse=False) # re_sort_before_save(by_length)
 
 		short_string = "|".join(short_list) if len(short_list) > 1 else short_list[0] # is_no_lambda
 
@@ -10725,7 +10725,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			if short_exists:  # if_some
 				short_list = [s.strip() for s in short_exists if s]
-			elif not short_exists:  # if_null
+			elif not short_emexists:  # if_null
 				try:
 					# short_exists = list(sl_gen()) # new(yes_gen)
 					short_exists: list = [sl.strip() for sl in filter(lambda x: x, tuple(short_list)) if
@@ -13434,6 +13434,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		cmd_file = cmd_file2 = ""  # default/with_vbr
 
+		year_or_seas = re.compile(r"([\d+]{4})")
+
 		# no_change_high_to_main(is_profile)_for_high # optimal_level(is_level)_for_30 # -profile:v high -level 30 # is_manual_run
 
 		# map_metadata -1(hide_metadata) # optimal_hide_all_attributes 
@@ -13444,44 +13446,88 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		if all((is_change, width, height, vfile, afile,
 				bitrate_data)):  # optimize_width # width*height # vcodec(acodec) # is_bitrate
-			if all((is_profile, is_level)):
+
+			# is_add_meta
+			if all((is_profile, is_level, not year_regex.findall(lf.split("\\")[-1]))):
 				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -vf \"scale=%s:%s\" -profile:v main -level 30 -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
 							   lf, vfile, str(width), str(height), afile, project_file)
 				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf \"scale=%s:%s\" -profile:v main -level 30 -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
 								lf, vfile, svbr, svbr, svbr2, str(width), str(height), afile, sabr, project_file)
-			elif all((is_profile, not is_level)):
+			elif all((is_profile, not is_level, not year_regex.findall(lf.split("\\")[-1]))):
 				cmd_file = "cmd /c " + "".join([path_for_queue,	"ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -vf \"scale=%s:%s\" -profile:v main -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
 							   lf, vfile, str(width), str(height), afile, project_file)
 				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf  \"scale=%s:%s\" -profile:v main -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
 								lf, vfile, svbr, svbr, svbr2, str(width), str(height), afile, sabr, project_file)
-			elif all((not is_profile, is_level)):
+			elif all((not is_profile, is_level, not year_regex.findall(lf.split("\\")[-1]))):
 				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -vf \"scale=%s:%s\" -level 30 -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
 							   lf, vfile, str(width), str(height), afile, project_file)
 				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf \"scale=%s:%s\" -level 30 -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
 								lf, vfile, svbr, svbr, svbr2, str(width), str(height), afile, sabr, project_file)
-			elif all((not is_profile, not is_level)):
+			elif all((not is_profile, not is_level, not year_regex.findall(lf.split("\\")[-1]))):
 				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -vf \"scale=%s:%s\" -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
 							   lf, vfile, str(width), str(height), afile, project_file)
 				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf \"scale=%s:%s\" -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
 								lf, vfile, svbr, svbr, svbr2, str(width), str(height), afile, sabr, project_file)
 
+			# is_skip_meta
+			if all((is_profile, is_level, year_regex.findall(lf.split("\\")[-1]))):
+				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -vf \"scale=%s:%s\" -profile:v main -level 30 -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
+							   lf, vfile, str(width), str(height), afile, project_file)
+				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf \"scale=%s:%s\" -profile:v main -level 30 -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
+								lf, vfile, svbr, svbr, svbr2, str(width), str(height), afile, sabr, project_file)
+			elif all((is_profile, not is_level, year_regex.findall(lf.split("\\")[-1]))):
+				cmd_file = "cmd /c " + "".join([path_for_queue,	"ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -vf \"scale=%s:%s\" -profile:v main -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
+							   lf, vfile, str(width), str(height), afile, project_file)
+				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf  \"scale=%s:%s\" -profile:v main -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
+								lf, vfile, svbr, svbr, svbr2, str(width), str(height), afile, sabr, project_file)
+			elif all((not is_profile, is_level, year_regex.findall(lf.split("\\")[-1]))):
+				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -vf \"scale=%s:%s\" -level 30 -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
+							   lf, vfile, str(width), str(height), afile, project_file)
+				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf \"scale=%s:%s\" -level 30 -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
+								lf, vfile, svbr, svbr, svbr2, str(width), str(height), afile, sabr, project_file)
+			elif all((not is_profile, not is_level, year_regex.findall(lf.split("\\")[-1]))):
+				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -vf \"scale=%s:%s\" -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
+							   lf, vfile, str(width), str(height), afile, project_file)
+				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf \"scale=%s:%s\" -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
+								lf, vfile, svbr, svbr, svbr2, str(width), str(height), afile, sabr, project_file)
+
 		elif all((is_change == False, vfile, afile,
 				  bitrate_data)):  # optimized_width # width*height # vcodec(acodec) # is_bitrate
-			if all((is_profile, is_level)):
+
+			# is_add_meta
+			if all((is_profile, is_level, not year_regex.findall(lf.split("\\")[-1]))):
 				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -profile:v main -level 30 -movflags faststart -threads 2 -c:a %s %s " % (
 							   lf, vfile, afile, project_file)
 				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -profile:v main -level 30 -movflags faststart -threads 2 -c:a %s -b:a %s %s " % (
 								lf, vfile, svbr, svbr, svbr2, afile, sabr, project_file)
-			elif all((is_profile, not is_level)):
+			elif all((is_profile, not is_level, not year_regex.findall(lf.split("\\")[-1]))):
 				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -profile:v main -movflags faststart -threads 2 -c:a %s %s " % (
 							   lf, vfile, afile, project_file)
 				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -profile:v main -movflags faststart -threads 2 -c:a %s -b:a %s %s " % (
 								lf, vfile, svbr, svbr, svbr2, afile, sabr, project_file)
-			elif all((not is_profile, is_level)):
+			elif all((not is_profile, is_level, not year_regex.findall(lf.split("\\")[-1]))):
 				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -level 30 -movflags faststart -threads 2 -c:a %s %s " % (
 							   lf, vfile, afile, project_file)
 				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -level 30 -movflags faststart -threads 2 -c:a %s -b:a %s %s " % (
 								lf, vfile, svbr, svbr, svbr2, afile, sabr, project_file)
+
+			# is_skip_meta
+			if all((is_profile, is_level, year_regex.findall(lf.split("\\")[-1]))):
+				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -profile:v main -level 30 -movflags faststart -threads 2 -c:a %s %s " % (
+							   lf, vfile, afile, project_file)
+				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -profile:v main -level 30 -movflags faststart -threads 2 -c:a %s -b:a %s %s " % (
+								lf, vfile, svbr, svbr, svbr2, afile, sabr, project_file)
+			elif all((is_profile, not is_level, year_regex.findall(lf.split("\\")[-1]))):
+				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -profile:v main -movflags faststart -threads 2 -c:a %s %s " % (
+							   lf, vfile, afile, project_file)
+				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -profile:v main -movflags faststart -threads 2 -c:a %s -b:a %s %s " % (
+								lf, vfile, svbr, svbr, svbr2, afile, sabr, project_file)
+			elif all((not is_profile, is_level, year_regex.findall(lf.split("\\")[-1]))):
+				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -level 30 -movflags faststart -threads 2 -c:a %s %s " % (
+							   lf, vfile, afile, project_file)
+				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -level 30 -movflags faststart -threads 2 -c:a %s -b:a %s %s " % (
+								lf, vfile, svbr, svbr, svbr2, afile, sabr, project_file)
+
 
 		else:
 			# new/update: width/height, h264, vbr, aac/copy, main, 30, $file$
