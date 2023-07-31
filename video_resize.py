@@ -1383,7 +1383,7 @@ top_list: list = []
 with open(top_folder, encoding="utf-8") as tff:
 	top_list = tff.readlines()
 
-filter_top_list = [tl.strip() for tl in filter(lambda x: x, tuple(top_list)) if len(tl.strip()) > 2] # shorts_by_length
+filter_top_list = [tl.strip() for tl in filter(lambda x: x, tuple(top_list)) if len(tl.strip()) >= 2] # shorts_by_length
 
 # load_meta_base(fitler) #1
 try:
@@ -1951,7 +1951,11 @@ async def ipconfig_to_base():
 
 			try:
 				cip, cmac = await ip_to_mac(ip=curr_ip)
-			except:
+				assert cmac, "" # is_assert_debug # if_mac_null
+			except AssertionError: # if_null
+				cip = cmac = ""
+				continue # if_null_skip_ip
+			except BaseException: # if_error
 				cip = cmac = ""
 				continue # if_error_skip_ip
 			else:
@@ -2239,12 +2243,14 @@ async def shutdown_if_time(utcnow: int = utc):
 
 # cpu_overload(try_stop_SysMain/Superfetch)
 
-# dspace(reserve) # midnight - 6am # 9pm - 11pm # overload(85) # 1
-# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour >= 23)), mem >= 85) # dspace / less_7am_or_more_11pm / overload(80->85)
-# dspace(reserve) # midnight - 6am # 9pm - 11pm # no_overload # default # 2
-is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour >= 23, ctme.hour + dayago > 23))) # dspace / less_7am_or_more_11pm_or_optimal_run_hours
-# no_dspace # midnight - 6am # 9pm - 11pm # no_overload # 3
-# is_status: tuple = (ctme.hour < mytime["sleeptime"][1], ctme.hour >= 23) # less_7am_or_more_11pm
+# dspace(reserve) # midnight - 6am # 11pm # overload(85) # 1
+is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22)), mem >= 85) # dspace / less_7am_or_more_10pm / overload(80->85)
+# dspace(reserve) # midnight - 6am # 11pm # no_overload # 2
+# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22))) # dspace / less_7am_or_more_10pm
+# dspace(reserve) # midnight - 6am # 11pm # filter_run_time # no_overload # 3
+# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22, ctme.hour + dayago > 23))) # dspace / less_7am_or_more_10pm_or_optimal_run_hours
+# no_dspace # midnight - 6am # 11pm # no_overload # 4
+# is_status: tuple = (ctme.hour < mytime["sleeptime"][1], ctme.hour > 22) # less_7am_or_more_10pm
 
 if is_status.count(True) > 0:
 	print("0[1431] %s" % str(is_status), mem)
@@ -9410,7 +9416,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			if short_list:
 				tmp: list = []
 
-				tmp = list(set([sl.strip() for sl in short_list if len(sl) >= 2])) # need_only_upper_or_bum
+				tmp = list(set([sl.strip() for sl in short_list if len(sl) > 1])) # need_only_upper_or_bum # short_by_length
 				short_list = sorted(tmp, reverse=False)
 
 		tmp = list(set([sl.strip() for sl in filter(lambda x: any((x[0] == x[0].upper(), x[0].isnumeric())), tuple(short_list))]))
@@ -10698,7 +10704,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			short_list = []
 
 		tmp: list = []
-		tmp = list(set([sl.strip() for sl in filter(lambda x: len(x.strip()) > 2, tuple(short_list))])) # short_by_length(sl)
+		tmp = list(set([sl.strip() for sl in filter(lambda x: len(x.strip()) > 1, tuple(short_list))])) # short_by_length(sl)
 
 		# short_list = sorted(short_list, reverse=False) # re_sort_before_save(by_string)
 		short_list = sorted(tmp, key=len, reverse=False) # re_sort_before_save(by_length)
@@ -13605,7 +13611,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			short_list = []
 
 		tmp: list = []
-		tmp = list(set([sl.strip() for sl in short_list if len(sl) >= 2]))
+		tmp = list(set([sl.strip() for sl in short_list if len(sl) > 1])) # short_by_length
 
 		short_list = sorted(tmp, reverse=False) # re_sort_before(by_string)
 		# short_list = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
