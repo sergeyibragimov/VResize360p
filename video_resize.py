@@ -1356,8 +1356,8 @@ except:
 	temp = []
 
 if all((temp, len(temp) <= len(all_list))):
-	all_list = sorted(temp, reverse=False) # sort_by_abc
-	# all_list = sorted(temp, key=len, reverse=False) # sort_by_key
+	all_list = sorted(temp, reverse=False) # sort_by_string
+	# all_list = sorted(temp, key=len, reverse=False) # sort_by_legnth
 
 os.chdir(r"c:\\downloads\\mytemp") # is_change_drive_and_folder
 
@@ -2319,8 +2319,8 @@ async def my_args() -> list: #2
 			temp2 = list(set([f.strip() for f in filter(lambda x: abc_or_num_regex.findall(x), tuple(temp))])) # start(abc/123) # debug
 
 			temp3 = list(set([t2.strip() if len(t2) >= 2 else "".join([t2,"_"]) for t2 in temp2]))  # length=2 # debug
-			tmp = sorted(temp3, reverse=False)
-			# tmp = sorted(temp3, key=len, reverse=False)
+			tmp = sorted(temp3, reverse=False) # sort_by_string
+			# tmp = sorted(temp3, key=len, reverse=False) # sort_by_length
 
 		print(Style.BRIGHT + Fore.CYAN + "Найдено %d аргументов [%s]" % (len(tmp), str(datetime.now())))  # is_color
 		write_log("debug sys[args]", "Найдено %d аргументов [%s]" % (len(tmp), str(datetime.now())))
@@ -5229,15 +5229,14 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 
 	if full_folder2:
 		temp = list(set(full_folder2))
-		full_folder2 = sorted(temp, reverse=False)
+
 		try:
 			# tmp = list(ff2_gen()) # new(yes_gen)
-			tmp: list = [ff2.strip() for ff2 in filter(lambda x: os.path.exists(x), tuple(full_folder2))]
+			tmp: list = list(set([ff2.strip() for ff2 in filter(lambda x: os.path.exists(x), tuple(temp)) if ff2]))
 		except:
 			tmp: list = []
 
-		tmp2 = list(set([ff2.strip() for ff2 in filter(lambda x: x, tuple(full_folder2))]))
-		full_folder2 = sorted(tmp2, reverse=False)
+		full_folder2 = sorted(tmp, reverse=False)
 
 		with unique_semaphore:
 			for ff2 in full_folder2:
@@ -5325,19 +5324,17 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 
 		try:
 			# full_folder2 = list(folder_gen21()) # new(yes_gen) # is_all_folders(with/without)_files_for_descriptions
-			full_folder2: list = ["\\".join(f.split("\\")[0:-1]).strip() for f in filter(lambda x: os.path.exists("\\".join(x.split("\\")[0:-1])), tuple(files)) if all((len(os.listdir("\\".join(f.split("\\")[0:-1]))) >= 0, f))]
+			full_folder2: list = list(set(["\\".join(f.split("\\")[0:-1]).strip() for f in filter(lambda x: os.path.exists("\\".join(x.split("\\")[0:-1])), tuple(files)) if all((len(os.listdir("\\".join(f.split("\\")[0:-1]))) >= 0, f))]))
 		except:
 			full_folder2: list = []
+		finally:
+			full_folder2.sort(reverse=False)
 
-		tmp = [ff2.strip() for ff2 in filter(lambda x: x, tuple(full_folder2))]
-		full_folder2 = sorted(tmp, reverse=False)
+			# full_folder2 = sorted(temp, reverse=False) # sort_by_string
+			# full_folder2 = sorted(temp, key=len, reverse=False) # sort_by_length
 
 		try:
 			if full_folder2:
-				temp = list(set(full_folder2))
-
-				full_folder2 = sorted(temp, reverse=False)
-				# full_folder2 = sorted(temp, key=len, reverse=False)
 
 				try:
 					with open(vr_folder, encoding="utf-8") as vff:
@@ -5384,8 +5381,8 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 
 					tmp = list(set(check_folders))
 
-					check_folders = sorted(tmp, reverse=False)
-					# check_folders = sorted(tmp, key=len, reverse=False)
+					check_folders = sorted(tmp, reverse=False) # sort_by_string
+					# check_folders = sorted(tmp, key=len, reverse=False) # sort_by_length
 
 					check_f_status = ";".join(check_folders) if check_folders else "" # is_no_lambda
 
@@ -5393,14 +5390,14 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 
 					# pass_2_of_2(need_true_short_rename_is_ignorecase) # get_without_seasepis_and_extension
 					try:
-						check_files: list = [crop_filename_regex.sub("", f.split("\\")[-1]) for ff_check in filter(lambda x: x, tuple(list(ff_last.values()))) for f in filter(lambda x: os.path.exists(x), tuple(files)) if crop_filename_regex.sub("", f.split("\\")[-1]) in ff_check and crop_filename_regex.sub("", f.split("\\")[-1]).lower() < len(ff_check.lower())]
+						check_files: list = list(set([crop_filename_regex.sub("", f.split("\\")[-1]) for ff_check in filter(lambda x: x, tuple(list(ff_last.values()))) for f in filter(lambda x: os.path.exists(x), tuple(files)) if crop_filename_regex.sub("", f.split("\\")[-1]) in ff_check and crop_filename_regex.sub("", f.split("\\")[-1]).lower() < len(ff_check.lower())]))
 					except:
 						check_files: list = []
+					finally:
+						check_files.sort(reverse=False)
 
-					tmp = list(set(check_files))
-
-					check_files = sorted(tmp, reverse=False)
-					# check_files = sorted(tmp, key=len, reverse=False)
+						# check_files = sorted(tmp, reverse=False) # sort_by_string
+						# check_files = sorted(tmp, key=len, reverse=False) # sort_by_length
 
 					check_f_status = ";".join(check_files) if check_files else "" # is_no_lambda
 
@@ -5426,8 +5423,8 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 
 						# some_shortfolders_or_null_list # no_keys_only_values
 
-						sfolders = sorted(list(set(ff_dict.values())), reverse=False) if temp else [] # is_no_lambda
-						# sfolders = sorted(list(set(ff_dict.values())), key=len, reverse=False) if temp else []
+					sfolders = sorted(list(set(ff_dict.values())), reverse=False) if temp else [] # is_no_lambda
+					# sfolders = sorted(list(set(ff_dict.values())), key=len, reverse=False) if temp else []
 
 				if len(sfolders) <= 20:
 					print(sfolders[0:len(sfolders)], "==>", "Папки с описаниями и файлами")
@@ -6099,8 +6096,8 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 			# soundtrack_list = sorted(soundtrack, reverse=True) # cba_by_index
 			# soundtrack_list = sorted(soundtrack, reverse=False) # abc_by_index
 
-			soundtrack_list = sorted(soundtrack, key=len, reverse=True)  # cba_by_string
-			# soundtrack_list = sorted(soundtrack, key=len, reverse=False) # abc_by_string
+			soundtrack_list = sorted(soundtrack, key=len, reverse=True)  # cba_by_length
+			# soundtrack_list = sorted(soundtrack, key=len, reverse=False) # abc_by_length
 		except:
 			soundtrack_list = []
 
@@ -7887,12 +7884,16 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			try:
 				# tmp = list(pf_gen()) # new(yes_gen)
-				tmp: list = [pf.strip() for pf in filter(lambda x: os.path.exists(x), tuple(proj_files))]
+				tmp: list = list(set([pf.strip() for pf in filter(lambda x: os.path.exists(x), tuple(proj_files)) if pf]))
 			except:
 				tmp: list = []
+			finally:
+				tmp.sort(reverse=False)
 
-			tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
-			proj_files = sorted(tmp2, reverse=False)
+				# tmp.sorted(tmp, key=length, reverse=False) # sort_by_length
+				# tmp.sorted(tmp, reverse=False) # sort_by_string
+
+			proj_files = tmp if tmp else []
 
 			cnt: int = 0
 
@@ -8114,12 +8115,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				try:
 					# dub_list = list(dub_list_gen()) # new(yes_gen)
-					dub_list: list = [t.strip() for t in filter(lambda x: x.split("\\")[-1] == fname, tuple(ff_last))]
+					dub_list: list = [t.strip() for t in filter(lambda x: x.split("\\")[-1] == fname, tuple(ff_last)) if t]
 				except:
 					dub_list: list = []
+				finally:
+					dub_list.sort(reverse=False)
 
-				tmp = list(set([dl.strip() for dl in filter(lambda x: x, tuple(dub_list))]))
-				dub_list = sorted(tmp, reverse=False)
+					# dub_list = sorted(tmp, reverse=False) # sort_by_string
+					# dub_list = sorted(tmp, key=len, reverse=False) # sort_by_length
 
 				len_file_list: list = []
 
@@ -8138,12 +8141,13 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				funique = set()
 				try:
 					# tmp = list(ff_gen()) # new(yes_gen)
-					tmp: list = [ff.strip() for ff in filter(lambda x: os.path.exists(x), tuple(ff_last))]
+					tmp: list = list(set([ff.strip() for ff in filter(lambda x: os.path.exists(x), tuple(ff_last)) if ff]))
 				except:
 					tmp: list = []
+				finally:
+					tmp.sort(reverse=False)
 
-				tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
-				ff_last = sorted(tmp2, reverse=False)
+				ff_last = tmp # sorted/sort
 
 				for ff in ff_last:  # filter(lambda x: os.path.exists(x), tuple(ff_last)):  # new(yes_gen)
 
@@ -8272,8 +8276,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								skip_file.add(fnshort)
 
 			try:
-				fsizes_list: list = [os.path.getsize(dl["file"][0]) for dl in datelist if
-									os.path.exists(dl["file"][0])]
+				fsizes_list: list = list(set([os.path.getsize(dl["file"][0]) for dl in datelist if
+									os.path.exists(dl["file"][0])]))
 			except:
 				fsizes_list: list = []
 			else:
@@ -8563,12 +8567,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				if temp.count(True):
 					try:
 						# temp2 = list(pf_gen()) # new(yes_gen)
-						temp2: list = [pf.strip() for pf in filter(lambda x: os.path.exists(x), tuple(proj_files))]
+						temp2: list = list(set([pf.strip() for pf in filter(lambda x: os.path.exists(x), tuple(proj_files)) if pf]))
 					except:
 						temp2: list = []
-
-					tmp = list(set([t2.strip() for t2 in filter(lambda x: x, tuple(temp2))]))
-					proj_files = sorted(tmp, reverse=False)
+					finally:
+						proj_files = sorted(temp2, reverse=False)
 
 					print(Style.BRIGHT + Fore.WHITE + "Осталось %d задачи(и), которые надо очистить" % temp.count(True))
 					write_log("debug files[project][count][+]",
@@ -8737,8 +8740,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		try:
 			temp = list(set([fl.split(".")[0].strip() for fl in os.listdir(path1) if fl.split(".")[-1].lower() in ["dmf", "dmfr", "filepart", "aria2", "crdownload", "crswap"]]))
 
-			skip_file1 = sorted(temp, reverse=False)
-			# skip_file1 = sorted(temp, key=len, reverse=False)
+			skip_file1 = sorted(temp, reverse=False) # sort_by_string
+			# skip_file1 = sorted(temp, key=len, reverse=False) # sort_by_length
 		except:
 			skip_file1 = []
 
@@ -8793,8 +8796,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		try:
 			temp = list(set([fl.split(".")[0].strip() for fl in os.listdir(path2) if fl.split(".")[-1].lower() in ["dmf", "dmfr", "filepart", "aria2", "crdownload", "crswap"]]))
 
-			skip_file2 = sorted(temp, reverse=False)
-			# skip_file2 = sorted(temp, key=len, reverse=False)
+			skip_file2 = sorted(temp, reverse=False) # sort_by_string
+			# skip_file2 = sorted(temp, key=len, reverse=False) # sort_by_length
 		except:
 			skip_file2 = []
 
@@ -8820,8 +8823,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		try:
 			temp = list(set([lt.split("\\")[-1].split(".")[0] for lt in list_total if lt.split(".")[-1].lower() in ["dmf", "dmfr", "filepart", "aria2", "crdownload", "crswap"]]))
 
-			skip_copy = sorted(temp, reverse=False)
-			# skip_copy = sorted(temp, key=len, reverse=False)
+			skip_copy = sorted(temp, reverse=False) # sort_by_string
+			# skip_copy = sorted(temp, key=len, reverse=False) # sort_by_length
 		except:
 			skip_copy = []
 
@@ -8856,17 +8859,29 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			try:
 				# tmp = list(l_gen()) # new(yes_gen)
-				tmp: list = [l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lst))]
+				tmp: list = list(set([l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lst)) if l]))
 			except:
 				tmp: list = []
+			finally:
+				tmp.sort(reverse=False)
 
-			tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
-			lst = sorted(tmp2, reverse=False)
+			lst = tmp # sorted/sort
 
 			for l in lst:  # filter(lambda x: os.path.exists(x), tuple(lst)):  # new(yes_gen)
 
-				if not lst:  # skip_if_nulllist
+				try:
+					assert lst, "" # is_assert_debug
+				except AssertionError: # if_null
 					break
+				except BaseException: # if_error
+					break
+
+				try:
+					assert l, "" # is_assert_debug
+				except AssertionError: # if_null
+					continue
+				except BaseException: # if_error
+					continue
 
 				if os.path.exists(l) and not is_skip_project:
 					os.remove(l)
@@ -8928,14 +8943,29 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			try:
 				# tmp = list(lt_gen()) # new(yes_gen)
-				tmp = [lt.strip() for lt in filter(lambda x: os.path.exists(x), tuple(list_total))]
+				tmp = list(set([lt.strip() for lt in filter(lambda x: os.path.exists(x), tuple(list_total)) if lt]))
 			except:
 				tmp = []
+			finally:
+				tmp.sort(reverse=False)
 
-			tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
-			list_total = sorted(tmp2, reverse=False)
+			list_total = tmp # sorted/sort
 
-			for lt in list_total:  # filter(lambda x: os.path.exists(x), tuple(list_total)):  # new(yes_gen)
+			for lt in list_total:
+
+				try:
+					assert list_total, "" # is_assert_debug
+				except AssertionError: # if_null
+					break
+				except BaseException: # if_error
+					break
+
+				try:
+					assert lt, "" # is_assert_debug
+				except AssertionError: # if_null
+					continue
+				except BaseException: # if_error
+					continue
 
 				try:
 					fname = lt.split("\\")[-1].strip()
@@ -9421,19 +9451,19 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		tmp = list(set([sl.strip() for sl in filter(lambda x: any((x[0] == x[0].upper(), x[0].isnumeric())), tuple(short_list))]))
 
-		short_list = sorted(tmp, reverse=False)
-		# short_list = sorted(tmp, key=len, reverse=False)
+		short_list = sorted(tmp, reverse=False) # sort_by_string
+		# short_list = sorted(tmp, key=len, reverse=False) # sort_by_length
 
 		try:
-			filter_list: list = [l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lst)) for sl in filter(lambda y: y, tuple(short_list)) if all((l, sl, l.split("\\")[-1].startswith(sl)))]  # exists/short_template/start_with_template
+			filter_list: list = list(set([l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lst)) for sl in filter(lambda y: y, tuple(short_list)) if all((l, sl, l.split("\\")[-1].startswith(sl)))]))  # exists/short_template/start_with_template
 		except:
 			filter_list: list = []
+		finally:
+			filter_list.sort(reverse=False)
 
-		temp = list(set(filter_list))
-
-		filter_list = sorted(temp, reverse=False)
-		# filter_list = sorted(temp, key=len, reverse=False)
-
+			# filter_list = sorted(temp, key=len, reverse=False) # sort_by_length
+			# filter_list = sorted(temp, reverse=False) # sort_by_string
+	
 		return filter_list
 
 
@@ -9768,8 +9798,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		finally:
 			temp = ["".join([path_for_folder1, l1]) for l1 in list1 if os.path.isfile("".join([path_for_folder1, l1]).strip())]
 
-			list1 = sorted(temp, reverse=False)
-			# list1 = sorted(temp, key=len, reverse=False)
+			list1 = sorted(temp, reverse=False) # sort_by_string
+			# list1 = sorted(temp, key=len, reverse=False) # sort_by_length
 
 			if list1:
 
@@ -10153,8 +10183,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		temp = list(set(filter1))
 
-		filter1 = sorted(temp, reverse=False)  # recovery_files
-		# filter1 = sorted(temp, key=len, reverse=False)  # recovery_files
+		filter1 = sorted(temp, reverse=False)  # recovery_files # sort_by_string
+		# filter1 = sorted(temp, key=len, reverse=False)  # recovery_files # sort_by_length
 
 		if filter1:
 			print(
@@ -10176,12 +10206,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			filter_temp: list = []
 
 			try:
-				filter_temp = sorted(filter1, reverse=False) # sort_by_abc
-				# filter_temp = sorted(filter1, key=len, reverse=False)  # sort_by_keys
+				filter_temp = sorted(filter1, reverse=False) # sort_by_string
+				# filter_temp = sorted(filter1, key=len, reverse=False)  # sort_by_length
 			except:
 				filter_temp = []
 			finally:
-				filter1 = filter_temp
+				filter1 = filter_temp if filter_temp else [] # is_no_lambda
 
 			if filter1:
 				if len(filter1) >= 20:
@@ -10235,8 +10265,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 	temp = list(set(filter2))
 
-	filter2 = sorted(temp, reverse=False)  # project_files
-	# filter2 = sorted(temp, key=len, reverse=False)  # project_files
+	filter2 = sorted(temp, reverse=False)  # project_files # sort_by_string
+	# filter2 = sorted(temp, key=len, reverse=False)  # project_files # sort_by_length
 
 	if filter2:
 		print(Style.BRIGHT + Fore.GREEN + "Файлы проекта готовы к обработке")
@@ -10257,12 +10287,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		filter_temp2: list = []
 
 		try:
-			filter_temp2 = sorted(filter2, reverse=False) # sort_by_abc
-			# filter_temp2 = sorted(filter2, key=len, reverse=False)  # sort_by_keys
+			filter_temp2 = sorted(filter2, reverse=False) # sort_by_string
+			# filter_temp2 = sorted(filter2, key=len, reverse=False)  # sort_by_length
 		except:
 			filter_temp2 = []
 		finally:
-			filter2 = filter_temp2
+			filter2 = filter_temp2 if filter_temp2 else [] # is_no_lambda
 
 		if filter2:
 			if len(filter2) >= 20:
@@ -10299,8 +10329,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		print(Style.BRIGHT + Fore.RED + "%s" % str(e))
 
 	try:
-		filter3 = sorted(list(set(my_arg_filter)), reverse=False)  # template_from_cmd_args
-		# filter3 = sorted(list(set(my_arg_filter)), key=len, reverse=False)  # template_from_cmd_args
+		filter3 = sorted(list(set(my_arg_filter)), reverse=False)  # template_from_cmd_args # sort_by_string
+		# filter3 = sorted(list(set(my_arg_filter)), key=len, reverse=False)  # template_from_cmd_args # sort_by_length
 	except:
 		filter3 = []
 	else:
@@ -10318,16 +10348,15 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		filter_temp3: list = []
 
 		try:
-			filter_temp3 = sorted(filter3, reverse=False) # sort_by_abc
-			# filter_temp3 = sorted(filter3, key=len, reverse=False)
+			filter_temp3 = sorted(filter3, reverse=False) # sort_by_string
+			# filter_temp3 = sorted(filter3, key=len, reverse=False) # sort_by_length
 		except:
 			filter_temp3 = []
-
-		try:
+		finally:
 			filter3 = filter_temp3 if filter_temp3 else [] # is_no_lambda
-		except:
-			filter3 = sorted(filter_temp3, reverse=False)
-			# filter3 = sorted(filter_temp3, key=len, reverse=False)
+
+			# filter3 = sorted(filter_temp3, reverse=False) # sort_by_string
+			# filter3 = sorted(filter_temp3, key=len, reverse=False) # sort_by_length
 
 		if filter3:
 			if len(filter3) >= 20:
@@ -10371,8 +10400,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		tmp = list(set([crop_filename_regex.sub("", pf.split("\\")[-1]).split("_")[0].strip() if
 						  pf.split("\\")[-1].count("_") > 0 else crop_filename_regex.sub("", pf.split("\\")[-1]).strip() for pf in filter(lambda x: os.path.exists(x), tuple(proj_files))]))  # match_or_equal
 
-		filter4 = sorted(tmp, reverse=False)
-		# filter4 = sorted(tmp, key=len, reverse=False)
+		filter4 = sorted(tmp, reverse=False) # sort_by_string
+		# filter4 = sorted(tmp, key=len, reverse=False) # sort_by_length
 
 	if filter4:
 		filter_temp4: list = []
@@ -10382,14 +10411,13 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			# filter_temp4 = sorted(filter4, key=len, reverse=False)
 		except:
 			filter_temp4 = []
-
-		try:
+		finally:
 			filter4 = filter_temp4 if filter_temp4 else [] # is_no_lambda
-		except:
-			filter4 = sorted(filter_temp4, reverse=False)
-			# filter4 = sorted(filter_temp4, key=len, reverse=False)
 
-		if filter3:
+			# filter4 = sorted(filter_temp4, reverse=False) # sort_by_string
+			# filter4 = sorted(filter_temp4, key=len, reverse=False) # sort_by_length
+
+		if filter4:
 			if len(filter4) >= 20:
 				print(Style.BRIGHT + Fore.YELLOW + "Проход 4 из 4 [%s]" % ", ".join(filter4[0:20]))
 				write_log("debug filter4[list]", ",".join(filter4[0:20]))
@@ -10469,8 +10497,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		temp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(temp)) if any((t.title().startswith(t[0]), t[0].isnumeric()))])) # compare_first_symb_by_capitalize
 
 		if temp2:
-			filter_list = sorted(temp2, reverse=False) # list_by_abc
-			# filter_list = sorted(temp2, key=len, reverse=False) # list_by_key
+			filter_list = sorted(temp2, reverse=False) # sort_by_string
+			# filter_list = sorted(temp2, key=len, reverse=False) # sort_by_length
 
 		fl_count = str(len(filter_list)) if filter_list else "All" # is_no_lambda
 
@@ -10593,14 +10621,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				try:
 					# tmp = list(temp_gen()) # new(yes_gen)
-					tmp: list = [sf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) for sf in
-						   tuple(short_files) if all((lf, sf, lf.split("\\")[-1].startswith(sf)))]
+					tmp: list = list(set([sf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) for sf in
+						   tuple(short_files) if all((lf, sf, lf.split("\\")[-1].startswith(sf)))]))
 				except:
 					tmp: list = []
-
-				# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
-				short_files = sorted(list(set(tmp)), reverse=False) if tmp else []  # re_sorted_before_save(by_string) # is_no_lambda
-				# short_files = sorted(tmp2, key=len, reverse=False) if tmp2 else []  # re_sorted_before_save(by_length)
+				finally:
+					# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
+					short_files = sorted(list(set(tmp)), reverse=False) if tmp else []  # re_sorted_before_save(by_string) # is_no_lambda
+					# short_files = sorted(tmp2, key=len, reverse=False) if tmp2 else []  # re_sorted_before_save(by_length)
 
 				if short_files:  # save_if_some_list
 					with open(short_folders, "w", encoding="utf-8") as sff:
@@ -10706,8 +10734,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		tmp: list = []
 		tmp = list(set([sl.strip() for sl in filter(lambda x: len(x.strip()) > 1, tuple(short_list))])) # short_by_length(sl)
 
-		# short_list = sorted(short_list, reverse=False) # re_sort_before_save(by_string)
-		short_list = sorted(tmp, key=len, reverse=False) # re_sort_before_save(by_length)
+		# short_list = sorted(short_list, reverse=False) # re_sort_before_by_string
+		short_list = sorted(tmp, key=len, reverse=False) # re_sort_before_by_length
 
 		short_string = "|".join(short_list) if len(short_list) > 1 else short_list[0] # is_no_lambda
 
@@ -10741,8 +10769,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				tmp = list(set([se.strip() for se in filter(lambda x: x, tuple(short_exists))]))
 
-				short_list = sorted(tmp, reverse=False)
-				# short_list = sorted(tmp, key=len, reverse=False)
+				short_list = sorted(tmp, reverse=False) # sort_by_string
+				# short_list = sorted(tmp, key=len, reverse=False) # sort_by_length
 
 			open(short_folders, "w", encoding="utf-8").close()  # clear_for_update # debug/test
 
@@ -10779,8 +10807,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		temp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(temp)) if any((t.title().startswith(t[0]), t[0].isnumeric()))])) # compare_first_symb_by_capitalize
 
 		if temp2:
-			filter_list = sorted(temp2, reverse=False) # sort_by_abc
-			# filter_list = sorted(temp2, key=len, reverse=False) # sort_by_key
+			filter_list = sorted(temp2, reverse=False) # sort_by_string
+			# filter_list = sorted(temp2, key=len, reverse=False) # sort_by_length
 
 		if filter_list:  # M(atch)/I(gnore)_case # by_filter
 			write_log("debug files[filter][-]", "%s" % "|".join(filter_list))  # current(3)
@@ -10805,12 +10833,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 	try:
 		# tmp = list(update_files_gen()) # new(yes_gen)
-		tmp: list = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]
+		tmp: list = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]
 	except:
 		tmp: list = []
-
-	tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
-	lfiles = sorted(tmp2, reverse=False)
+	finally:
+		lfiles = sorted(tmp, reverse=False)
 
 	if need_find_all:  # avg_days_to_full_period
 
@@ -10889,12 +10916,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		unique = full_list = set()
 		try:
-			tmp: list = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]
+			tmp: list = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]))
 		except:
 			tmp: list = []
-
-		tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
-		lfiles = sorted(tmp2, reverse=False)
+		finally:
+			lfiles = sorted(tmp, reverse=False)
 
 		cnt: int = 0
 
@@ -11039,8 +11065,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		temp = list(set([f.strip() for f in filter(lambda x: x, tuple(filter_list))]))
 
-		filter_list = sorted(temp, reverse=False)
-		# filter_list = sorted(temp, key=len, reverse=False)
+		filter_list = sorted(temp, reverse=False) # sort_by_string
+		# filter_list = sorted(temp, key=len, reverse=False) # sort_by_length
 
 		# temp_regex = re.compile("(.*)(?:(_[\d+]{2,4}s|\([\d+]{4}\)))(.*)(?:(.dmf|.dmfr|.filepart|.aria2|.crdownload|.crswap))", re.M)
 
@@ -11102,8 +11128,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
 
-		lfiles = sorted(tmp, reverse=False) # re_sort_before(by_string)
-		# lfiles = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
+		lfiles = sorted(tmp, reverse=False) # re_sort_by_string
+		# lfiles = sorted(tmp, key=len, reverse=False) # re_sort_by_length
 
 		cnt: int = 0
 
@@ -11209,8 +11235,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		temp = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]
 	except:
 		temp = []
-
-	if temp:
+	finally:
 		lfiles = sorted(temp, reverse=False)
 
 	# new_or_update_jobs # pass_2_of_2(if_ok_move_and_update)
@@ -11335,19 +11360,18 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		# tmp = list(set([lt.strip() for lt in filter(lambda x: x, tuple(lfiles_total))])) # if_yes_gen
 
-		lfiles_total = sorted(lfiles_total, reverse=False) # re_sort_before(by_string)
-		# lfiles_total = sorted(lfiles_total, key=len, reverse=False) # re_sort_before(by_length)
+		lfiles_total = sorted(lfiles_total, reverse=False) # re_sort_before_by_string
+		# lfiles_total = sorted(lfiles_total, key=len, reverse=False) # re_sort_before_by_length
 
 		try:
-			tmp: list = [crop_filename_regex.sub("", lf.split("\\")[-1].strip()) for lf in
-				   filter(lambda x: os.path.exists(x), tuple(lfiles_total)) if lf]
-			tmp2 = list(set(tmp))
-
-			tmp = sorted(tmp2, reverse=False)
-			# tmp = sorted(tmp2, key=len, reverse=False)
+			tmp: list = list(set([crop_filename_regex.sub("", lf.split("\\")[-1].strip()) for lf in
+				   filter(lambda x: os.path.exists(x), tuple(lfiles_total)) if lf]))
 		except:
 			tmp: list = []
 		else:
+			tmp = sorted(tmp, reverse=False) # sort_by_string
+			# tmp = sorted(tmp, key=len, reverse=False) # sort_by_length
+
 			write_log("debug lfiles_total[projects]", "%s" % ";".join(tmp))
 
 	tmp = list(set(lfiles_total))
@@ -11572,12 +11596,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	# --- update_files ---
 
 	try:
-		temp = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]
+		temp = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))
 	except:
 		temp = []
-
-	if temp:
-		lfiles = sorted(temp, reverse=False)
+	finally:
+		lfiles = sorted(temp, reverse=False) # re_sort_before_by_string
+		# lfiles = sorted(temp, key=len, reverse=False) # re_sort_before_by_length
 
 	date1 = datetime.now()
 
@@ -11587,17 +11611,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 	slist: list = []
 	dub_list: list = []
-
-	try:
-		# tmp = list(lf_gen()) # new(yes_gen)
-		tmp: list = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))
-	except:
-		tmp: list = []
-
-	# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
-
-	lfiles = sorted(tmp, reverse=False) # re_sort_before(by_string)
-	# lfiles = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
 
 	cnt: int = 0
 
@@ -11744,11 +11757,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 	# --- update_files ---
 	try:
-		temp = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]
+		temp = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]))
 	except:
 		temp = []
-
-	if temp:
+	finally:
 		lfiles = sorted(temp, reverse=False)
 
 	filecmdbase_copy: dict = {}
@@ -12332,12 +12344,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		unique = full_list = set()
 		try:
 			# tmp = list(lf_gen()) # new(yes_gen)
-			tmp: list = [lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]
+			tmp: list = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))
 		except:
 			tmp: list = []
-
-		tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
-		lfiles = sorted(tmp2, reverse=False)
+		finally:
+			lfiles = sorted(tmp, reverse=False)
 
 		cnt: int = 0
 
@@ -12349,7 +12360,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			h, m = 0, 0
 
 		with unique_semaphore:
-			for lf in filter(lambda x: x, tuple(lfiles)):  # filter(lambda x: os.path.exists(x), tuple(lfiles))
+			for lf in lfiles:
 
 				try:
 					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
@@ -12420,7 +12431,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			temp = list(set(full_list))
 			lfiles = sorted(temp, reverse=False)
 
-
 		def files_to_short_by_full(lfiles=lfiles):
 			for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)):
 				if all((lf, crop_filename_regex.sub("", lf.split("\\")[-1]))):
@@ -12468,15 +12478,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		# shorts_in_list(upgrade)
 		try:
 			# filter_list = [crop_filename_regex.sub("", sm.split("\\")[-1]) for lf in filter(lambda x: os.path.exists(x), tuple(some_files))] # equal
-			filter_list: list = [
+			filter_list: list = list(set([
 				crop_filename_regex.sub("", lf.split("\\")[-1]).split("_")[0].strip() if lf.split("\\")[-1].count(
 					"_") > 0 else crop_filename_regex.sub("", lf.split("\\")[-1]).strip() for lf in
-				filter(lambda x: os.path.exists(x), tuple(some_files))]  # match_or_equal
+				filter(lambda x: os.path.exists(x), tuple(some_files))]))  # match_or_equal
 		except:
-			filter_lis: list = []
-
-		temp = list(set([fl for fl in filter(lambda x: x, tuple(filter_list))]))
-		filter_list = sorted(temp, reverse=False)
+			filter_list: list = []
+		finally:
+			filter_list = sorted(filter_list, reverse=False)
 
 		# temp_regex = re.compile("(.*)(?:(_[\d+]{2,4}s|\([\d+]{4}\)))(.*)(?:(.dmf|.dmfr|.filepart|.aria2|.crdownload|.crswap))", re.M)
 
@@ -12536,11 +12545,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			tmp: list = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))
 		except:
 			tmp: list = []
-
-		# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
-
-		lfiles = sorted(tmp, reverse=False) # re_sort_before(by_string)
-		# lfiles = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
+		finally:
+			lfiles = sorted(tmp, reverse=False) # re_sort_before_by_string
+			# lfiles = sorted(tmp, key=len, reverse=False) # re_sort_before_by_length
 
 		cnt: int = 0
 
@@ -12695,11 +12702,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		tmp: list = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))
 	except:
 		tmp: list = []
-
-	# tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))])) # if_yes_gen
-
-	lfiles = sorted(tmp, reverse=False) # re_sort_before(by_string)
-	# lfiles = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
+	finally:
+		lfiles = sorted(tmp, reverse=False) # re_sort_before_by_string
+		# lfiles = sorted(tmp, key=len, reverse=False) # re_sort_before_by_length
 
 	hms_sum: int = 0
 	hms_len: int = 0
@@ -13606,15 +13611,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			short_list = list(set([
 				crop_filename_regex.sub("", lf.split("\\")[-1]).split("_")[0].strip() if lf.split("\\")[-1].count(
 					"_") > 0 else crop_filename_regex.sub("", lf.split("\\")[-1]).strip() for lf in
-				filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))  # match_or_equal
+				filter(lambda x: os.path.exists(x), tuple(lfiles)) if len(lf) > 1]))  # match_or_equal
 		except:
 			short_list = []
-
-		tmp: list = []
-		tmp = list(set([sl.strip() for sl in short_list if len(sl) > 1])) # short_by_length
-
-		short_list = sorted(tmp, reverse=False) # re_sort_before(by_string)
-		# short_list = sorted(tmp, key=len, reverse=False) # re_sort_before(by_length)
+		finally:
+			short_list = sort(reverse=False) # re_sort_before_by_string
+			# short_list = sort(key=len, reverse=False) # re_sort_before_by_length
 
 		if short_list:
 			write_log("debug short", ";".join(short_list))  # short_files
@@ -13854,12 +13856,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		unique = full_list = set()
 		try:
 			# tmp = list(sf_gen()) # new(yes_gen)
-			tmp: list = [sf.strip() for sf in filter(lambda x: os.path.exists(x), tuple(sorted_files))]
+			tmp: list = list(set([sf.strip() for sf in filter(lambda x: os.path.exists(x), tuple(sorted_files)) if sf]))
 		except:
 			tmp: list = []
-
-		tmp2 = list(set([t.strip() for t in filter(lambda x: x, tuple(tmp))]))
-		sorted_files = sorted(tmp2, reverse=False)
+		finally:
+			sorted_files = sorted(tmp, reverse=False)
 
 		for sf in sorted_files:  # filter(lambda x: x, tuple(tmp))
 
