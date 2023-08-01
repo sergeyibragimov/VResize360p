@@ -1327,8 +1327,8 @@ if all_list:
 		tmp = list(set([al.strip() for al in filter(lambda x: any((x[0] == x[0].upper(), x[0].isnumeric())), tuple(all_list))])) # unique
 	except:
 		tmp = [] # null_if_error
-
-	all_list = tmp if tmp else [] # is_no_lambda
+	finally:
+		all_list = tmp if tmp else [] # is_no_lambda
 
 # 1684 [None, None] Текущий список папок, общий список папок # current_list_length / is_full_list / status's
 all_list_status = "Общий список в %d папках" % len(all_list) if all_list else "Общего списка в папках не найдено" # str(debug) -> int(count) # is_no_lambda
@@ -2243,10 +2243,10 @@ async def shutdown_if_time(utcnow: int = utc):
 
 # cpu_overload(try_stop_SysMain/Superfetch)
 
-# dspace(reserve) # midnight - 6am # 11pm # overload(85) # 1
-is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22)), mem >= 85) # dspace / less_7am_or_more_10pm / overload(80->85)
+# # dspace(reserve) # midnight - 6am # 11pm # overload(85) # 1
+# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22)), mem >= 85) # dspace / less_7am_or_more_10pm / overload(80->85)
 # dspace(reserve) # midnight - 6am # 11pm # no_overload # 2
-# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22))) # dspace / less_7am_or_more_10pm
+is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22))) # dspace / less_7am_or_more_10pm
 # dspace(reserve) # midnight - 6am # 11pm # filter_run_time # no_overload # 3
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22, ctme.hour + dayago > 23))) # dspace / less_7am_or_more_10pm_or_optimal_run_hours
 # no_dspace # midnight - 6am # 11pm # no_overload # 4
@@ -5801,7 +5801,8 @@ async def process_move(file1: str = "", file2: str = "", is_copy: bool = False, 
 			fast_move: bool = False
 
 		try:
-			fast_move_status = "Быстрый перенос %s" % file1 if fast_move else "Обычный перенос %s" % file1 # is_no_lambda
+			# fast_move_status = "Быстрый перенос %s" % file1 if fast_move else "Обычный перенос %s" % file1 # is_no_lambda # old
+			fast_move_status = ("Обычный перенос %s" % file1, "Быстрый перенос %s" % file1)[fast_move] # ternary
 		except BaseException as e:
 			fast_move_status = "Неизвестный перенос %s [%s]" % (file1, str(e))
 
@@ -5984,7 +5985,8 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 
 		write_log("debug start[trouble_autorename]", "%s" % str(datetime.now()))
 
-		old_filename = filename if os.path.exists(filename) else "" # is_no_lambda
+		# old_filename = filename if os.path.exists(filename) else "" # is_no_lambda # old
+		old_filename ("", filename)[os.path.exists(filename)] # ternary
 
 		try:
 			assert old_filename, "Возможно файл отсутствует @trouble_autorename/old_filename" # is_assert_debug
@@ -8562,7 +8564,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				del MySt
 
 			if len(proj_files) >= 0:
-				temp = [True if os.path.exists(pf) else False for pf in proj_files] # is_no_lambda
+				temp = [True if os.path.exists(pf) else False for pf in proj_files] # is_no_lambda # old
+				# temp = [(False, True)[os.path.exists(pf)] for pf in proj_files] # ternary
 
 				if temp.count(True):
 					try:
@@ -10213,6 +10216,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			finally:
 				filter1 = filter_temp if filter_temp else [] # is_no_lambda
 
+				# filter1 = sorted(filter_temp1, reverse=False) # sort_by_string
+				# filter1 = sorted(filter_temp1, key=len, reverse=False) # sort_by_length				
+
 			if filter1:
 				if len(filter1) >= 20:
 					print(Style.BRIGHT + Fore.YELLOW + "Проход 1 из 4 [%s]" % ", ".join(filter1[0:20]))
@@ -10293,6 +10299,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			filter_temp2 = []
 		finally:
 			filter2 = filter_temp2 if filter_temp2 else [] # is_no_lambda
+
+			# filter2 = sorted(filter_temp2, reverse=False) # sort_by_string
+			# filter2 = sorted(filter_temp2, key=len, reverse=False) # sort_by_length			
 
 		if filter2:
 			if len(filter2) >= 20:
@@ -12810,8 +12819,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		# run(pass_1_of_2)
 
-		fname = lf.split("\\")[-1].strip() if os.path.exists(lf) else ""  # filename(no_ext) # is_no_lambda
-		fext = lf.split(".")[-1].lower().strip() if os.path.exists(lf) else ""  # extention # is_no_lambda
+		fname = lf.split("\\")[-1].strip() if os.path.exists(lf) else ""  # filename(no_ext) # is_no_lambda # old
+		# fname = ("", lf.split("\\")[-1].strip())[os.path.exists(lf)] # filename(no_ext) # ternary
+
+		fext = lf.split(".")[-1].lower().strip() if os.path.exists(lf) else ""  # extention # is_no_lambda # old
+		# fext = ("", lf.split(".")[-1].lower().strip())[os.path.exists(lf)] # extention # ternary
 
 		try:
 			assert lf and os.path.exists(lf) and fname and fext, "" # is_assert_debug # is_no_except(no_logging)
