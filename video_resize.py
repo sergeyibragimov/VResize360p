@@ -834,13 +834,13 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 				is_not_found: bool = False
 				is_two_desc: bool = False
 
-				is_folder: bool = False
+				# is_folder: bool = False
 
 				try:
 					if not os.path.isfile(fsf):
 						list_files = os.listdir(fsf)
 						assert list_files, "Нет файлов в папке %s" % fsf # is_assert_debug
-						is_folder = True
+						# is_folder = True
 				except AssertionError as err: # if_null
 					# list_files = [] # BaseException
 					logging.warning("Нет файлов в папке %s" % fsf)
@@ -854,20 +854,23 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 					is_not_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) == 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 0) # desc(0) / files(0)
 					is_two_desc = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 2) # desc(2) / files(0/1)
 
-					some_find: int = 0
+				# some_find: int = 0
 
-					for lf in list_files:
-						try:
-							ap = (os.path.abspath(lf))
-							isfile = (not os.path.isdir(lf))
-						except:
-							continue # skip_if_some_error(next)
+				# abspath_for_file
+				'''
+				for lf in list_files:
+					try:
+						ap = (os.path.abspath(lf))
+						isfile = (not os.path.isdir(lf))
+					except:
+						continue # skip_if_some_error(next)
+					else:
+						if all((ap, isfile)):
+							# current_file(no_path) / is_abspath(is_full_path) / is_file(is_no_dir) # is_color
+							print(Style.BRIGHT + Fore.WHITE + "%s %s" % (lf, "<->".join([str(ap), str(isfile)]))) # logging_file(abs_path/file) # all_true
 						else:
-							if all((ap, isfile)):
-								# current_file(no_path) / is_abspath(is_full_path) / is_file(is_no_dir) # is_color
-								print(Style.BRIGHT + Fore.WHITE + "%s %s" % (lf, "<->".join([str(ap), str(isfile)]))) # logging_file(abs_path/file) # all_true
-							else:
-								print(Style.BRIGHT + Fore.YELLOW + "%s %s" % (lf, "<->".join([str(ap), str(isfile)]))) # another # is_some_false
+							print(Style.BRIGHT + Fore.YELLOW + "%s %s" % (lf, "<->".join([str(ap), str(isfile)]))) # another # is_some_false
+				'''
 
 				# path_to_description
 				try:
@@ -961,7 +964,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 											elif desc.count(";") == 2:
 												desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]).strip() # is_eng
 												logging.info("desc/is_eng %s" % desc) # debug # (6) # is_eng(logging)
-										
+
 							except: # skip_desc
 								continue
 
@@ -1071,11 +1074,11 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 								return no_prot_ext
 
 						dt = datetime.now()
-						
+
 						try:
 							dsize: int = disk_usage("d:\\").free
 						except:
-							dsize: int = 0						
+							dsize: int = 0
 
 						is_backup: bool = False
 						is_backup = (dt.hour <= 21, dsize // (1024 ** 2) > 0) # debug # midnght-9pm # limit_1mb(ok) # is_default
@@ -1342,7 +1345,7 @@ except AssertionError as err: # if_null
 	raise err
 	exit()
 except BaseException as e: # if_error
-	logging.error("Пустой список all_list")
+	logging.error("Пустой список all_list [%s]" % str(e))
 	exit()
 
 abc_or_num_regex = re.compile(r"^[A-Z0-9].*", re.I)
@@ -1383,7 +1386,7 @@ top_list: list = []
 with open(top_folder, encoding="utf-8") as tff:
 	top_list = tff.readlines()
 
-filter_top_list = [tl.strip() for tl in filter(lambda x: x, tuple(top_list)) if len(tl.strip()) >= 2] # shorts_by_length
+filter_top_list = [tl.strip() for tl in filter(lambda x: x, tuple(top_list)) if tl] # shorts
 
 # load_meta_base(fitler) #1
 try:
@@ -2177,7 +2180,7 @@ async def utc_time(dt = datetime.now()):
 	try:
 		gmt = abs(cur_gmt - gmt).seconds // 3600 # 5
 
-		assert gmt in range(-12, 12), "Ошибка часового пояса или отрицательный часовой пояс @utc_time/gmt" # is_assert_debug
+		assert gmt in range(-12, 13), "Ошибка часового пояса или отрицательный часовой пояс @utc_time/gmt" # is_assert_debug
 	except AssertionError as err: # if_null
 		gmt = 999
 		logging.warning("Ошибка часового пояса или отрицательный часовой пояс @utc_time/gmt")
@@ -2243,13 +2246,15 @@ async def shutdown_if_time(utcnow: int = utc):
 
 # cpu_overload(try_stop_SysMain/Superfetch)
 
-# # dspace(reserve) # midnight - 6am # 11pm # overload(85) # 1
+# # dspace(+reserve) # midnight - 6am # 11pm # overload(85) # 1
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22)), mem >= 85) # dspace / less_7am_or_more_10pm / overload(80->85)
-# dspace(reserve) # midnight - 6am # 11pm # no_overload # 2
-is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22))) # dspace / less_7am_or_more_10pm
-# dspace(reserve) # midnight - 6am # 11pm # filter_run_time # no_overload # 3
+# dspace(+reserve) # midnight - 6am # 11pm # no_overload # 2
+# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22))) # dspace / less_7am_or_more_10pm
+# dspace(+reserve) # midnight - 6am # no_overload # 3
+is_status: tuple = (not dsize2, ctme.hour < mytime["sleeptime"][1]) # dspace / less_7am
+# dspace(+reserve) # midnight - 6am # 11pm # filter_run_time # no_overload # 4
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22, ctme.hour + dayago > 23))) # dspace / less_7am_or_more_10pm_or_optimal_run_hours
-# no_dspace # midnight - 6am # 11pm # no_overload # 4
+# no_dspace # midnight - 6am # 11pm # no_overload # 5
 # is_status: tuple = (ctme.hour < mytime["sleeptime"][1], ctme.hour > 22) # less_7am_or_more_10pm
 
 if is_status.count(True) > 0:
@@ -5327,11 +5332,11 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 			full_folder2: list = list(set(["\\".join(f.split("\\")[0:-1]).strip() for f in filter(lambda x: os.path.exists("\\".join(x.split("\\")[0:-1])), tuple(files)) if all((len(os.listdir("\\".join(f.split("\\")[0:-1]))) >= 0, f))]))
 		except:
 			full_folder2: list = []
-		finally:
-			full_folder2.sort(reverse=False)
 
-			# full_folder2 = sorted(temp, reverse=False) # sort_by_string
-			# full_folder2 = sorted(temp, key=len, reverse=False) # sort_by_length
+		full_folder2.sort(reverse=False)
+
+		# full_folder2 = sorted(temp, reverse=False) # sort_by_string
+		# full_folder2 = sorted(temp, key=len, reverse=False) # sort_by_length
 
 		try:
 			if full_folder2:
@@ -5945,7 +5950,7 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 		logging.warning("Файл отсутствует @seasonvar_parse/%s" % filename)
 		raise err
 		return None
-	except BaseException as err: # if_error
+	except BaseException as e: # if_error
 		logging.error("Файл отсутствует @seasonvar_parse/%s [%s]" % (filename, str(e)))
 		return None
 
@@ -5986,7 +5991,7 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 		write_log("debug start[trouble_autorename]", "%s" % str(datetime.now()))
 
 		# old_filename = filename if os.path.exists(filename) else "" # is_no_lambda # old
-		old_filename ("", filename)[os.path.exists(filename)] # ternary
+		old_filename = ("", filename)[os.path.exists(filename)] # ternary
 
 		try:
 			assert old_filename, "Возможно файл отсутствует @trouble_autorename/old_filename" # is_assert_debug
@@ -7712,10 +7717,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			hours, minutes = int(timing[0]["hh"]), int(timing[0]["mm"])
 
 			if hours > 24:
-				hours = hours % 24
+				hours %= 24
 
 			if minutes > 60:
-				minites = minutes % 60
+				minutes %= 60
 
 			try:
 				assert hours or minutes, "" # is_assert_debug
@@ -7735,10 +7740,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		if hours > 24:
 			hours = hours % 24 # debug # if_more_24hour_find_mod
-			
+
 		if minutes > 60:
 			minutes = minutes % 60 # debug # if_more_60minute_find_mod
-			
+
 		try:
 			assert hours or minutes, "" # is_assert_debug
 		except AssertionError: # as err: # if_null
@@ -7936,7 +7941,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				logging.warning("Файл отсутствует @project_done/%s" % pf)
 				raise err
 				continue
-			except BaseException as err: # if_error
+			except BaseException as e: # if_error
 				logging.warning("Файл отсутствует @project_done/%s [%s]" % (pf, str(e)))
 				continue
 
@@ -8290,7 +8295,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				assert avg_size, "" # is_assert_debug
 			except AssertionError as err: # if_null
 				avg_size = 0
-				raise err # logging				
+				raise err # logging
 			except BaseException: # if_error
 				try:
 					avg_size = (lambda s, l: s / l)(sum(fsizes_list), len(fsizes_list)) # by_lambda
@@ -9449,7 +9454,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			if short_list:
 				tmp: list = []
 
-				tmp = list(set([sl.strip() for sl in short_list if len(sl) > 1])) # need_only_upper_or_bum # short_by_length
+				tmp = list(set([sl.strip() for sl in short_list if sl])) # need_only_upper_or_bum #  if len(sl) > 1 # short_by_length
 				short_list = sorted(tmp, reverse=False)
 
 		tmp = list(set([sl.strip() for sl in filter(lambda x: any((x[0] == x[0].upper(), x[0].isnumeric())), tuple(short_list))]))
@@ -9466,7 +9471,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			# filter_list = sorted(temp, key=len, reverse=False) # sort_by_length
 			# filter_list = sorted(temp, reverse=False) # sort_by_string
-	
+
 		return filter_list
 
 
@@ -10217,7 +10222,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				filter1 = filter_temp if filter_temp else [] # is_no_lambda
 
 				# filter1 = sorted(filter_temp1, reverse=False) # sort_by_string
-				# filter1 = sorted(filter_temp1, key=len, reverse=False) # sort_by_length				
+				# filter1 = sorted(filter_temp1, key=len, reverse=False) # sort_by_length
 
 			if filter1:
 				if len(filter1) >= 20:
@@ -10301,7 +10306,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			filter2 = filter_temp2 if filter_temp2 else [] # is_no_lambda
 
 			# filter2 = sorted(filter_temp2, reverse=False) # sort_by_string
-			# filter2 = sorted(filter_temp2, key=len, reverse=False) # sort_by_length			
+			# filter2 = sorted(filter_temp2, key=len, reverse=False) # sort_by_length
 
 		if filter2:
 			if len(filter2) >= 20:
@@ -10605,7 +10610,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					sfl = []
 
 				with unique_semaphore:
-					for sf in filter(lambda x: len(x.strip()) > 2, tuple(short_files)): # short_by_length(sf)
+					for sf in filter(lambda x: len(x.strip()) >= 2, tuple(short_files)): # short_by_length(sf)
 						if all((not sf in sfl, sf)):
 							sfl.append(sf.strip())
 
@@ -10768,7 +10773,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			if short_exists:  # if_some
 				short_list = [s.strip() for s in short_exists if s]
-			elif not short_emexists:  # if_null
+			elif not short_exists:  # if_null
 				try:
 					# short_exists = list(sl_gen()) # new(yes_gen)
 					short_exists: list = [sl.strip() for sl in filter(lambda x: x, tuple(short_list)) if
@@ -11121,7 +11126,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			lfiles = lf.result()
 
 		if filter_list:
-			tfilter_list = [f.strip() for f in filter_list if len(f) > 1]
+			tfilter_list = list(set([f.strip() for f in filter_list if f])) # if len(f) > 1
 			filter_list = tfilter_list if tfilter_list else [] # is_no_lambda
 
 			write_log("debug files[filter][reserved]", "%s" % "|".join(filter_list))  # current(4)
@@ -11199,7 +11204,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = 2 # limit_hour
 					# raise err
 				except BaseException as e: # if_error
-					logging.error("Меньше установленого лимита по времени hour[2] [%s]" % str(e)) 
+					logging.error("Меньше установленого лимита по времени hour[2] [%s]" % str(e))
 					hour = 2
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >=h, mm >= m)) # all((hh > hour, mm >= m))
@@ -11842,7 +11847,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						for fln in flenname:
 							for i in range(int(fln[0]/splitLength)):
 								start = i * 60
-								length= splitLength * 60 
+								length= splitLength * 60
 
 								script_line = f"ffmpeg -hide_banner -y -i {fln[1]} -ss {str(start)} -t {str(length)} clip{str(i)}.m4v"
 								# script_line = "ffmpeg -hide_banner -y -i %s -ss %s -t %s clip%s.m4v" % (fln[1], str(start), str(length), str(i))
@@ -12540,7 +12545,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			lfiles = lf.result()
 
 		if filter_list:
-			tfilter_list = [f.strip() for f in filter_list if len(f) > 1]
+			tfilter_list = list(set([f.strip() for f in filter_list if f])) # if len(f) > 1
 			filter_list = tfilter_list if tfilter_list else [] # is_no_lambda
 
 			write_log("debug files[filter][reserved]", "%s" % "|".join(filter_list))  # current(5)
@@ -13461,8 +13466,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		# no_change_high_to_main(is_profile)_for_high # optimal_level(is_level)_for_30 # -profile:v high -level 30 # is_manual_run
 
-		# map_metadata -1(hide_metadata) # optimal_hide_all_attributes 
-		
+		# map_metadata -1(hide_metadata) # optimal_hide_all_attributes
+
 		# map_metadata 0(edit_or_hide_tags_by_keys) # ffmpeg -i test.mp4 -map_metadata 0 -metadata creation_time="2020-07-30 12:59:20" -c copy C.mp4
 
 		# map_metadata 1(insert_metadata_attributes(m4a->mp3) #  ffmpeg -i "02 Napali.m4a" -i metadata.txt -map_metadata 1 -c:a libmp3lame -ar 44100 -b:a 192k -id3v2_version 3 -f mp3 "02 Napali.mp3"
@@ -13623,12 +13628,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			short_list = list(set([
 				crop_filename_regex.sub("", lf.split("\\")[-1]).split("_")[0].strip() if lf.split("\\")[-1].count(
 					"_") > 0 else crop_filename_regex.sub("", lf.split("\\")[-1]).strip() for lf in
-				filter(lambda x: os.path.exists(x), tuple(lfiles)) if len(lf) > 1]))  # match_or_equal
+				filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))  # match_or_equal
 		except:
 			short_list = []
 		finally:
-			short_list = sort(reverse=False) # re_sort_before_by_string
-			# short_list = sort(key=len, reverse=False) # re_sort_before_by_length
+			short_list.sort(reverse=False) # re_sort_before_by_string
+			# short_list.sort(key=len, reverse=False) # re_sort_before_by_length
 
 		if short_list:
 			write_log("debug short", ";".join(short_list))  # short_files
@@ -15469,7 +15474,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 								ok_count += 1
 								ok_bad_dict[0] = ok_bad_dict.get(0, 0) + 1
-								
+
 
 								if os.path.exists(cj["src"]) and os.path.exists(cj["dst"]):
 									try:
@@ -15495,7 +15500,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								# diff_save_status(short/full) # debug # dst <= src # src <= dst
 								diff_save_short = "Задача %s выполнена с разницей, её нельзя сохранять" % full_to_short(cj["dst"]) if os.path.exists(cj["src"]) else "Задача %s, файл отсутствует" % full_to_short(cj["src"])
 								diff_save_full = "Задача %s выполнена с разницей, её нельзя сохранять" % cj["dst"] if os.path.exists(cj["src"]) else "Задача %s, файл отсутствует" % cj["src"]
-								
+
 								print(Style.BRIGHT + Fore.YELLOW + "%s" % diff_save_short)
 								write_log("debug check_job[diff]", "%s" % diff_save_full)
 
