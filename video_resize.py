@@ -808,6 +808,8 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 			# true_sym = re.compile(r"([^A-ZА-Я\d\-])", re.I); # sample = "Hello world"; print(list(set(true_sym.findall(sample)))) # need_skip
 
+			fsf_set = set()
+
 			for fsf in folder_scan_full:
 
 				try:
@@ -829,6 +831,11 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 				except BaseException as e: # if_error
 					logging.error("Нет имени папки @folders_from_path/fsf [%s]" % str(e))
 					continue
+
+				if not fsf.strip() in fsf_set:
+					fsf_set.add(fsf.strip()) # add_if_not_runned
+				else:
+					continue # skip_if_runned
 
 				is_found: bool = False
 				is_not_found: bool = False
@@ -939,7 +946,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 											# logging.info("desc/parse_desc %s" % desc) # debug # (1)
 
-											# desc = desc.replace("í", "i")
+											# desc = desc.replace("í", "i")  # no_cyrilic
 
 											# if any((desc.split(";")[0][0].isnumeric(), desc.split(";")[0][0].isalpha())): # skip_symb # debug
 											if any((";;" in desc, ";(" in desc, ");" in desc)):
@@ -5800,8 +5807,7 @@ async def process_move(file1: str = "", file2: str = "", is_copy: bool = False, 
 			fname = file1  # if_error_use_full
 
 		try:
-			# fast_move: bool = (os.path.exists(file1) and any((os.path.getsize(file1) <= avg_size, not avg_size))) # exist_is_avg_null(is_avg)
-			fast_move: bool = (os.path.exists(file1) and os.path.getsize(file1) <= avg_size) # exist_is_avg_null(is_avg)
+			fast_move: bool = (os.path.exists(file1) and all((os.path.getsize(file1) <= avg_size, avg_size >= 0))) # exist_is_avg_null(is_avg)
 		except:
 			fast_move: bool = False
 
@@ -9532,7 +9538,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			except:
 				big_cinema = []
 
-		elif not os.path.exists(file_cinema):  # if_no_nlocal_folder
+		elif not os.path.exists(file_cinema) or not big_cinema:  # if_no_nlocal_folder(no_files)
 			big_cinema = []
 
 		print(Style.BRIGHT + Fore.CYAN + "Проверка готовых больших и проектов файлов. Ждите...")
@@ -10658,6 +10664,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				elif not short_files:  # save_if_some_list
 					write_log("debug shortfiles[filter]", "No_short_files at [%s]" % str(datetime.now()))
 
+			if not short_files: # stop_if_no_files # temp(debug)
+				logging.info("no short_files[10669]")
+				exit()
+
 		filter_list: list(set(short_files)) if short_files else [] # is_no_lambda
 
 		if filter_list:  # M(atch)/I(gnore)_case # by_filter
@@ -10744,6 +10754,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						  all((lf, 2, lf.count(".") == 1, video_regex.findall(lf.split("\\")[-1])))]))
 		except:
 			short_list = []
+
+		if not short_list: # stop_if_not_files # temp(debug)
+			logging.info("no short_list[10760]")
+			exit()
 
 		tmp: list = []
 		tmp = list(set([sl.strip() for sl in filter(lambda x: len(x.strip()) > 1, tuple(short_list))])) # short_by_length(sl)
@@ -11124,6 +11138,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				lf = e.submit(one_folder, "c:\\downloads\\new\\", video_regex)  # local # combine
 
 			lfiles = lf.result()
+
+		if not lfiles: # stop_if_no_files # temp(debug)
+			logging.info("no lfiles[11144]")
+			exit()
 
 		if filter_list:
 			tfilter_list = list(set([f.strip() for f in filter_list if f])) # if len(f) > 1
@@ -12543,6 +12561,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				lf = e.submit(one_folder, "c:\\downloads\\new\\", video_regex)  # local # combine
 
 			lfiles = lf.result()
+
+		if not lfiles: # stop_if_no_files # temp(debug)
+			logging.info("no lfiles[12567]")
+			exit()
 
 		if filter_list:
 			tfilter_list = list(set([f.strip() for f in filter_list if f])) # if len(f) > 1
