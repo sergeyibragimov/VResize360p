@@ -1416,9 +1416,12 @@ if all((filter_top_list, len(somebase_dict) >= 0)):
 
 	# filter_for_new_backup = list(set([k.strip() for ftl in filter_top_list for k, v in somebase_dict.items() if len(ftl.strip()) > 0 and k.split("\\")[-1].startswith(ftl)]))
 
+	# get_by_1000_if_more(filter_top_by_folders)
+	'''
 	filter_get1000 = filter_top_by_folders[0:1000] if len(filter_top_by_folders) > 1000 else filter_top_by_folders # only_1000(optimal) # top_1000
 	if all((filter_get1000, len(filter_get1000) <= len(filter_top_by_folders))):
 		filter_top_by_folders = filter_get1000
+	'''
 
 	dt = datetime.now()
 
@@ -1428,9 +1431,12 @@ if all((filter_top_list, len(somebase_dict) >= 0)):
 	# filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = 0, is_dir=False, is_less=False, is_any=True)[0] != None])) # by_Year
 	filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period =12*days, is_dir=False, is_less=True, is_any=False)[0] != None])) # 12_year_and_less
 
+	# get_by_1000_if_more(filter_for_new_backup)
+	'''
 	filter_get1000 = filter_for_new_backup[0:1000] if len(filter_for_new_backup) > 1000 else filter_for_new_backup # only_1000(for_fast) # top_1000
 	if all((filter_get1000, len(filter_get1000) <= len(filter_for_new_backup))):
 		filter_for_new_backup = filter_get1000
+	'''
 
 	# x[0].isaplha() -> x[0] == x[0].upper()
 
@@ -9437,7 +9443,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		finally:
 			some_files = [*somebase_dict] if somebase_dict else [] # is_no_lambda
 
-		# some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit
+		some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit(if_hide) # (1)
 
 		short_list: list = []
 		keyword_list: list = []
@@ -10546,7 +10552,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		finally:
 			some_files = [*somebase_dict] if somebase_dict else [] # is_no_lambda
 
-		# some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit
+		some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit(if_hide) # (2)
 
 		if filter_list:  # some_template
 			video_regex = re.compile(
@@ -10701,7 +10707,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		finally:
 			some_files: [*somebase_dict] if somebase_dict else [] # list(somebase_dict.keys()) # is_no_lambda
 
-		# some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit
+		some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit(if_hide) # (3)
 
 		# temp_regex = re.compile("(.*)(?:(_[\d+]{2,4}s|\([\d+]{4}\)))(.*)(?:(.dmf|.dmfr|.filepart|.aria2|.crdownload|.crswap))", re.M)
 
@@ -11079,7 +11085,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		finally:
 			some_files = [*somebase_dict] if somebase_dict else [] # list(somebase_dict.keys()) # is_no_lambda
 
-		# some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit
+		some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit(if_hide) # (4)
 
 		# shorts_in_list(upgrade)
 		try:
@@ -12498,7 +12504,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		finally:
 			some_files = [*somebase_dict] if somebase_dict else [] # list(somebase_dict.keys()) # is_no_lambda
 
-		# some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit
+		some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit(if_hide) # (5)
 
 		def files_to_short(some_files=some_files):
 			for sm in filter(lambda x: os.path.exists(x), tuple(some_files)):
@@ -13292,7 +13298,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		finally:
 			some_files: [*somebase_dict] if somebase_dict else [] # list(somebase_dict.keys()) # is_no_lambda
 
-		# some_files = some_files[0:1000] if len(some_files) > 1000 else some_files # no_limit
+		some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit(if_hide) # (6)
 
 		# scale=640:360:flags=lanczos,pad=640:480:0:60 # scale=1440:1080:flags=lanczos,pad=1920:1080:240:0
 
@@ -14500,73 +14506,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				cur = conn.cursor()
 				cur.execute("select logging_files()")
 				print(cur.fetchall()) # print(cur.fetchone())[0]
-			'''
-
-			# avg / classify / is_max / count_jobs(max/20)
-			'''
-			fsize_sum: int = 0
-			fsize_len: int = 0
-			fsize_avg: int = 0
-			fcount: int = 0
-
-			fsize_list: list = []
-			fsize_classify: list = []
-
-			for k, v in filecmdbase_dict.items():
-
-				try:
-					fsize = os.path.getsize(k)
-				except:
-					fsize = 0
-
-				if fsize:
-					fcount += 1
-					fsize_list.append(fsize)
-
-			if fsize_list:
-				fsize_sum = sum(fsize_list)
-				fsize_len = fcount if fcount == len(fsize_list) else len(fsize_list) # any_equal_result
-				fsize_avg = fsize_sum // fsize_len
-
-			if all((fsize_avg, fsize_list)):
-				try:
-					fsize_classify = [(0, fl) if fl - fsize_avg > 0 else (1, fl) for fl in fsize_list] # if_some_classify_by_filesize
-				except:
-					fsize_classify = [] # null_if_no_classify
-
-			if fsize_classify: # what_max
-				is_max1, is_count1 = 0, 0
-				is_max2, is_count2 = 0, 0
-
-				for fc in fsize_classify:
-					if fc[0] == 0 and fc[1] > is_max1: # classify(0)
-						is_max1 = fc[1]
-						is_count1 += 1
-					elif fc[0] == 1 and fc[1] > is_max2: # classify(1)
-						is_max2 = fc[1]
-						is_count2 += 1
-
-			default_jobs = max(is_count1, is_count2) # max_filesize(current_jobs)
-			write_log("debug default_jobs[1]", "%d" % default_jobs) # if_zero_no_logic / if_not_zero_ok
-
-			if any((not default_jobs, default_jobs > 20)): # if_null_or_more_20_jobs
-				default_jobs = 20 # default(10)
-				write_log("debug default_jobs[null]", "%d" % default_jobs)
-
-			gcl_error: bool = False
-
-			# select_jobs_by_range(default_jobs)
-			try:
-				# get_count_list = [*filecmdbase_dict][len(filecmdbase_dict)-default_jobs: len(filecmdbase_dict)] if len(filecmdbase_dict) > default_jobs else [*filecmdbase_dict] # last_jobs
-				get_count_list = [*filecmdbase_dict][0:default_jobs] if len(filecmdbase_dict) > default_jobs else [*filecmdbase_dict] # first_jobs # is_debug
-			except:
-				get_count_list = [*filecmdbase_dict] # if_error_select_all_jobs # is_debug
-				gcl_error = True
-			else:
-				gcl_error = False
-
-			if get_count_list:
-				write_log("debug get_count_list", "Run count: %d [%s]" % (len(get_count_list), str(gcl_error))) # run_jobs_by_count / is_error
 			'''
 
 			for k, v in filecmdbase_dict.items(): # somebase_dict # cbf_dict
