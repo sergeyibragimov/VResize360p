@@ -13500,7 +13500,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		cmd_file = cmd_file2 = ""  # default/with_vbr
 
-		year_or_seas = re.compile(r"([\d+]{4})")
+		year_regex = re.compile(r"([\d+]{4})")
 
 		# no_change_high_to_main(is_profile)_for_high # optimal_level(is_level)_for_30 # -profile:v high -level 30 # is_manual_run
 
