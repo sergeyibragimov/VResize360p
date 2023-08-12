@@ -997,14 +997,24 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 				if len(ftd) > 1 and os.path.exists(ftd[0]) and ftd[0] != None: # ftd[1] >= 0:
 					try:
-						folder_or_file = "Папка: %s" % fsf if ftd[-1] else "Файл: %s " % ftd[0] # is_no_lambda
+						folder_or_file = "Папка: %s" % fsf if ftd[-1] else "Файл: %s " % ftd[0] # is_no_lambda # type1
 						days_ago = "%d месяцев назад" % (ftd[1] // 30) if ftd[1] // 30 > 0 else "%d дней назад" % ftd[1]
 					except:
-						folder_or_file = "Папка: %s" % fsf if ftd[-1] else "Файл: %s" % ftd[0] # is_no_lambda
-						print(Style.BRIGHT + Fore.YELLOW + "%s [%s]" % (folder_or_file, str(datetime.now()))) # folder(file) / datetime
-					else:
-						fold_and_date.append((folder_or_file, days_ago, str(datetime.now())))
-						# print(Style.BRIGHT + Fore.WHITE + "%s %s [%s]" % (folder_or_file, days_ago, str(datetime.now()))) # folder(file) / days_ago / datetime
+						folder_or_file = "Папка: %s" % fsf if ftd[-1] else "Файл: %s" % ftd[0] # is_no_lambda # type2
+					finally:
+						try:
+							assert ftd[1] >= 0, ""
+						except AssertionError as err:
+							raise err
+							print(Style.BRIGHT + Fore.YELLOW + "%s [%s]" % (folder_or_file, str(datetime.now()))) # folder(file) / datetime 
+							logging.warning("%s [%s]" % (folder_or_file, str(datetime.now()))) # if_null(is_color)
+						except BaseException as e:
+							print(Style.BRIGHT + Fore.RED + "%s [%s] [%s]" % (folder_or_file, str(datetime.now()), str(e))) # folder(file) / datetime / error 
+							logging.error("%s [%s] [%s]" % (folder_or_file, str(datetime.now()), str(e))) # if_error(is_color)
+						else:
+							fold_and_date.append((folder_or_file, days_ago, str(datetime.now())))
+							# print(Style.BRIGHT + Fore.WHITE + "%s %s [%s]" % (folder_or_file, str(days_ago), str(datetime.now()))) # folder(file) / dayago /datetime # is_color
+							logging.info("%s %s [%s]" % (folder_or_file, str(days_ago), str(datetime.now()))) # if_ok(is_color)
 
 				fold_and_date_sorted: list = []
 
@@ -13524,6 +13534,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							   lf, vfile, str(width), str(height), afile, project_file)
 				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf \"scale=%s:%s\" -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
 								lf, vfile, svbr, svbr, svbr2, str(width), str(height), afile, sabr, project_file)
+			else:
+				write_log("debug is_add_meta[unknown]", "%s" % lf) # some_paramaters
+				logging.info("debug is_add_meta[unknown]")
 
 			# is_skip_meta
 			if all((is_profile, is_level, year_regex.findall(lf.split("\\")[-1]))):
@@ -13546,6 +13559,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							   lf, vfile, str(width), str(height), afile, project_file)
 				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf \"scale=%s:%s\" -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
 								lf, vfile, svbr, svbr, svbr2, str(width), str(height), afile, sabr, project_file)
+			else:
+				write_log("debug is_skip_meta[unknown]", "%s" % lf) # some_paramaters
+				logging.info("debug is_skip_meta[unknown]")
 
 		elif all((is_change == False, vfile, afile,
 				  bitrate_data)):  # optimized_width # width*height # vcodec(acodec) # is_bitrate
