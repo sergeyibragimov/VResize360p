@@ -63,7 +63,7 @@ logging.basicConfig(handlers=[logging.FileHandler("".join([script_path, "\\video
 
 logging.info(f"debug start {str(datetime.now())}")
 
-mytime: dict = {"jobtime": [9, 18, 4], "dinnertime": [12, 13], "sleeptime": [0, 7], "anytime": [True]}
+mytime: dict = {"jobtime": [9, 18, 4], "dinnertime": [12, 13], "sleeptime": [0, 6], "anytime": [True]} # sleep_time_less_hour
 
 
 @contextmanager
@@ -1418,13 +1418,8 @@ except:
 if all((filter_top_list, len(somebase_dict) >= 0)):
 
 	# old # only_folders / no_backup # is_count_equal_template
-	filter_top_by_folders =list(set([ftl.strip() for ftl in filter_top_list for k, v in somebase_dict.items() if
+	filter_top_by_folders = list(set([ftl.strip() for ftl in filter_top_list for k, v in somebase_dict.items() if
 								  len(ftl.strip()) > 0 and k.split("\\")[-1].startswith(ftl)]))
-
-	if not filter_top_by_folders: # stay_filter_short
-		filter_top_by_folders =list(set([ftl.strip() for ftl in filter_top_list if len(ftl.strip()) > 0]))
-
-	# filter_for_new_backup = list(set([k.strip() for ftl in filter_top_list for k, v in somebase_dict.items() if len(ftl.strip()) > 0 and k.split("\\")[-1].startswith(ftl)]))
 
 	# get_by_1000_if_more(filter_top_by_folders)
 	'''
@@ -1439,7 +1434,7 @@ if all((filter_top_list, len(somebase_dict) >= 0)):
 
 	# new # no_folders / only_backup # is_count_equal_template # default(30_days)
 	# filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = 0, is_dir=False, is_less=False, is_any=True)[0] != None])) # by_Year
-	filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period =12*days, is_dir=False, is_less=True, is_any=False)[0] != None])) # 12_year_and_less
+	filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = 12*days, is_dir=False, is_less=True, is_any=False)[0] != None])) # 12_year_and_less
 
 	# get_by_1000_if_more(filter_for_new_backup)
 	'''
@@ -10487,14 +10482,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			filter_list += filter4  # from_ready_jobs(add) # is_sort_by_key(4)
 
 		# if filter5:
-			# filter_list += filter4  # ? # is_sort_by_key(5)
+			# filter_list += filter5  # ? # is_sort_by_key(5)
 
 		true_sym = re.compile(r"([^A-ZА-Я\d\-\_])", re.I) # 2_Broke_Girls # 9-1-1_Lone_Star
 		new_filter_set = set()
 		new_filter: list = []
 
 		try:
-			for fl in filter_list:
+			for fl in filter(lambda x: len(x) >= 2, tuple(filter_list)): # optimal_length_short_template # default(all)
 				st = fl
 				for ss in true_sym.findall(fl):
 					if all((st, ss, ss in st)): # skip_syms_in_filter_list
@@ -10520,6 +10515,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			# temp_list = filter_list # no_sort # type3
 
 			filter_list = list(set(temp_list))  # unique_list
+		else:
+			print("Пустой фильтр или короткий фильтр для обработки [%s]" % str(datetime.now()))
+			write_log("debug filter_list[None]", "Пустой фильтр или короткий фильтр для обработки [%s]" % str(datetime.now()))
+			exit()
 
 		# default_short_names_without_slice
 		tmp = [fl.strip() for fl in filter_list if all((len(fl) >= 2, fl != "''"))]  # skip_null_filter
