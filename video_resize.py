@@ -327,7 +327,6 @@ files_base: dict = {
 open(files_base["soundtrack"], "w", encoding="utf-8").close()
 
 # ctme.hour # ctime.weekday()
-mytime: dict = {"jobtime": [9, 18, 4], "dinnertime": [12, 13], "sleeptime": [0, 7], "anytime": [True]}
 
 # --- regex_codes ---
 # seasyear = re.compile(r"(?:(_[\d+]{2,4}s|\([\d+]{4}\)))", re.M) # MatchCase # season_and_year(findall)
@@ -2230,7 +2229,7 @@ async def shutdown_if_time(utcnow: int = utc):
 
 	global ctme
 
-	# mytime: dict = {"jobtime": [9, 18, 4], "dinnertime": [12, 13], "sleeptime": [0, 7]}
+	# mytime: dict = {"jobtime": [9, 18, 4], "dinnertime": [12, 13], "sleeptime": [0, 6], "anytime": [True]} # sleep_time_less_hour
 
 	write_log("debug utctime", "Utc: %s" % str(utcnow)) # time_zone(gmt)
 
