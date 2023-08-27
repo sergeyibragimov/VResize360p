@@ -6110,7 +6110,7 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 							'Zone Vision', 'SAFARISOUND', 'GeneralFilm', 'Nickelodeon', 'AngelOfTrue', 'Субтитры VP', 'Studio Band',
 							'RG_Paravozik', 'SHIZAProject', 'Кураж-Бамбей', 'RG.Paravozik', 'www.Riper.AM', 'TEPES TeamHD', 'scarfilm.org',
 							'AnimeReactor', 'DreamRecords', 'by_761OPiter', 'Kuraj-Bambey', 'кубик в кубе', 'VO-production', 'ViruseProject',
-							'DIVA Universal', 'www.riperam.org', 'Wentworth Miller', 'TVHUB', 'LineFilm', 'DUB', 'MrMittens']
+							'DIVA Universal', 'www.riperam.org', 'Wentworth Miller', 'TVHUB', 'LineFilm', 'DUB', 'MrMittens', 'KYRAZ.BAMBEI']
 
 		with open(files_base["stracks"], "w", encoding="utf-8") as sf:
 			sf.writelines("%s\n" % st.strip() for st in filter(lambda x: x, tuple(soundtrack)))
