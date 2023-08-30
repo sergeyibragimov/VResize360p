@@ -2225,13 +2225,16 @@ async def ntp_to_utc():
 utc = asyncio.run(utc_time())
 
 
-async def shutdown_if_time(utcnow: int = utc):
+async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 
 	global ctme
 
 	# mytime: dict = {"jobtime": [9, 18, 4], "dinnertime": [12, 13], "sleeptime": [0, 6], "anytime": [True]} # sleep_time_less_hour
 
 	write_log("debug utctime", "Utc: %s" % str(utcnow)) # time_zone(gmt)
+
+	if all((no_date in str(datetime.today()).split(" ")[0], no_date)):
+		return
 
 	# if ctime.hour <= mytime["sleeptime"][1] and all((not list(filter(lambda x: "aria2" in x, tuple(os.listdir(copy_src)))), not list(filter(lambda x: "aria2" in x, tuple(os.listdir(copy_src2)))))):  # shutdown_before_7am_or_equal_and_no_download_files
 	# if ctme.hour < mytime["sleeptime"][1] and any((not os.listdir(copy_src), not os.listdir(copy_src2))):  # shutdown_before_7am_or_equal_and_some_no_download_files
@@ -2284,7 +2287,7 @@ if is_status.count(True) > 0:
 		ut = 0
 
 	if any((ut <= ctme.hour < mytime["sleeptime"][1], ctme.hour < mytime["sleeptime"][1])): # debug # 5 <= x < 7
-		asyncio.run(shutdown_if_time())
+		asyncio.run(shutdown_if_time()) # no_date="29.08.2023"
 
 	exit()
 
@@ -12269,7 +12272,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				ctme = datetime.now()
 
-				asyncio.run(shutdown_if_time())  # check_time_after_run(finish) # try_skip
+				asyncio.run(shutdown_if_time())  # check_time_after_run(finish) # try_skip # no_date="29.08.2023"
 
 				filecmdbase_dict = {}  # clean_jobs_list_after_skip # clear_when_done
 
@@ -12286,7 +12289,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				ctme = datetime.now()
 
-				asyncio.run(shutdown_if_time())  # check_time_after_run(finish) # try_skip
+				asyncio.run(shutdown_if_time())  # check_time_after_run(finish) # try_skip # no_date="29.08.2023"
 
 				filecmdbase_dict = {}  # clean_jobs_list_after_update # clear_when_done
 
@@ -16235,4 +16238,4 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	# check_time_after_run(finish)
 	ctme = datetime.now()
 
-	asyncio.run(shutdown_if_time())
+	asyncio.run(shutdown_if_time()) # no_date="29.08.2023"
