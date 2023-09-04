@@ -2233,8 +2233,8 @@ async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 
 	write_log("debug utctime", "Utc: %s" % str(utcnow)) # time_zone(gmt)
 
-	if all((no_date in str(datetime.today()).split(" ")[0], no_date)):
-		return
+	# if all((no_date in str(datetime.today()).split(" ")[0], no_date)):
+		# return
 
 	# if ctime.hour <= mytime["sleeptime"][1] and all((not list(filter(lambda x: "aria2" in x, tuple(os.listdir(copy_src)))), not list(filter(lambda x: "aria2" in x, tuple(os.listdir(copy_src2)))))):  # shutdown_before_7am_or_equal_and_no_download_files
 	# if ctme.hour < mytime["sleeptime"][1] and any((not os.listdir(copy_src), not os.listdir(copy_src2))):  # shutdown_before_7am_or_equal_and_some_no_download_files
