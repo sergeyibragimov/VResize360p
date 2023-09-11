@@ -777,7 +777,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 			"""
 			try:
-				with open(desc_base_temp, encoding="utf=8") as dbtf:
+				with open(desc_base_temp, encoding="utf-8") as dbtf:
 					desc_dict2 = json.load(dbtf)
 			except:
 				desc_dict2 = {}
@@ -2526,7 +2526,7 @@ async def days_by_list(lst: list = [], is_avg: bool = False): #8
 	today = datetime.today()  # datetime
 	try:
 		# lst = list(days_by_list_gen()) # new(yes_gen)
-		lst: list = sorted([l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lst)) and l], reverse=False)
+		lst: list = sorted([l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lst))], reverse=False) # and l
 	except:
 		lst: list = []
 
@@ -5125,6 +5125,19 @@ class MyString:
 		if self.endtxt:
 			self.lendict += " " + self.endtxt
 		return self.lendict
+
+"""
+f = File("data.txt", "r") # with File("data.txt", "r") as f: pass
+
+del f
+"""
+
+class File:
+	def __init__(self, filename, mode):
+		self.file = open(filename, mode)
+
+	def __del__(self):
+		self.file.close()		
 
 
 # @log_error
