@@ -14038,6 +14038,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		hours_set = set()
 
+		# clean_hours_cfg_by_schedule
+
+		dt = datetime.now()
+
+		if all((dt.weekday() >= 0, dt.hour in range(9, 19))) : # any_day_in_job_time(9am-6pm)_to_default
+			if os.path.exists(files_base["hours"]):
+				os.remove(files_base["hours"])
+
 		try:
 			with open(files_base["hours"], encoding="utf-8") as fbhf:
 				max_hour_list = fbhf.readlines()
