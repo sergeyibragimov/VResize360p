@@ -896,83 +896,64 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 					# 911 (9-1-1) 3 Jan 2018 # 911 (9-1-1) 3.01.2018 # one_info_different_date_types
 
-					desc_regex = re.compile(r"(.*)\s\((.*)\)\s(?:([\d+]{1,2}\s[A-Za-z]{3}\s[\d+]{4}|[\d+]{1,2}\.[\d+]{1,2}\.[\d+]{4}))", re.I) # rus / eng / date
+					# desc_regex = re.compile(r"(.*)\s\((.*)\)\s(?:([\d+]{1,2}\s[A-Za-z]{3}\s[\d+]{4}|[\d+]{1,2}\.[\d+]{1,2}\.[\d+]{4}))", re.I) # rus / eng / date
+					desc_regex = re.compile(r"(.*)\s\((.*)\)\s([\d+]{1,2}\s[A-Z]{3}\s[\d+]{4})", re.I) # debug?
+
+					# txt = "Две девицы на мели (2 Broke Girls) 19 Sep 2011"
+					# list(desc_regex.findall(txt)[0]) # ('Две девицы на мели', '2 Broke Girls', '19 Sep 2011')
+
+					# txt = "13 клиническая () 22 Dec 2022"
+					# list(desc_regex.findall(txt)[0]) # ['13 клиническая', '', '22 Dec 2022']
+
+					# filter_list = [l.strip() for l in list(desc_regex.findall(txt)[0]) if l] # 3(eng) # 2(rus)
+
 					# se_or_year = re.compile(r"(?:([\d+]{2}s[\d+]e|\([\d+]{4}\)))", re.I)
 
 					for fl in filter(lambda x: x.lower().endswith("txt"), tuple(full_list)): # filtred_by_ext # full_list: # no_filter
 
-						if fl: # fl.lower().endswith("txt"): # manual_filter
+						dlist: list = []
 
-							dlist: list = []
+						try:
+							with open(fl, encoding="utf-8") as df:
+								dlist = df.readlines()
 
+							assert dlist, ""
+						except AssertionError: # if_null
+							logging.info("Нет описания для \'%s\' попытка прочитать в другой кодировке" % fl)
+
+						if not dlist:
 							try:
-								with open(fl, encoding="utf-8") as df:
+								with open(fl, encoding="cp1251") as df: # cp866
 									dlist = df.readlines()
 
-								assert dlist, "" # is_assert_debug
-							except AssertionError: # if_null
-								logging.info("Нет описания для \'%s\'" % fl)
-								continue # if_null_description
-							except BaseException: # if_error
-								dlist = []
+								assert dlist, ""
+							except AssertionError:
+								continue # if_error_codepage(some_error) # check_this_codepage_in_dict
 
-							try:
-								if all((dlist, dlist[0])): # add_some_desc(lines/line[1])
+						for dl in dlist:
 
-									row_data = str(dlist[0]).strip() # first_line
+							parse_list = []
+							filter_list = []
 
-									# if_not_utf-8(is_ansi) # debug
-									if all((not row_data[0].isnumeric(), not row_data[0].isalpha())):
-										row_data = row_data.replace("\ufeff", "")
+							desc = ""
 
-									# ("Медленные лошади (Slow Horses) 1 Apr 2022")
-									# {"Медленные лошади": "Slow Horses;1 Apr 2022"}
+							if desc_regex.findall(dl):
+								parse_list = list(desc_regex.findall(dl)[0])
 
-									# ("Алиби () 18 Oct 2021")
-									# {'Алиби': '18 Oct 2021'}
+							if parse_list:
+								filter_list = [l.strip() for l in parse_list if l] # 3(eng) # 2(rus)
 
-									try:
-										parse_desc = desc_regex.findall(row_data)
-									except:
-										parse_desc = []
+							if any((len(filter_list) == 1, len(filter_list) == 2)): # rus_or_eng
+								desc = ";".join(filter_list)
 
-									is_rus: bool = False
-
-									# yes_description # desc(1)
-									if parse_desc:
-										try:
-											desc = ";".join(parse_desc[0])
-
-											# logging.info("desc/parse_desc %s" % desc) # debug # (1)
-
-											# desc = desc.replace("í", "i")  # no_cyrilic
-
-											# if any((desc.split(";")[0][0].isnumeric(), desc.split(";")[0][0].isalpha())): # skip_symb # debug
-											if any((";;" in desc, ";(" in desc, ");" in desc)):
-												desc = desc.replace(";;", ";") # clear_double(if_rus)
-												desc = desc.replace(";(", ";") # clear_first_quote(is_rus)
-												desc = desc.replace(");", ";") # clear_second_quote(is_rus)
-
-												is_rus = True
-
-												logging.info("desc/replace %s" % desc) # debug # (2) # is_rus_only
-
-											assert desc, "" # is_assert_debug
-										except AssertionError as err:
-											raise err
-											logging.warning("desc/unknown %s" % fl) # debug # (3) # is_unknown
-										except BaseException as e:
-											logging.error("desc/error %s" % str(e)) # debug # (4) # is_error
-										else:
-											if desc.count(";") == 1:
-												desc_dict[desc.split(";")[0].strip()] = desc.split(";")[-1].strip() # is_rus
-												logging.info("desc/is_rus %s" % desc) # debug # (5) # is_rus(is_logging)
-											elif desc.count(";") == 2:
-												desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]).strip() # is_eng
-												logging.info("desc/is_eng %s" % desc) # debug # (6) # is_eng(logging)
-
-							except: # skip_desc
-								continue
+							if desc.count(";") == 1: # if_rus # debug
+								desc_dict[desc.split(";")[0].strip()] = desc.split(";")[-1].strip()
+								break # stop_if_found
+							elif desc.count(";") == 2: # if_eng # debug
+								desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]).strip()
+								break # stop_if_found
+							else:
+								continue # skip_if_another_length
 
 				if desc_dict: # some_data # data
 
