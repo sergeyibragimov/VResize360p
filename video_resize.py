@@ -107,7 +107,7 @@ async def hd_generate(from_w: int = 640, from_h: int = 360, to_max: int = 2500, 
 		logging.error("Ошибка hd маштабов @hd_generate/scales [%s]" % str(e))
 	else:
 		scales.sort(reverse=False)
-		# print(scales)
+		logging.info(";".join(scales)) # print(scales) # logging_or_print_scales(;)
 
 	return scales
 
@@ -131,7 +131,7 @@ async def sd_generate(from_w: int = 640, from_h: int = 480, to_max: int = 2500, 
 		logging.error("Ошибка sd маштабов @sd_generate/scales [%s]" % str(e))
 	else:
 		scales.sort(reverse=False)
-		# print(scales)
+		logging.info(",".join(scales)) # print(scales) # logging_or_print_scales(,)
 
 	return scales
 
@@ -887,8 +887,10 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 					# raise err
 				else:
 					full_list.sort(reverse=False)
+					logging.info("Список из описаний найдено full_list [%d]" % len(full_list))
 
-				# descriptions
+				# descriptions # debug
+				# """
 				if len(list(filter(lambda x: "txt" in x, tuple(list_files)))) > 0 and full_list:
 
 					# "﻿10 причин моей ненависти": "﻿10 причин моей ненависти;(10 Things I Hate About You);7 Jul 2009"
@@ -896,69 +898,77 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 					# 911 (9-1-1) 3 Jan 2018 # 911 (9-1-1) 3.01.2018 # one_info_different_date_types
 
-					# desc_regex = re.compile(r"(.*)\s\((.*)\)\s(?:([\d+]{1,2}\s[A-Za-z]{3}\s[\d+]{4}|[\d+]{1,2}\.[\d+]{1,2}\.[\d+]{4}))", re.I) # rus / eng / date
-					desc_regex = re.compile(r"(.*)\s\((.*)\)\s([\d+]{1,2}\s[A-Z]{3}\s[\d+]{4})", re.I) # debug?
+					# desc_regex = re.compile(r"(.*)\s\((.*)\)\s(?:([\d+]{1,2}\s[A-Za-z]{3}\s[\d+]{4}|[\d+]{1,2}\.[\d+]{1,2}\.[\d+]{4}))", re.I) # rus / eng / date # old
+					desc_regex = re.compile(r"(.*)\s\((.*)\)\s([\d+]{1,2}\s[A-Z]{3}\s[\d+]{4})", re.I) # debug? # new
 
-					# txt = "Две девицы на мели (2 Broke Girls) 19 Sep 2011"
-					# list(desc_regex.findall(txt)[0]) # ('Две девицы на мели', '2 Broke Girls', '19 Sep 2011')
+					dlist = []
 
-					# txt = "13 клиническая () 22 Dec 2022"
-					# list(desc_regex.findall(txt)[0]) # ['13 клиническая', '', '22 Dec 2022']
-
-					# filter_list = [l.strip() for l in list(desc_regex.findall(txt)[0]) if l] # 3(eng) # 2(rus)
-
-					# se_or_year = re.compile(r"(?:([\d+]{2}s[\d+]e|\([\d+]{4}\)))", re.I)
-
-					for fl in filter(lambda x: x.lower().endswith("txt"), tuple(full_list)): # filtred_by_ext # full_list: # no_filter
-
-						dlist: list = []
+					for fl in full_list:
 
 						try:
-							with open(fl, encoding="utf-8") as df:
-								dlist = df.readlines()
-
-							assert dlist, ""
-						except AssertionError: # if_null
-							logging.info("Нет описания для \'%s\' попытка прочитать в другой кодировке" % fl)
+							with open(fl, encoding="utf-8") as flf:
+								dlist = flf.readlines()
+						except:
+							dlist = []
 
 						if not dlist:
 							try:
-								with open(fl, encoding="cp1251") as df: # cp866
-									dlist = df.readlines()
+								with open(fl, encoding="cp1251") as flf:
+									dlist = flf.readlines()
+							except:
+								dlist = []
 
-								assert dlist, ""
-							except AssertionError:
-								continue # if_error_codepage(some_error) # check_this_codepage_in_dict
+						if not dlist:
+							try:
+								with open(fl, encoding="cp866") as flf:
+									dlist = flf.readlines()
+							except:
+								dlist = []
 
-						for dl in dlist:
+						if not dlist:
+							try:
+								with open(fl, encoding="iso8859_5") as flf:
+									dlist = flf.readlines()
+							except:
+								dlist = []
 
-							parse_list = []
-							filter_list = []
+						if not dlist:
+							try:
+								with open(fl, encoding="koi8_r") as flf:
+									dlist = flf.readlines()
+							except:
+								dlist = []
 
-							desc = ""
+					for dl in dlist: # only_first_line # debug
 
-							if desc_regex.findall(dl):
-								parse_list = list(desc_regex.findall(dl)[0])
+						if not dl:
+							continue # skip_null_line
 
-							if parse_list:
-								filter_list = [l.strip() for l in parse_list if l] # 3(eng) # 2(rus)
+						if not dlist:
+							break # stop_if_null
 
-							if any((len(filter_list) == 1, len(filter_list) == 2)): # rus_or_eng
-								desc = ";".join(filter_list)
+						parse_list = []
 
-							if desc.count(";") == 1: # if_rus # debug
-								desc_dict[desc.split(";")[0].strip()] = desc.split(";")[-1].strip()
-								break # stop_if_found
-							elif desc.count(";") == 2: # if_eng # debug
-								desc_dict[desc.split(";")[0].strip()] = ";".join(desc.split(";")[1:]).strip()
-								break # stop_if_found
-							else:
-								continue # skip_if_another_length
+						# txt = "Две девицы на мели (2 Broke Girls) 19 Sep 2011"
+						# list(desc_regex.findall(txt)[0]) # ('Две девицы на мели', '2 Broke Girls', '19 Sep 2011')
+
+						# txt = "13 клиническая () 22 Dec 2022"
+						# list(desc_regex.findall(txt)[0]) # ['13 клиническая', '', '22 Dec 2022']
+
+						if desc_regex.findall(dl):
+							parse_list = list(desc_regex.findall(dl)[0])
+
+						if all((parse_list, dl)):
+							filter_list = [l.strip() for l in parse_list if l] # 3(eng) # 2(rus)
+
+							if any((filter_list[0][0].isalpha(), filter_list[0][0].isnumeric())): # check_first_syms
+								desc_dict[filter_list[0].strip()] = ";".join(filter_list[1:]).strip()
 
 				if desc_dict: # some_data # data
 
 					with open(desc_base, "w", encoding="utf-8") as dbf:
 						json.dump(desc_dict, dbf, ensure_ascii=False, indent=2, sort_keys=True)
+				# """
 
 				# config = {"ff": fsf, "period": days, "is_dir": False, "is_less": False, "is_any": True} # **config # fsf(default) -> None(debug)
 				# ff_to_days(ff=fsf, period=days, is_dir=False, is_less=False, is_any=True)
@@ -986,10 +996,10 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 							assert ftd[1] >= 0, ""
 						except AssertionError as err:
 							raise err
-							print(Style.BRIGHT + Fore.YELLOW + "%s [%s]" % (folder_or_file, str(datetime.now()))) # folder(file) / datetime 
+							print(Style.BRIGHT + Fore.YELLOW + "%s [%s]" % (folder_or_file, str(datetime.now()))) # folder(file) / datetime
 							logging.warning("%s [%s]" % (folder_or_file, str(datetime.now()))) # if_null(is_color)
 						except BaseException as e:
-							print(Style.BRIGHT + Fore.RED + "%s [%s] [%s]" % (folder_or_file, str(datetime.now()), str(e))) # folder(file) / datetime / error 
+							print(Style.BRIGHT + Fore.RED + "%s [%s] [%s]" % (folder_or_file, str(datetime.now()), str(e))) # folder(file) / datetime / error
 							logging.error("%s [%s] [%s]" % (folder_or_file, str(datetime.now()), str(e))) # if_error(is_color)
 						else:
 							fold_and_date.append((folder_or_file, days_ago, str(datetime.now())))
@@ -1650,7 +1660,7 @@ def log_error(f):
 	return inner
 
 
-async def mp4_to_m3u8(filename: str = "", is_run: bool = False, is_stay: bool = False) -> tuple:
+async def mp4_to_m3u8(filename: str = "", is_run: bool = False, is_stay: bool = False, ext: str = "mp4") -> tuple:
 
 	try:
 		assert filename and  os.path.exists(filename), "Файл отсутствует @mp4_to_m3u8/filename" # is_assert_debug
@@ -1667,10 +1677,16 @@ async def mp4_to_m3u8(filename: str = "", is_run: bool = False, is_stay: bool = 
 	except:
 		folder = ""
 
+	# some_ext: str = ""
+
 	try:
 		fname = filename.split("\\")[-1]
 	except:
 		fname = ""
+	# else:
+		# if all((filename.split(".")[-1] != ext, ext)):
+			# some_ext = filename.split(".")[-1]
+		
 
 	try:
 		if not os.path.exists(path_for_segments):
@@ -5118,7 +5134,7 @@ class File:
 		self.file = open(filename, mode)
 
 	def __del__(self):
-		self.file.close()		
+		self.file.close()
 
 
 # @log_error
@@ -6093,21 +6109,22 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 		# @files_base["soundtrack"] # manual_parse
 
 		soundtrack: list = ['СТС', 'ДТВ', 'Swe', 'KvK', 'FOX', '2x2', 'ТНТ', 'MTV', 'Ukr', 'NTb', 'SET', 'Ozz', 'SNK', 'НТВ', 'ТВ3',
-							'Kyle', 'DDP5', 'Diva', 'AMZN', '3xRus', 'RenTV', 'Getty', '2xRus', 'RuDub', 'Gravi', 'Kerob', 'FiliZa',
-							'Cuba77', 'RusTVC', 'lunkin', 'Amedia', 'Goblin', 'Котова', 'AniDub', 'qqss44', 'Jetvis', 'Kravec',
-							'Disney', 'SHURSH', 'Ancord', 'ylnian', '7turza', 'AltPro', 'HDCLUB', 'SATRip', 'Sci-Fi', 'Кравец',
-							'JimmyJ', 'Kinozal', 'Hamster', '1 канал', 'HDREZKA', 'AniFilm', 'Сыендук', 'RiperAM', 'HDRezka',
-							'Пифагор', 'Files-x', 'TVShows', 'To4kaTV', 'GraviTV', 'Nicodem', 'BaibaKo', 'SoftBox', 'ColdFilm',
-							'DexterTV', 'Alehandr', 'Оригинал', 'LostFilm', 'Субтитры', 'Домашний', 'STEPonee', 'CrazyCat', 'Ultradox',
-							'filmgate', 'novafilm', 'gravi-tv', 'AlexFilm', 'FilmGate', 'GreenTea', 'AniMedia', 'GoldTeam', 'AniLibria',
-							'Axn SciFi', 'CasStudio', 'seasonvar', 'MediaClub', 'Невафильм', 'Aleksan55', 'Шадинский', 'Novamedia',
-							'turok1990', 'NewStudio', 'Nikolspup', 'CBS Drama', 'Universal', 'MrMittens', 'cinemaset', 'Seryy1779',
-							'SDI Media', 'Paramount', 'Nataleksa', '25Kuzmich', 'ExKinoRay', 'Persona99', 'Sony Turbo', 'ZoneVision',
-							'WarHead.ru', 'films.club', 'East Dream', '1001cinema', 'Shachiburi', 'BenderBEST', 'Sony Sci-Fi',
-							'Zone Vision', 'SAFARISOUND', 'GeneralFilm', 'Nickelodeon', 'AngelOfTrue', 'Субтитры VP', 'Studio Band',
-							'RG_Paravozik', 'SHIZAProject', 'Кураж-Бамбей', 'RG.Paravozik', 'www.Riper.AM', 'TEPES TeamHD', 'scarfilm.org',
-							'AnimeReactor', 'DreamRecords', 'by_761OPiter', 'Kuraj-Bambey', 'кубик в кубе', 'VO-production', 'ViruseProject',
-							'DIVA Universal', 'www.riperam.org', 'Wentworth Miller', 'TVHUB', 'LineFilm', 'DUB', 'MrMittens', 'KYRAZ.BAMBEI']
+					'Kyle', 'DDP5', 'Diva', 'AMZN', '3xRus', 'RenTV', 'Getty', '2xRus', 'RuDub', 'Gravi', 'Kerob', 'FiliZa',
+					'Cuba77', 'RusTVC', 'lunkin', 'Amedia', 'Goblin', 'Котова', 'AniDub', 'qqss44', 'Jetvis', 'Kravec',
+					'Disney', 'SHURSH', 'Ancord', 'ylnian', '7turza', 'AltPro', 'HDCLUB', 'SATRip', 'Sci-Fi', 'Кравец',
+					'JimmyJ', 'Kinozal', 'Hamster', '1 канал', 'HDREZKA', 'AniFilm', 'Сыендук', 'RiperAM', 'HDRezka',
+					'Пифагор', 'Files-x', 'TVShows', 'To4kaTV', 'GraviTV', 'Nicodem', 'BaibaKo', 'SoftBox', 'ColdFilm',
+					'DexterTV', 'Alehandr', 'Оригинал', 'LostFilm', 'Субтитры', 'Домашний', 'STEPonee', 'CrazyCat', 'Ultradox',
+					'filmgate', 'novafilm', 'gravi-tv', 'AlexFilm', 'FilmGate', 'GreenTea', 'AniMedia', 'GoldTeam', 'AniLibria',
+					'Axn SciFi', 'CasStudio', 'seasonvar', 'MediaClub', 'Невафильм', 'Aleksan55', 'Шадинский', 'Novamedia',
+					'turok1990', 'NewStudio', 'Nikolspup', 'CBS Drama', 'Universal', 'MrMittens', 'cinemaset', 'Seryy1779',
+					'SDI Media', 'Paramount', 'Nataleksa', '25Kuzmich', 'ExKinoRay', 'Persona99', 'Sony Turbo', 'ZoneVision',
+					'WarHead.ru', 'films.club', 'East Dream', '1001cinema', 'Shachiburi', 'BenderBEST', 'Sony Sci-Fi',
+					'Zone Vision', 'SAFARISOUND', 'GeneralFilm', 'Nickelodeon', 'AngelOfTrue', 'Субтитры VP', 'Studio Band',
+					'RG_Paravozik', 'SHIZAProject', 'Кураж-Бамбей', 'RG.Paravozik', 'www.Riper.AM', 'TEPES TeamHD', 'scarfilm.org',
+					'AnimeReactor', 'DreamRecords', 'by_761OPiter', 'Kuraj-Bambey', 'кубик в кубе', 'VO-production', 'ViruseProject',
+					'DIVA Universal', 'www.riperam.org', 'Wentworth Miller', 'TVHUB', 'LineFilm', 'DUB', 'MrMittens', 'KYRAZ.BAMBEI',
+					'DenSBK']
 
 		with open(files_base["stracks"], "w", encoding="utf-8") as sf:
 			sf.writelines("%s\n" % st.strip() for st in filter(lambda x: x, tuple(soundtrack)))
@@ -11038,7 +11055,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					# raise err
 				except BaseException as e: # if_error
 					logging.error("Меньше установленого лимита по времени hour[1] [%s]" % str(e))
-					hour = 2
+					hour = 4
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # all((mm >= l_avg, l_avg >= 30)): # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -11230,11 +11247,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[2]" # 2
 				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[2]")
-					hour = 2 # limit_hour
+					hour = 4 # limit_hour
 					# raise err
 				except BaseException as e: # if_error
 					logging.error("Меньше установленого лимита по времени hour[2] [%s]" % str(e))
-					hour = 2
+					hour = 4
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >=h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -11707,11 +11724,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[3]" # 3 # is_assert_debug
 			except AssertionError: # as err: # if_null
 				logging.warning("Меньше установленого лимита по времени hour[3]")
-				hour = 2 # limit_hour
+				hour = 4 # limit_hour
 				# raise err
 			except BaseException as e: # if_error
 				logging.error("Меньше установленого лимита по времени hour[3] [%s]" % str(e))
-				hour = 2
+				hour = 4
 
 			# time_is_limit_1hour_50min # all((h >= 0, m, hh >=h, mm >= m)) # all((hh > hour, mm >= m))
 			if all((hh > hour, hour)): # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -12064,11 +12081,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[4]" # 4 # is_assert_debug
 				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[4]")
-					hour = 2 # limit_hour
+					hour = 4 # limit_hour
 					# raise err
 				except BaseException as e: # if_error
 					logging.error("Меньше установленого лимита по времени hour[4] [%s]" % str(e))
-					hour = 2
+					hour = 4
 
 				# # time_is_limit_1hour_or_30min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)): # stop_if_more_30min # mm[0] // 60 >= limit_hour:  # stop_if_more_"2"hour
@@ -12447,11 +12464,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[5]" # 5 # is_assert_debug
 				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[5]")
-					hour = 2 # limit_hour
+					hour = 4 # limit_hour
 					# raise err
 				except BaseException as e: # if_error
 					logging.error("Меньше установленого лимита по времени hour[5] [%s]" % str(e))
-					hour = 2
+					hour = 4
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)): # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -12662,11 +12679,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[6]" # 6 # is_assert_debug
 				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[6]")
-					hour = 2 # limit_hour
+					hour = 4 # limit_hour
 					# raise err
 				except BaseException as e: # if_error
 					logging.warning("Меньше установленого лимита по времени hour[6] [%s]" % str(e))
-					hour = 2
+					hour = 4
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -12828,11 +12845,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[7]" # 7 # is_assert_debug
 		except AssertionError: # as err: # if_null
 			logging.warning("Меньше установленого лимита по времени hour[7]")
-			hour = 2 # limit_hour
+			hour = 4 # limit_hour
 			# raise err
 		except BaseException as e: # if_error
 			logging.error("Меньше установленого лимита по времени hour[7] [%s]" % str(e))
-			hour = 2
+			hour = 4
 
 		# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 		if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -15208,11 +15225,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[8]" # 8 # is_assert_debug
 				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[8]")
-					hour = 2 # limit_hour
+					hour = 4 # limit_hour
 					# raise err
 				except BaseException as e: # if_error
 					logging.error("Меньше установленого лимита по времени hour[8] [%s]" % str(e))
-					hour = 2
+					hour = 4
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 2:  # stop_if_more_2hour
@@ -15306,11 +15323,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[9]" # 9 # is_assert_debug
 				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[9]")
-					hour = 2 # limit_hour
+					hour = 4 # limit_hour
 					# raise err
 				except BaseException as e: # if_error
 					logging.error("Меньше установленого лимита по времени hour[9] [%s]" % str(e))
-					hour = 2
+					hour = 4
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # prc >= 75 # stop_by_progress(1/3) ~ 75% (debug)
@@ -15716,11 +15733,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[10]" # 10 # is_assert_debug
 				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[10]")
-					hour = 2 # limit_hour
+					hour = 4 # limit_hour
 					# raise err
 				except BaseException as e: # if_error
 					logging.error("Меньше установленого лимита по времени hour[10] [%s]" % str(e))
-					hour = 2
+					hour = 4
 				# """
 
 				# all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
@@ -15889,11 +15906,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[11]" # 11 # is_assert_debug
 						except AssertionError: # as err: # if_null
 							logging.warning("Меньше установленого лимита по времени hour[11]")
-							hour = 2 # limit_hour
+							hour = 4 # limit_hour
 							# raise err
 						except BaseException as e: # if_error
 							logging.error("Меньше установленого лимита по времени hour[11] [%s]" % str(e))
-							hour = 2
+							hour = 4
 						# """
 
 						# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
