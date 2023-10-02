@@ -222,15 +222,17 @@ envdict = os.getenv.__globals__ # переменные_среды
 # error_save_json
 '''
 environ_file: str = "".join([path_for_queue, "environ.json"])
-environ_dict: dict = {}
 try:
 	environ_dict = envdict["environ"]
 	assert environ_dict, ""
-except AssertionError as err:
-	raise err # logging.warning
-else:
+except AssertionError: # as err: # if_null
+	environ_dict = {}
+	# raise err # logging.warning
+except BaseException: # if_some_error
+	environ_dict = {}
+finally:
 	with open(environ_file, "w", encoding="utf-8") as eff:
-		json.dump(environ_dict, eff, ensure_ascii=False, indent=2)
+		json.dump(environ_dict, eff, ensure_ascii=False, indent=4) # environ_dict(some) / environ_dict(null)
 '''
 
 # environ_block(windows) # debug(is_error)
@@ -380,13 +382,13 @@ with open("c:\\downloads\\mytemp\\overload.csv", "a", newline="") as ocf:
 # group_of_data # debug
 """
 async def group_by_age(people):
-    result = {}
-    for name, age in people:
-        if age in result:
-            result[age].append(name)
-        else:
-            result[age] = [name]
-    return result
+	result = {}
+	for name, age in people:
+		if age in result:
+			result[age].append(name)
+		else:
+			result[age] = [name]
+	return result
 """
 
 
@@ -601,12 +603,12 @@ async def date_to_week() -> dict:
 	# week using the return value of the
 	# isoweekday() function
 	weekdays = {1: "Monday",
-            2: "Tuesday",
-            3: "Wednesday",
-            4: "Thursday",
-            5: "Friday",
-            6: "Saturday",
-            7: "Sunday"}
+			2: "Tuesday",
+			3: "Wednesday",
+			4: "Thursday",
+			5: "Friday",
+			6: "Saturday",
+			7: "Sunday"}
 
 	try:
 		# Getting current date using today()
@@ -773,7 +775,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 				desc_dict = {}
 
 				with open(desc_base, "w", encoding="utf-8") as dbf:
-					json.dump(desc_dict, dbf, ensure_ascii=False, indent=2, sort_keys=True)
+					json.dump(desc_dict, dbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 			"""
 			try:
@@ -967,7 +969,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 				if desc_dict: # some_data # data
 
 					with open(desc_base, "w", encoding="utf-8") as dbf:
-						json.dump(desc_dict, dbf, ensure_ascii=False, indent=2, sort_keys=True)
+						json.dump(desc_dict, dbf, ensure_ascii=False, indent=4, sort_keys=True)
 				# """
 
 				# config = {"ff": fsf, "period": days, "is_dir": False, "is_less": False, "is_any": True} # **config # fsf(default) -> None(debug)
@@ -1226,7 +1228,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 												# write_log("debug soundtrack_count[popular]", "%s" % class_status)
 
 								with open(soundtrack_base, "w", encoding="utf-8") as sbf:
-									json.dump(soundtrack_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True) # is(decrypt/debug)
+									json.dump(soundtrack_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True) # is(decrypt/debug)
 
 							# x[0].isalpha() -> x[0] == x[0].upper()
 
@@ -1403,7 +1405,7 @@ except:
 	somebase_dict = {}
 
 	with open(some_base, "w", encoding="utf-8") as sbf:
-		json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+		json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 if all((filter_top_list, len(somebase_dict) >= 0)):
 
@@ -1533,7 +1535,7 @@ except:
 	log_dict = {}
 
 	with open(log_base, "w", encoding="utf-8") as nlf:
-		json.dump(log_dict, nlf, ensure_ascii=False, indent=2)
+		json.dump(log_dict, nlf, ensure_ascii=False, indent=4)
 else:
 	if log_dict:
 		new_dict = log_dict
@@ -1550,7 +1552,7 @@ else:
 		log_dict.update(new_dict)  # update
 
 		with open(log_base, "w", encoding="utf-8") as nlf:
-			json.dump(log_dict, nlf, ensure_ascii=False, indent=2)
+			json.dump(log_dict, nlf, ensure_ascii=False, indent=4)
 
 some_dict: dict = {}
 
@@ -1561,7 +1563,7 @@ except:
 	log_dict = {}
 
 	with open(log_base, "w", encoding="utf-8") as lbf:
-		json.dump(log_dict, lbf, ensure_ascii=False, indent=2)
+		json.dump(log_dict, lbf, ensure_ascii=False, indent=4)
 
 
 def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging: bool = False):  # event_log(is_all)
@@ -1585,7 +1587,7 @@ def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging:
 		log_dict = {}
 
 		with open(log_base, "w", encoding="utf-8") as lbf:
-			json.dump(log_dict, lbf, ensure_ascii=False, indent=2)
+			json.dump(log_dict, lbf, ensure_ascii=False, indent=4)
 	finally:
 		if all((desc, txt)):
 			if any(("error" in txt.lower().strip(), "error" in desc.lower().strip(), is_error == True)):
@@ -1599,7 +1601,7 @@ def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging:
 
 		if log_dict:
 			with open(log_base, "w", encoding="utf-8") as lbf:
-				json.dump(log_dict, lbf, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(log_dict, lbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 	# logging(old/plain)
 
@@ -1857,7 +1859,7 @@ try:
 		lanmacs = json.load(ljf)
 except:
 	with open("".join([script_path, "\\lanmacs.json"]), "w", encoding="utf-8") as ljf:
-		json.dump(lanmacs, ljf, ensure_ascii=False, indent=2, sort_keys=True)
+		json.dump(lanmacs, ljf, ensure_ascii=False, indent=4, sort_keys=True)
 
 
 async def ip_to_mac(ip: str = "") -> tuple: # single_by_async
@@ -3088,7 +3090,7 @@ class Get_AR:
 				sar_dict = json.load(sjf)
 		except:
 			with open(sar_base, "w", encoding="utf-8") as sjf:
-				json.dump(sar_dict, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(sar_dict, ensure_ascii=False, indent=4, sort_keys=True)
 
 		# SAR of 640/480 = 4:3
 		# sar_list = []; sar_list.extend([1/1, 12/11, 10/11, 16/11, 40/33, 24/11, 20/11, 32/11, 80/33, 72/59, 11/9, 5/4, 22/15, 4/3, 18/11, 15/11, 64/33, 160/99, 3/2, 2/1]) # last
@@ -3101,7 +3103,7 @@ class Get_AR:
 
 		if sar_dict:
 			with open(sar_base, "w", encoding="utf-8") as sjf:
-				json.dump(sar_dict, ensure_ascjii=False, indent=2, sort_keys=True)
+				json.dump(sar_dict, ensure_ascjii=False, indent=4, sort_keys=True)
 
 		par_dict: dict = {}
 
@@ -3110,7 +3112,7 @@ class Get_AR:
 				par_dict = json.load(pjf)
 		except:
 			with open(par_base, "w", encoding="utf-8") as pjf:
-				json.dump(par_dict, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(par_dict, ensure_ascii=False, indent=4, sort_keys=True)
 
 		# (4/3) / (704/576) = 12/11 # (16/9) / (704/576) = 16/11 # PAR = DAR/SAR
 		par_list = [] #; par_list = [float(dl / sl) for dl in dar_list for sl in sar_list if all((dl, sl))]
@@ -3127,7 +3129,7 @@ class Get_AR:
 
 		if par_dict:
 			with open(par_base, "w", encoding="utf-8") as pjf:
-				json.dump(par_dict, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(par_dict, ensure_ascii=False, indent=4, sort_keys=True)
 
 		dar_dict: dict = {}
 
@@ -3136,7 +3138,7 @@ class Get_AR:
 				dar_dict = json.load(djf)
 		except:
 			with open(dar_base, "w", encoding="utf-8") as djf:
-				json.dump(dar_dict, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(dar_dict, ensure_ascii=False, indent=4, sort_keys=True)
 
 		dar_list = [] #; dar_list = [sl * pl for sl in sar_list for pl in par_list if all((sl, pl))]
 
@@ -3152,7 +3154,7 @@ class Get_AR:
 
 		if dar_dict:
 			with open(dar_base, "w", encoding="utf-8") as djf:
-				json.dump(dar_dict, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(dar_dict, ensure_ascii=False, indent=4, sort_keys=True)
 
 		if any((dar_list, sar_list, par_list)):
 			print(Style.BRIGHT + Fore.WHITE + "%s" % self.filename,"D(isplay)AR: %s" % str(dar_list), "S(cale)AR: %s" % str(sar_list), "P(ixel)AR: %s" % str(par_list))
@@ -3748,7 +3750,7 @@ class MyMeta:
 			fps_dict = {}
 
 			with open(fps_base, "w", encoding="utf-8") as fbf:
-				json.dump(fps_dict, fbf, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(fps_dict, fbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 		fpsdict: dict = {}
 
@@ -3824,7 +3826,7 @@ class MyMeta:
 			write_log("debug fps[data][unknown]", ";".join([str(fps), self.filename])) # fps_value / filename
 
 		with open(fps_base, "w", encoding="utf-8") as fbf:
-			json.dump(fps_dict, fbf, ensure_ascii=False, indent=2, sort_keys=True)
+			json.dump(fps_dict, fbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 		return fps  # no_fps(null)
 
@@ -5322,7 +5324,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 					ff_last = {}
 
 					with open(vr_files, "w", encoding="utf-8") as vff:
-						json.dump(ff_last, vff, ensure_ascii=False, indent=2, sort_keys=True)
+						json.dump(ff_last, vff, ensure_ascii=False, indent=4, sort_keys=True)
 
 				# current_jobs(list)
 
@@ -5340,7 +5342,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 
 					with open(vr_files, "w", encoding="utf-8") as vff:
 						# vff.writelines("%s\n" % f.strip() for f in files) # save_files(txt) # need_json
-						json.dump(ff_dict, vff, ensure_ascii=False, indent=2, sort_keys=True) # save_list_files(exists) # is_files
+						json.dump(ff_dict, vff, ensure_ascii=False, indent=4, sort_keys=True) # save_list_files(exists) # is_files
 
 		except BaseException as e:
 			if is_log:
@@ -5378,7 +5380,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 					ff_last = {}
 
 					with open(vr_folder, "w", encoding="utf-8") as vff:
-						json.dump(ff_last, vff, ensure_ascii=False, indent=2, sort_keys=True)
+						json.dump(ff_last, vff, ensure_ascii=False, indent=4, sort_keys=True)
 				else:
 					# pass_1_of_2(not_exists_folders)
 					try:
@@ -5454,7 +5456,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 
 					with open(vr_folder, "w", encoding="utf-8") as vff:
 						# vff.writelines("%s\n" % ff2.strip() for ff2 in full_folder2) # save_folders(txt) # need_json
-						json.dump(ff_dict, vff, ensure_ascii=False, indent=2, sort_keys=True) # save_list_files(exists) # is_folder
+						json.dump(ff_dict, vff, ensure_ascii=False, indent=4, sort_keys=True) # save_list_files(exists) # is_folder
 
 						# some_shortfolders_or_null_list # no_keys_only_values
 
@@ -6145,7 +6147,7 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 			soundtrack_dict = {}
 
 			with open(soundtrack_base, "w", encoding="utf-8") as sbf:
-				json.dump(soundtrack_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(soundtrack_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 		else:
 			# soundtrack_in_filename_by_low_string
 			try:
@@ -6213,7 +6215,7 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 							write_log("debug soundtrack_count[popular]", "%s" % class_status)
 
 			with open(soundtrack_base, "w", encoding="utf-8") as sbf:
-				json.dump(soundtrack_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(soundtrack_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 	await soundtrack_save()
 
@@ -6367,7 +6369,7 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 			ff_last = {} # skip_with_error
 		else:
 			with open(vr_files, "w", encoding="utf-8") as vff:
-				json.dump(ff_last, vff, ensure_ascii=False, indent=2, sort_keys=True) # save_without_error
+				json.dump(ff_last, vff, ensure_ascii=False, indent=4, sort_keys=True) # save_without_error
 
 	# convert_fullname_to_(fullpath / shortfilename)
 	try:
@@ -7847,7 +7849,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			somebase_dict = {}
 
 			with open(some_base, "w", encoding="utf-8") as sbf:
-				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 		# filter_current_jobs(is_update)
 
@@ -7859,7 +7861,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			fcmd = {}
 
 			with open(filecmd_base, "w", encoding="utf-8") as fbf:
-				json.dump(fcmd, fbf, ensure_ascii=False, indent=2, sort_keys=False)
+				json.dump(fcmd, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 		first_len = second_len = 0
 
@@ -7874,7 +7876,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		if all((second_len, second_len <= first_len)):
 			with open(filecmd_base, "w", encoding="utf-8") as fbf:
-				json.dump(fcmd, fbf, ensure_ascii=False, indent=2, sort_keys=False)
+				json.dump(fcmd, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 		# @load_known_files
 		try:
 			with open(vr_files, encoding="utf-8") as vff:
@@ -8478,7 +8480,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 												somebase_dict = {}
 
 												with open(some_base, "w", encoding="utf-8") as sbf:
-													json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+													json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 											first_len: int = len(somebase_dict)
 
@@ -8491,7 +8493,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 											if all((second_len, second_len <= first_len)):  # clear_ready(optimized_file)
 												with open(some_base, "w", encoding="utf-8") as sbf:
-													json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+													json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 												print(Style.BRIGHT + Fore.GREEN + "Добавление в очередь файла",
 												Style.BRIGHT + Fore.WHITE + "%s" % fullname)  # add_to_all(process_move)
@@ -8509,7 +8511,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 												fcmd = {}
 
 												with open(filecmd_base, "w", encoding="utf-8") as fbf:
-													json.dump(fcmd, fbf, ensure_ascii=False, indent=2, sort_keys=False)
+													json.dump(fcmd, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 											first_len = len(fcmd)
 
@@ -8519,7 +8521,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 											if all((second_len, second_len <= first_len)):
 												with open(filecmd_base, "w", encoding="utf-8") as fbf:
-													json.dump(fcmd, fbf, ensure_ascii=False, indent=2, sort_keys=False)
+													json.dump(fcmd, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 										try:
 											await process_move(fullname, fullname2, False, True, avg_size) # no_asyncio.run # async_if_small #1
@@ -9457,7 +9459,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			somebase_dict = {}
 
 			with open(some_base, "w", encoding="utf-8") as sbf:
-				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 		finally:
 			some_files = [*somebase_dict] if somebase_dict else [] # is_no_lambda
 
@@ -9634,7 +9636,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					error_dict = json.load(ebf)
 			except:
 				with open(error_base, "w", encoding="utf-8") as ebf:
-					json.dump(error_dict, ebf, ensure_ascii=False, indent=2, sort_keys=True)
+					json.dump(error_dict, ebf, ensure_ascii=False, indent=4, sort_keys=True)
 
 			for k, v in move_dict.items():
 
@@ -9740,7 +9742,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 										somebase_dict = {}
 
 										with open(some_base, "w", encoding="utf-8") as sbf:
-											json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+											json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 									first_len: int = len(somebase_dict)
 
@@ -9753,7 +9755,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 									if all((second_len, second_len <= first_len)):  # clear_ready(big_cinema)
 										with open(some_base, "w", encoding="utf-8") as sbf:
-											json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+											json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 										print(Style.BRIGHT + Fore.YELLOW + "Подготовка к переносу файла",
 											Style.BRIGHT + Fore.WHITE + "%s" % bc)
@@ -9790,7 +9792,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 											fcmd = {}
 
 											with open(filecmd_base, "w", encoding="utf-8") as fbf:
-												json.dump(fcmd, fbf, ensure_ascii=False, indent=2, sort_keys=False)
+												json.dump(fcmd, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 										first_len = len(fcmd)
 
@@ -9801,7 +9803,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 										if all((second_len, second_len <= first_len)):
 											with open(filecmd_base, "w", encoding="utf-8") as fbf:
-												json.dump(fcmd, fbf, ensure_ascii=False, indent=2, sort_keys=False)
+												json.dump(fcmd, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 								elif not is_clean and os.path.exists(k):
 									os.remove(k)  # del_ready_with_error_length
@@ -9815,7 +9817,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				error_dict = {k: v for k, v in error_dict.items() if os.path.exists(k)} # exists_only
 
 			with open(error_base, "w", encoding="utf-8") as ebf:
-				json.dump(error_dict, ebf, ensure_ascii=False, indent=2, sort_keys=True) # errors(+exists)
+				json.dump(error_dict, ebf, ensure_ascii=False, indent=4, sort_keys=True) # errors(+exists)
 
 		print(Style.BRIGHT + Fore.YELLOW + "Проверка готовых больших и проектов файлов завершена...")
 
@@ -10239,7 +10241,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				copy_dict = {}
 
 				with open(trends_base, "w", encoding="utf-8") as ftf:
-					json.dump(copy_dict, ftf, ensure_ascii=False, indent=2, sort_keys=False)
+					json.dump(copy_dict, ftf, ensure_ascii=False, indent=4, sort_keys=False)
 
 			filter_temp: list = []
 
@@ -10275,7 +10277,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				copy_dict.update(copy_dict1)
 
 			with open(trends_base, "w", encoding="utf-8") as tbf:
-				json.dump(copy_dict, tbf, ensure_ascii=False, indent=2, sort_keys=False)
+				json.dump(copy_dict, tbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 		# open(files_base["backup"], "w", encoding="utf-8").close() # clean_if_some_data # debug/test
 
@@ -10323,7 +10325,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			copy_dict = {}
 
 			with open(trends_base, "w", encoding="utf-8") as ftf:
-				json.dump(copy_dict, ftf, ensure_ascii=False, indent=2, sort_keys=False)
+				json.dump(copy_dict, ftf, ensure_ascii=False, indent=4, sort_keys=False)
 
 		filter_temp2: list = []
 
@@ -10359,7 +10361,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			copy_dict.update(copy_dict2)
 
 		with open(trends_base, "w", encoding="utf-8") as tbf:
-			json.dump(copy_dict, tbf, ensure_ascii=False, indent=2, sort_keys=False)
+			json.dump(copy_dict, tbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 	elif not filter2:
 		write_log("debug project[none]", "Нет данных по фильтру 2 [%s]" % str(datetime.now()))
@@ -10570,7 +10572,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			somebase_dict = {}
 
 			with open(some_base, "w", encoding="utf-8") as sbf:
-				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 		finally:
 			some_files = [*somebase_dict] if somebase_dict else [] # is_no_lambda
 
@@ -10708,7 +10710,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		open(files_base["backup"], "w", encoding="utf-8").close()  # clear_backup(after_filter) # is_need_hide
 
 		with open(filecmd_base, "w", encoding="utf-8") as fbf:
-			json.dump({}, fbf, ensure_ascii=False, indent=2, sort_keys=False) # clear_list(after_filter) # is_need_hide
+			json.dump({}, fbf, ensure_ascii=False, indent=4, sort_keys=False) # clear_list(after_filter) # is_need_hide
 
 		# open(cfilecmd_base, "w", encoding="utf-8").close()  # clear_combinelist(after_filter) # hide_if_manual_run
 		# open(path_for_queue + "another.lst", "w", encoding="utf-8").close() # is_csv(after_filter) # hide_if_not_need_another
@@ -10725,7 +10727,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			somebase_dict = {}
 
 			with open(some_base, "w", encoding="utf-8") as sbf:
-				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 		finally:
 			some_files: [*somebase_dict] if somebase_dict else [] # list(somebase_dict.keys()) # is_no_lambda
 
@@ -11103,7 +11105,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			somebase_dict = {}
 
 			with open(some_base, "w", encoding="utf-8") as sbf:
-				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 		finally:
 			some_files = [*somebase_dict] if somebase_dict else [] # list(somebase_dict.keys()) # is_no_lambda
 
@@ -11833,7 +11835,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		filecmdbase_dict = {}
 
 		with open(filecmd_base, "w", encoding="utf-8") as fbf:
-			json.dump({}, fbf, ensure_ascii=False, indent=2, sort_keys=False)
+			json.dump({}, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 	else:
 		if filecmdbase_dict:  # is_optimize_and_run_by_time
 			filecmdbase_copy = filecmdbase_dict
@@ -12250,7 +12252,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			# update_data_if_stay_files(some)_or_all_ready(null)
 			if all((len(filecmdbase_copy) >= 0, filecmdbase_dict, len(filecmdbase_copy) < len(filecmdbase_dict))):
 				with open(filecmd_base, "w", encoding="utf-8") as fbf:
-					json.dump(filecmdbase_copy, fbf, ensure_ascii=False, indent=2, sort_keys=False)
+					json.dump(filecmdbase_copy, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 			if all((filter_run, filter_skip)):
 				filter_run = {k: v for k, v in filter_run.items() for k2, v2 in filter_skip.items() if
@@ -12288,7 +12290,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				filecmdbase_dict = {}  # clean_jobs_list_after_skip # clear_when_done
 
 				with open(filecmd_base, "w", encoding="utf-8") as fbf:
-					json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=2, sort_keys=False)
+					json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 			elif all((filecmdbase_dict, not filter_run)) or all((filter_run, filecmdbase_dict, len(filter_run) < len(filecmdbase_dict))) and all((cnt, maxcnt, cnt <= maxcnt)):
 				# update_if_some_jobs_or_run_less_jobs_count # logic(2_of_2)
@@ -12305,7 +12307,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				filecmdbase_dict = {}  # clean_jobs_list_after_update # clear_when_done
 
 				with open(filecmd_base, "w", encoding="utf-8") as fbf:
-					json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=2, sort_keys=False)
+					json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 	# @paths_base
 	try:
@@ -12315,7 +12317,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		pathbase_dict = {}
 
 		with open(paths_base, "w", encoding="utf-8") as pbf:
-			json.dump({}, pbf, ensure_ascii=False, indent=2, sort_keys=True)
+			json.dump({}, pbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 	else:
 		listfiles_dict = {lf.strip(): "\\".join(lf.split("\\")[:-1]).strip() for lf in
@@ -12329,7 +12331,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		pathbase_dict = {k: v for k, v in pathbase_dict.items() if os.path.exists(k)}
 
 		with open(paths_base, "w", encoding="utf-8") as pbf:
-			json.dump(pathbase_dict, pbf, ensure_ascii=False, indent=2, sort_keys=True)
+			json.dump(pathbase_dict, pbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 	if need_find_all:  # avg_days_to_full_period
 		try:
@@ -12522,7 +12524,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			somebase_dict = {}
 
 			with open(some_base, "w", encoding="utf-8") as sbf:
-				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 		finally:
 			some_files = [*somebase_dict] if somebase_dict else [] # list(somebase_dict.keys()) # is_no_lambda
 
@@ -13107,7 +13109,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			vbr_dict = {}
 
 			with open(vbr_base, "w", encoding="utf-8") as vbf:
-				json.dump(vbr_dict, vbf, ensure_ascii=False, indent=2)
+				json.dump(vbr_dict, vbf, ensure_ascii=False, indent=4)
 
 		try:
 			vbr_dict[lf.strip()] = int(sb_calc[-1])  # save_vbr_for_job
@@ -13126,7 +13128,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		vbr_dict = {k: v for k, v in vbr_dict.items() if os.path.exists(k)}  # exists
 
 		with open(vbr_base, "w", encoding="utf-8") as vbf:
-			json.dump(vbr_dict, vbf, ensure_ascii=False, indent=2)
+			json.dump(vbr_dict, vbf, ensure_ascii=False, indent=4)
 
 		try:
 			vbr = MM.calc_vbr(filename=lf, width=width, height=height)  # -b:v aaaK
@@ -13316,7 +13318,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			somebase_dict = {}
 
 			with open(some_base, "w", encoding="utf-8") as sbf:
-				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 		finally:
 			some_files: [*somebase_dict] if somebase_dict else [] # list(somebase_dict.keys()) # is_no_lambda
 
@@ -13397,7 +13399,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					fcmd = {}
 
 					with open(filecmd_base, "w", encoding="utf-8") as fbf:
-						json.dump(fcmd, fbf, ensure_ascii=False, indent=2, sort_keys=False)
+						json.dump(fcmd, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 				first_len = len(fcmd)
 
@@ -13408,7 +13410,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				if all((second_len, second_len <= first_len)):
 					with open(filecmd_base, "w", encoding="utf-8") as fbf:
-						json.dump(fcmd, fbf, ensure_ascii=False, indent=2, sort_keys=False)
+						json.dump(fcmd, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 			else:
 				# --- (is_not_optimized/is_optimized) ---
@@ -13448,7 +13450,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					lf.strip(), str(e), str(datetime.now())), is_error=True)  # error_without_param # filename / error / datetime
 
 		with open(some_base, "w", encoding="utf-8") as sbf:
-			json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+			json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 		# find_logic(debug/test)
 
@@ -13736,7 +13738,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		if filecmdbase_dict: # filesize(optimize)_or_abc(default)_sort
 			with open(filecmd_base, "w", encoding="utf-8") as fbf:
-				json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=2, sort_keys=False)
+				json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 		jobs_list = sorted([*filecmdbase_dict], reverse=False) if [*filecmdbase_dict] else [] # is_no_lambda
 
@@ -13750,7 +13752,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				files_dict = {}
 
 				with open(jobs_base, "w", encoding="utf-8") as fbf:
-					json.dump(files_dict, fbf, ensure_ascii=False, indent=2, sort_keys=True)
+					json.dump(files_dict, fbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 			else:
 				# with unique_semaphore:
@@ -13796,7 +13798,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								os.path.exists(k)}
 
 				with open(jobs_base, "w", encoding="utf-8") as fbf:
-					json.dump(files_dict, fbf, ensure_ascii=False, indent=2, sort_keys=True)
+					json.dump(files_dict, fbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 		# null_command_line_script
 
@@ -13820,7 +13822,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			nob_dict = {}
 
 			with open(new_optimize_base, "w", encoding="utf-8") as nobf:
-				json.dump(nob_dict, nobf, ensure_ascii=False, indent=2, sort_keys=True)
+				json.dump(nob_dict, nobf, ensure_ascii=False, indent=4, sort_keys=True)
 
 		# nob_dict = {k:v for k, v in nob_dict.items() if os.path.exists(k) and all((sum(v) > 0, len(v) == 3))} # 1/2/3 # default(length=3) # skip_try_except
 		nob_dict = {k: v for k, v in nob_dict.items() if
@@ -13872,7 +13874,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						os.path.exists(k)}
 
 		with open(new_optimize_base, "w", encoding="utf-8") as nobf:
-			json.dump(nob_dict, nobf, ensure_ascii=False, indent=2, sort_keys=True)
+			json.dump(nob_dict, nobf, ensure_ascii=False, indent=4, sort_keys=True)
 		# filter(filecmdbase_dict/trends_dict) # debug/test
 
 		# set_or_update(trends)_by_any_video # hidden(debug)
@@ -13884,7 +13886,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			trends_dict = {}
 
 			with open(trends_base, "w", encoding="utf-8") as ftf:
-				json.dump(trends_dict, ftf, ensure_ascii=False, indent=2, sort_keys=False)
+				json.dump(trends_dict, ftf, ensure_ascii=False, indent=4, sort_keys=False)
 
 		else:
 			try:
@@ -13915,7 +13917,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			with open(trends_base, "w", encoding="utf-8") as ftf:
 				json.dump(trends_dict, ftf, ensure_ascii=False,
-						  indent=2)  # update_trends(short)_if_mp4 # sort_keys=False
+						  indent=4) # sort_keys=False
 
 		# with unique_semaphore:
 		# for k, v in filecmdbase_dict.items():
@@ -14259,7 +14261,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				somebase_dict = {}
 
 				with open(some_base, "w", encoding="utf-8") as sbf:
-					json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sork_keys=True) #1-save_current_meta(new)
+					json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4) # -save_current_meta(new)
 
 			# filter_stay_only_exists_jobs(is_meta)
 			first_len: int = len(somebase_dict)
@@ -14268,7 +14270,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			if all((second_len, second_len <= first_len)):
 				with open(some_base, "w", encoding="utf-8") as sbf:
-					json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True) #1-save_current_meta(update)
+					json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4) # -save_current_meta(update)
 
 			write_log("debug somebase_dict[mcount]", "%d" % len(somebase_dict)) # after_load(meta)
 
@@ -14280,7 +14282,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				filecmdbase_dict = {}
 
 				with open(filecmd_base, "w", encoding="utf-8") as fbf:
-					json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=2, sort_keys=False) #2-save_current_jobs(new)
+					json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=4) # -save_current_jobs(new)
 
 			first_len = second_len = 0
 
@@ -14295,7 +14297,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			if all((second_len, second_len <= first_len)):
 				with open(filecmd_base, "w", encoding="utf-8") as fbf:
-					json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=2, sort_keys=False) #2-save_current_jobs(update)
+					json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=4) # -save_current_jobs(update)
 
 			write_log("debug filecmdbase_dict[jcount]", "%d" % len(filecmdbase_dict)) # after_load(current)
 
@@ -14309,7 +14311,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				cbf_dict = {}
 
 				with open(cfilecmd_base, "w", encoding="utf-8") as cbf:
-					json.dump(cbf_dict, cbf, ensure_ascii=False, indent=2, sort_keys=False) #3-save_combine_jobs(new)
+					json.dump(cbf_dict, cbf, ensure_ascii=False, indent=4) # -save_combine_jobs(new)
 
 			first_len = second_len = 0
 
@@ -14326,7 +14328,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			if all((second_len, second_len <= first_len)):
 				with open(cfilecmd_base, "w", encoding="utf-8") as cbf:
-					json.dump(cbf_dict, cbf, ensure_ascii=False, indent=2, sort_keys=False) #3-save_combine_jobs(update)
+					json.dump(cbf_dict, cbf, ensure_ascii=False, indent=4) # -save_combine_jobs(update)
 
 			# sorted_current_jobs # type1
 			MM = MyMeta()
@@ -14431,7 +14433,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			del MM
 
 			with open(filecmd_base, "w", encoding="utf-8") as fbf:
-				json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=2, sort_keys=False) # save_current_jobs
+				json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=4, sort_keys=False) # save_current_jobs
 
 			# is_skip_database
 
@@ -14689,7 +14691,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				# filecmdbase_dict = {k:v for ls in listed_sort for k, v in cbf_dict.items() if os.path.exists(k) and ls[0].strip() == k.strip()} # compare_current_and_combine_jobs
 
 				# with open(filecmd_base, "w", encoding="utf-8") as fbf:
-					# json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=2, sort_keys=False)
+					# json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 			del MM
 
@@ -14789,7 +14791,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					std_dict = json.load(sbf)
 			except:
 				with open(std_base, "w", encoding="utf-8") as sbf:
-					json.dump(std_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+					json.dump(std_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 			if std_dict: # filter_by_exists_files
 				std_dict = {k: v for k, v in std_dict.items() if os.path.exists(k)}
@@ -14854,7 +14856,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				filecmdbase_dict = {}
 
 				with open(filecmd_base, "w", encoding="utf-8") as fbf:
-					json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=2, sort_keys=False) #2-save_current_jobs(new)
+					json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=4) # -save_current_jobs(new)
 			'''
 
 			sum_classify: dict = {}
@@ -14908,7 +14910,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					filecmdbase_dict = fcb
 
 				with open(filecmd_base, "w", encoding="utf-8") as fbf:
-					json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=2, sort_keys=False) #2-save_current_jobs(new)
+					json.dump(filecmdbase_dict, fbf, ensure_ascii=False, indent=4) # -save_current_jobs(new)
 
 			filecmdbase_list = [*filecmdbase_dict] # skip_sort(defaul)
 			filecmdbase_pos_dict = {jfile.strip(): str(i+1).strip() for i, jfile in enumerate(filecmdbase_list)} # start_at_1
@@ -15177,7 +15179,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				if std_dict:
 					with open(std_base, "w", encoding="utf-8") as sbf:
-						json.dump(std_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+						json.dump(std_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 				# if all((len(hours_set) == max_hour, max_hour >= 2)):  # 2_hours_or_more_to_stop(default) # wait_after_2_hours
 				# break
@@ -15194,14 +15196,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					trends_dict = {}
 
 					with open(trends_base, "w", encoding="utf-8") as ftf:
-						json.dump(trends_dict, ftf, ensure_ascii=False, indent=2, sort_keys=False)
+						json.dump(trends_dict, ftf, ensure_ascii=False, indent=4, sort_keys=False)
 
 				else:
 					if len(fname.strip()) > 0:
 						trends_dict[crop_filename_regex.sub("", fname).strip()] = str(datetime.now())
 
 				with open(trends_base, "w", encoding="utf-8") as ftf:
-					json.dump(trends_dict, ftf, ensure_ascii=False, indent=2, sort_keys=False)  # update_trends(short)_if_mp4
+					json.dump(trends_dict, ftf, ensure_ascii=False, indent=4)
 
 				# p: int = -999
 
@@ -15357,7 +15359,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					ff_last = {}
 
 					with open(vr_files, "w", encoding="utf-8") as vff:
-						json.dump(ff_last, vff, ensure_ascii=False, indent=2, sort_keys=True)
+						json.dump(ff_last, vff, ensure_ascii=False, indent=4, sort_keys=True)
 
 				try:
 					segments_list = os.listdir(path_for_segments)
@@ -15388,7 +15390,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					ff_last = {}
 
 					with open(vr_files, "w", encoding="utf-8") as vff:
-						json.dump(ff_last, vff, ensure_ascii=False, indent=2, sort_keys=True)
+						json.dump(ff_last, vff, ensure_ascii=False, indent=4, sort_keys=True)
 
 				first_len: int = 0
 				first_len = len(ff_last) # without_update_length # pass_1_of_2
@@ -15401,7 +15403,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				if all((second_len, second_len <= first_len)):
 					with open(vr_files, "w", encoding="utf-8") as vff:
-						json.dump(ff_last, vff, ensure_ascii=False, indent=2, sort_keys=True)
+						json.dump(ff_last, vff, ensure_ascii=False, indent=4, sort_keys=True)
 
 			asyncio.run(clear_m3u8())
 			asyncio.run(update_combine_jobs())
@@ -15583,7 +15585,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				if isinstance(lanmacs, dict):
 					with open("".join([script_path, "\\lanmacs.json"]), "w", encoding="utf-8") as ljf:
-						json.dump(lanmacs, ljf, ensure_ascii=False, indent=2, sort_keys=True)
+						json.dump(lanmacs, ljf, ensure_ascii=False, indent=4, sort_keys=True)
 
 				dt2 = datetime.now() # is_debug(time)
 
@@ -15864,7 +15866,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							fb_dict = {}
 
 							with open(filecmd_base, "w", encoding="utf-8") as fbf:
-								json.dump(fb_dict, fbf, ensure_ascii=False, indent=2, sort_keys=True)
+								json.dump(fb_dict, fbf, ensure_ascii=False, indent=4, sort_keys=True)
 						# else:
 							# if fb_dict:
 								# fb_dict = {k:v for k, v in fb_dict.items() if any(("scale" in v.lower(), "profile" in v.lower(), "level" in v.lower()))} # need_optimize(scale/profile/level) # skip_other
@@ -15928,7 +15930,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							trends_dict = {}
 
 							with open(trends_base, "w", encoding="utf-8") as ftf:
-								json.dump(trends_dict, ftf, ensure_ascii=False, indent=2, sort_keys=False)
+								json.dump(trends_dict, ftf, ensure_ascii=False, indent=4, sort_keys=False)
 
 						finally:
 							if len(mp4_file.strip()) > 0:
@@ -15952,7 +15954,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 							with open(trends_base, "w", encoding="utf-8") as ftf:
 
-								json.dump(trends_dict, ftf, ensure_ascii=False, indent=2, sort_keys=False) # update_trends(short)_if_not_mp4
+								json.dump(trends_dict, ftf, ensure_ascii=False, indent=4)
 
 						# pccmd: int = -999
 
@@ -16120,7 +16122,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				# clear_when_exit_or_ready(any) / hide_if_not_clear_combine_jobs
 				# with open(cfilecmd_base, "w", encoding="utf-8") as cbf:
-					# json.dump({}, cbf, ensure_ascii=False, indent=2, sort_keys=False)
+					# json.dump({}, cbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 			del MT
 
@@ -16151,7 +16153,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		somebase_dict = {}
 
 		with open(some_base, "w", encoding="utf-8") as sbf:
-			json.dump(somebase_dict, sbf, ensure_ascii=False, indent=2, sort_keys=True)
+			json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 	# trends_base_load(hidden) # {"short":"%date%"}
 	try:
@@ -16192,7 +16194,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			if all((trends_second, trends_second <= trends_first)):
 				with open(trends_base, "w", encoding="utf-8") as tbf:  # dict(some_trends_for_run) # update_or_cleaned
-					json.dump(trends_dict, tbf, ensure_ascii=False, indent=2, sort_keys=True)
+					json.dump(trends_dict, tbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 	# jobs_base_load(hidden) # {"fullname":"command_line"}
 	try:
@@ -16202,7 +16204,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		fb_dict = {}
 
 		with open(filecmd_base, "w", encoding="utf-8") as fbf:
-			json.dump(fb_dict, fbf, ensure_ascii=False, indent=2, sort_keys=False)
+			json.dump(fb_dict, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 	# last_jobs_by_count # pass_1_of_2
 
@@ -16246,7 +16248,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 	if all((second_len, second_len <= first_len)): # if_stay_some(>0)_or_all_ready(0)
 		with open(filecmd_base, "w", encoding="utf-8") as fbf:
-			json.dump(fb_dict, fbf, ensure_ascii=False, indent=2, sort_keys=False)  # stay_files_only_in_meta
+			json.dump(fb_dict, fbf, ensure_ascii=False, indent=4, sort_keys=False)  # stay_files_only_in_meta
 
 	# if_need_clean_"error"_from_log
 	write_log("debug end", f"{str(datetime.now())}")
