@@ -91,7 +91,7 @@ def atomic_writes(path, mode="w", encoding="utf-8"):
 # 640x360 -> 1280x720 -> 1920x1080 # 16/9(hd)
 
 # @16/9(hd) # 8/16
-async def hd_generate(from_w: int = 640, from_h: int = 360, to_max: int = 2500, bit: int = 16) -> list:
+async def hd_generate(from_w: int = 640, from_h: int = 360, to_max: int = 2500, bit: int = 16) -> list: #5
 	scales: list = []
 
 	try:
@@ -114,7 +114,7 @@ async def hd_generate(from_w: int = 640, from_h: int = 360, to_max: int = 2500, 
 # 640x360, 896x504, 1152x648, 1408x792, 1664x936, 1920x1080, 2176x1224, 2432x1368
 
 # @4/3(sd) # 8/16
-async def sd_generate(from_w: int = 640, from_h: int = 480, to_max: int = 2500, bit: int = 16) -> list:
+async def sd_generate(from_w: int = 640, from_h: int = 480, to_max: int = 2500, bit: int = 16) -> list: #5
 
 	scales: list = []
 
@@ -392,7 +392,7 @@ async def group_by_age(people):
 """
 
 
-async def dict_filter(dct: dict = {}, sort_index: int = -1) -> dict: # 1
+async def dict_filter(dct: dict = {}, sort_index: int = -1) -> dict: #16
 
 	try:
 		assert dct, "Пустой словарь @dict_filter/dct" # is_assert_debug
@@ -752,6 +752,20 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 		mydir3 = "d:\\multimedia\\video\\serials_conv\\top100_eng.lst" # folder -> file
 		mydir4 = "c:\\downloads\\soft\\for_usb_ffmpeg(projects)\\eng.lst" # folder -> file
 
+	# delete_last_list_by_language # debug
+
+	need_delete = False
+
+	try:
+		if os.path.exists(mydir3):
+			need_delete = True # if_need_delete(if_exists)
+	except BaseException as e:
+		need_delete = False # if_some_error(skip_delete)
+		logging.error("%s" % str(e))
+	finally:
+		if need_delete:
+			os.remove(mydir3)
+
 	rus_regex = re.compile("_Rus", re.M)
 
 	# full_paths # video_regex
@@ -803,11 +817,6 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 						Style.BRIGHT + Fore.YELLOW + "записей")
 
 					desc_dict.update(desc_dict_filter)
-
-			# folders_sym: list = []
-			# folders_sym = sorted(list(set([fsf[0] for fsf in folder_scan_full if fsf[0]])), reverse=False)
-
-			# true_sym = re.compile(r"([^A-ZА-Я\d\-])", re.I); # sample = "Hello world"; print(list(set(true_sym.findall(sample)))) # need_skip
 
 			fsf_set = set()
 
@@ -900,54 +909,53 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 					# 911 (9-1-1) 3 Jan 2018 # 911 (9-1-1) 3.01.2018 # one_info_different_date_types
 
-					# desc_regex = re.compile(r"(.*)\s\((.*)\)\s(?:([\d+]{1,2}\s[A-Za-z]{3}\s[\d+]{4}|[\d+]{1,2}\.[\d+]{1,2}\.[\d+]{4}))", re.I) # rus / eng / date # old
-					desc_regex = re.compile(r"(.*)\s\((.*)\)\s([\d+]{1,2}\s[A-Z]{3}\s[\d+]{4})", re.I) # debug? # new
+					desc_regex = re.compile(r"(.*)\s\((.*)\)\s([\d+]{1,2}\s[A-Z]{3}\s[\d+]{4})", re.I) # rus / eng / date
 
 					dlist = []
 
 					for fl in full_list:
 
 						try:
-							with open(fl, encoding="utf-8") as flf:
+							with open(fl, encoding="utf-8") as flf: # codepage1
 								dlist = flf.readlines()
 						except:
 							dlist = []
 
 						if not dlist:
 							try:
-								with open(fl, encoding="cp1251") as flf:
+								with open(fl, encoding="cp1251") as flf: # codepage2
 									dlist = flf.readlines()
 							except:
 								dlist = []
 
 						if not dlist:
 							try:
-								with open(fl, encoding="cp866") as flf:
+								with open(fl, encoding="cp866") as flf: # codepage3
 									dlist = flf.readlines()
 							except:
 								dlist = []
 
 						if not dlist:
 							try:
-								with open(fl, encoding="iso8859_5") as flf:
+								with open(fl, encoding="iso8859_5") as flf: # codepage4
 									dlist = flf.readlines()
 							except:
 								dlist = []
 
 						if not dlist:
 							try:
-								with open(fl, encoding="koi8_r") as flf:
+								with open(fl, encoding="koi8_r") as flf: # codepage5
 									dlist = flf.readlines()
 							except:
 								dlist = []
 
 					for dl in dlist: # only_first_line # debug
 
-						if not dl:
-							continue # skip_null_line
-
 						if not dlist:
 							break # stop_if_null
+
+						if not dl:
+							continue # skip_null_line
 
 						parse_list = []
 
@@ -982,8 +990,8 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 				days = 366 if dt.year % 4 == 0 else 365 # by_year # is_no_lambda
 
 				try:
-					#ftd = ff_to_days(ff=fsf, period=days, is_dir=False, is_less=False, is_any=True) # period=30(is_month) # period=days(is_year) # by_Year
-					ftd = ff_to_days(ff=fsf, period=12*days, is_dir=False, is_less=True, is_any=False) # period=30(is_month) # period=days(is_year) # 12_Year_and_less
+					#ftd = ff_to_days(ff=fsf, period=days, is_dir=False, is_less=False, is_any=True) # period=30(is_month)/days(is_year) # by_Year
+					ftd = ff_to_days(ff=fsf, period=12*days, is_dir=False, is_less=True, is_any=False) # period=30(is_month)/days(is_year) # 12_Year_and_less
 				except:
 					ftd = (None, ) # if_error2(None)
 
@@ -1048,6 +1056,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 						desc_list: list = []
 						parse_list: list = []
 						# parse_filename: list = []
+
 
 						def http_trace_to_soundtrack_parse(line: str = ""):
 
@@ -1184,8 +1193,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 										soundtrack_count_sorted = sorted(soundtrack_count, key=lambda soundtrack_count: soundtrack_count[1]) # sorted_by_value
 										soundtrack_count = [(scs[0], int(scs[1])) for scs in soundtrack_count_sorted if isinstance(soundtrack_count_sorted, tuple)]
 
-										# print(Style.BRIGHT + Fore.CYAN + "debug soundtrack_count[low] \'%s\'" % str(soundtrack_count)) # is_color
-										print(Style.BRIGHT + Fore.CYAN + "debug soundtrack_count[low] \'%d soundtrack count\'" % len(soundtrack_count)) # is_color
+										print(Style.BRIGHT + Fore.CYAN + "debug soundtrack_count[low] \'%d soundtrack count\'" % len(soundtrack_count)) # is_color # %s/str
 
 								try:
 									soundtrack_count = {v.strip(): str(list(soundtrack_dict.values()).count(v.strip())) for k, v in
@@ -1200,8 +1208,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 										stc = {scs[0]: scs[1] for scs in soundtrack_count_sorted} # sorted_json
 										soundtrack_count = stc if stc else {} # is_no_lambda
 
-										print(Style.BRIGHT + Fore.WHITE + "debug soundtrack_count[combine] \'%s\'" % str(soundtrack_count)) # is_color
-										# print(Style.BRIGHT + Fore.WHITE + "debug soundtrack_count[combine] \'%d soundtrack count\'" % len(soundtrack_count)) # is_color
+										print(Style.BRIGHT + Fore.WHITE + "debug soundtrack_count[combine] \'%s\'" % str(soundtrack_count)) # is_color # %d/len
 
 										try:
 											soundtrack_count_new = {k: int(v) for k, v in soundtrack_count.items()}
@@ -1291,11 +1298,17 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 			with open(mydir2, "w", encoding="utf-8") as mf: # resave # debug # top_file_by_lang
 				mf.writelines("%s\n" % fs.strip() for fs in filter(lambda x: any((x[0] == x[0].upper(), x[0].isnumeric())), tuple(folder_scan))) # int/str # is_by_count(top)
 
+	need_delete = False
+
 	try:
 		if os.path.exists(mydir3) and folder_scan:
-			os.remove(mydir3)
+			need_delete = True # if_need_delete(if_exists)
 	except BaseException as e:
-		print(Style.BRIGHT + Fore.RED + "%s" % str(e))
+		need_delete = False # if_some_error(skip_delete)
+		logging.error("%s" % str(e))
+	finally:
+		if need_delete:
+			os.remove(mydir3)
 
 	# if folder_scan:
 		# print(folder_scan)
@@ -1566,7 +1579,7 @@ except:
 		json.dump(log_dict, lbf, ensure_ascii=False, indent=4)
 
 
-def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging: bool = False):  # event_log(is_all)
+def write_log(desc: str = "", txt: str = str(None), is_error: bool = False, is_logging: bool = False):  # event_log(is_all)
 
 	try:
 		assert desc and txt, "Пустое описание или комментарий @write_log/desc/txt" # is_assert_debug
@@ -1688,7 +1701,6 @@ async def mp4_to_m3u8(filename: str = "", is_run: bool = False, is_stay: bool = 
 	# else:
 		# if all((filename.split(".")[-1] != ext, ext)):
 			# some_ext = filename.split(".")[-1]
-		
 
 	try:
 		if not os.path.exists(path_for_segments):
@@ -1865,8 +1877,8 @@ except:
 async def ip_to_mac(ip: str = "") -> tuple: # single_by_async
 
 	try:
-		# eth_mac = get_mac_address(interface="eth0")
-		# win_mac = get_mac_address(interface="Ethernet 3")
+		# eth_mac = get_mac_address(interface="eth0") # linux
+		# win_mac = get_mac_address(interface="Ethernet 3") # "linux"
 		ip_mac = get_mac_address(ip=ip, network_request=True) # "192.168.0.1" # default
 		# ip6_mac = get_mac_address(ip6="::1")
 		# host_mac = get_mac_address(hostname="localhost") # is_need
@@ -2144,7 +2156,6 @@ async def kill_proc_by_name(proc_name: str = ""):
 					if not 'SYSTEM' in p.username:
 						# write_log("debug kill", str(proc.name))
 						proc.kill()
-
 		except:
 			return
 
@@ -2170,7 +2181,7 @@ else:
 
 # debug
 # sys.exit() # spyder_debug
-# exit() # python_debug(no_run) # debug # stop_if_some_error(is_long)
+exit() # python_debug(no_run) # debug # stop_if_some_error(is_long)
 
 # dsize = dsize2 = 0
 
@@ -2211,7 +2222,7 @@ async def utc_time(dt = datetime.now()):
 async def ntp_to_utc():
 	try:
 		c = ntplib.NTPClient()
-		response = c.request('uk.pool.ntp.org', version=3) # ntp.server.pool
+		response = c.request('asia.pool.ntp.org', version=3) # "uk".pool.ntp.org # internet_sync_time
 		# print(response.offset) #0.22685885429382324
 	except BaseException as err:
 		raise err
@@ -2266,13 +2277,13 @@ async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 # cpu_overload(try_stop_SysMain/Superfetch)
 
 # # dspace(+reserve) # midnight - 6am # 11pm # overload(85) # 1
-# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22)), mem >= 85) # dspace / less_7am_or_more_10pm / overload(80->85)
+# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22)), mem >= 85) # dspace(is_need_hide) / less_7am_or_more_10pm / overload(80->85)
 # dspace(+reserve) # midnight - 6am # 11pm # no_overload # 2
-# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22))) # dspace / less_7am_or_more_10pm
+# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22))) # dspace(is_need_hide) / less_7am_or_more_10pm
 # dspace(+reserve) # midnight - 6am # no_overload # 3
-is_status: tuple = (not dsize2, ctme.hour < mytime["sleeptime"][1]) # dspace / less_7am
+is_status: tuple = (not dsize2, ctme.hour < mytime["sleeptime"][1]) # dspace(is_need_hide) / less_7am
 # dspace(+reserve) # midnight - 6am # 11pm # filter_run_time # no_overload # 4
-# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22, ctme.hour + dayago > 23))) # dspace / less_7am_or_more_10pm_or_optimal_run_hours
+# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22, ctme.hour + dayago > 23))) # dspace(is_need_hide) / less_7am_or_more_10pm_or_optimal_run_hours
 # no_dspace # midnight - 6am # 11pm # no_overload # 5
 # is_status: tuple = (ctme.hour < mytime["sleeptime"][1], ctme.hour > 22) # less_7am_or_more_10pm
 
@@ -2322,8 +2333,7 @@ async def my_args() -> list: #2
 
 	# sys.argv -> "argparse" # hide_docstring
 
-
-	# abc_or_num_regex = re.compile(r"^[A-Z0-9].*", re.I)
+	abc_or_num_regex = re.compile(r"^[A-Z0-9].*", re.I)
 
 	# old_command_line_arguments
 	try:
@@ -2342,9 +2352,9 @@ async def my_args() -> list: #2
 			# temp2 = list(set([t.strip() for t in temp if abc_or_num_regex.findall(t)])) # start(abc/123) # is_ok
 			temp2 = list(set([f.strip() for f in filter(lambda x: abc_or_num_regex.findall(x), tuple(temp))])) # start(abc/123) # debug
 
-			temp3 = list(set([t2.strip() if len(t2) >= 2 else "".join([t2,"_"]) for t2 in temp2]))  # length=2 # debug
-			tmp = sorted(temp3, reverse=False) # sort_by_string
-			# tmp = sorted(temp3, key=len, reverse=False) # sort_by_length
+			temp3 = list(set([t2.strip() if len(t2) >= 2 else "".join([t2,"_"]) for t2 in temp2]))  # length >= 2 # debug
+			# tmp = sorted(temp3, reverse=False) # sort_by_abc
+			tmp = sorted(temp3, key=len, reverse=False) # sort_by_key
 
 		print(Style.BRIGHT + Fore.CYAN + "Найдено %d аргументов [%s]" % (len(tmp), str(datetime.now())))  # is_color
 		write_log("debug sys[args]", "Найдено %d аргументов [%s]" % (len(tmp), str(datetime.now())))
@@ -2520,7 +2530,7 @@ async def days_by_list(lst: list = [], is_avg: bool = False): #8
 	avg_list: list = []
 	sum_days: int = 0
 	len_days: int = 0
-	max_days: int = 0
+	max_days: int = -1
 
 	today = datetime.today()  # datetime
 	try:
@@ -2541,6 +2551,16 @@ async def days_by_list(lst: list = [], is_avg: bool = False): #8
 			except BaseException as e: # if_error
 				logging.error("Пустой список или нет файлов @days_by_list/lst [%s]" % str(e))
 				break
+
+			try:
+				assert l, "Пустое значение списка @days_by_list/l" # is_assert_debug
+			except AssertionError as err: # if null:
+				logging.warning("Пустое значение списка @days_by_list/l")
+				raise err
+				continue
+			except BaseException as e: # if_error
+				logging.error("Пустое значение списка @days_by_list/l [%s]" % str(e))
+				continue
 
 			try:
 				fdate = os.path.getmtime(l)  # unixdate
@@ -2572,9 +2592,8 @@ async def days_by_list(lst: list = [], is_avg: bool = False): #8
 			avg_days: int = (lambda s, l: s // l)(sum_days, len_days)
 		except:  # DevideByZero
 			avg_days: int = 0
-		else:
-			if avg_days != None:  # use_avg_days # not_null
-				max_days = avg_days
+		finally:
+			max_days = avg_days if avg_days != None else 0  # use_avg_days_or_one_day_by_default
 
 	return max_days
 
@@ -2650,6 +2669,7 @@ def join_filename(file_path, file_name) -> str: #3
 
 # --- Notify center
 
+# update_icons_if_need
 icons: dict = {"cleaner": "c:\\downloads\\mytemp\\cleaner.ico",
 			   "complete": "c:\\downloads\\mytemp\\complete.ico",
 			   "different": "c:\\downloads\\mytemp\\different.ico",
@@ -2665,9 +2685,8 @@ icons: dict = {"cleaner": "c:\\downloads\\mytemp\\cleaner.ico",
 			   "work": "c:\\downloads\\mytemp\\work.ico"}
 
 
-# 9
 # @log_error
-def MyNotify(txt: str = "", icon: str = "", sec: int = 10): #13
+def MyNotify(txt: str = "", icon: str = "", sec: int = 10): #19
 	error: bool = False
 
 	try:
@@ -2741,9 +2760,9 @@ def one_folder(folder, files_template) -> list:
 		write_log("debug one_folder[error]", "Ошибка создания папки %s [%s]" % (folder, str(e)), is_error=True)
 	finally:
 		try:
-			os.mkdir(folder) # type1
+			os.mkdir(folder.title()) # type1
 		except BaseException as e:
-			os.system(r"cmd /c mkdir %s" % folder) # type2(error)
+			os.system(r"cmd /c mkdir %s" % folder.title()) # type2(error)
 
 			write_log("debug one_folder[folder]!",
 					  "Папка %s уже создана [%s] [%s]" % (folder, str(e), str(datetime.now())), is_error=True)
@@ -2777,13 +2796,11 @@ def sub_folder(folder, files_template) -> list:
 			write_log("debug sub_folder[create]", "Создаётся подпапка %s т.к. она отсуствует" % folder)
 	except BaseException as e:
 		write_log("debug sub_folder[error]", "Ошибка создания подпапки %s [%s]" % (folder, str(e)), is_error=True)
-
 	finally:
-
 		try:
-			os.mkdir(folder) # type1
+			os.mkdir(folder.title()) # type1
 		except BaseException as e:
-			os.system(r"cmd /c mkdir %s " % folder) # type2(error)
+			os.system(r"cmd /c mkdir %s " % folder.title()) # type2(error)
 
 			write_log("debug sub_folder[folder]!",
 					  "Папка %s уже создана [%s] [%s]" % (folder, str(e), str(datetime.now())), is_error=True)
@@ -2888,7 +2905,7 @@ async def avg_lst(lst: list = []) -> int:  # default_list / in_arg_is_filesizes_
 
 
 # @log_error
-async def screen_clear():
+async def screen_clear(): #3
 	# for mac and linux(here, os.name is 'posix')
 
 	if os.name == 'posix':
@@ -2939,7 +2956,7 @@ class Get_AR:
 		self.width = width
 		self.height = height
 
-	def width_to_ar(self, width: int = 0, height: int = 0, owidth: int = 640) -> tuple:  # width=640,height=360
+	def width_to_ar(self, width: int = 0, height: int = 0, owidth: int = 640) -> tuple:  # width=640,height=360 #5
 
 		try:
 			assert width and height, "Ширина или высота пустая @width_to_ar/width/height" # is_assert_debug
@@ -2962,7 +2979,7 @@ class Get_AR:
 			if all((second % 2 != 0, second)):
 				second -= 1  # height(-1)
 
-			def sh_equal(second=second, owidth=owidth, width=width, height=height):
+			def sh_equal(second=second, owidth=owidth, width=width, height=height): #2
 				for nh in range(second - 16, second, 1):
 					if (owidth / nh) == (width / height):
 						yield (owidth, nh)
@@ -3002,7 +3019,7 @@ class Get_AR:
 			return (0, 0, 0)
 
 	def height_to_ar(self, width: int = 0, height: int = 0,
-					 oheight: int = 360) -> tuple:  # width=640,height=360 # islogic=(False, 640)
+					 oheight: int = 360) -> tuple:  # width=640,height=360 # islogic=(False, 640) # 4
 
 		try:
 			assert width and height, "Высота пустая @height_to_ar/width/height" # is_assert_debug
@@ -3025,7 +3042,7 @@ class Get_AR:
 			if all((second % 2 != 0, second)):
 				second -= 1  # width(-1)
 
-			def sw_equal(second=second, oheight=oheight, width=width, height=height):
+			def sw_equal(second=second, oheight=oheight, width=width, height=height): #2
 				for nw in range(second - 16, second, 1):
 					if (nw / oheight) == (width / height):
 						yield (nw, oheight)
@@ -3064,7 +3081,7 @@ class Get_AR:
 		else:
 			return (0, 0, 0)
 
-	def spd_ar(self, filename: str = "", width: int = 0, height: int = 0, is_hd: bool = False, is_sd: bool = False) -> tuple:
+	def spd_ar(self, filename: str = "", width: int = 0, height: int = 0, is_hd: bool = False, is_sd: bool = False) -> tuple: # debug #5
 
 		self.filename: str = filename
 
@@ -3080,9 +3097,11 @@ class Get_AR:
 
 		# aspect ratio list(display/scale/pixel)
 
-		dar_list = []; dar_list.extend([4 / 3, 16 / 9]) # is_google # SAR x PAR = DAR
-		# dar_list = []; dar_list.append() # dar_by_job(one)
+		sar = par = dar = []
 
+		# @sar_base
+		# SAR of 640 / 480 = 4:3
+		sar_list = []
 		sar_dict: dict = {}
 
 		try:
@@ -3092,20 +3111,16 @@ class Get_AR:
 			with open(sar_base, "w", encoding="utf-8") as sjf:
 				json.dump(sar_dict, ensure_ascii=False, indent=4, sort_keys=True)
 
-		# SAR of 640/480 = 4:3
-		# sar_list = []; sar_list.extend([1/1, 12/11, 10/11, 16/11, 40/33, 24/11, 20/11, 32/11, 80/33, 72/59, 11/9, 5/4, 22/15, 4/3, 18/11, 15/11, 64/33, 160/99, 3/2, 2/1]) # last
-		sar_list = []; sar_list.append(width/height)
+		sar_dict[str(width / height)] = [self.filename, width / height]
+		sar_list = [*sar_dict]
 
-		try:
-			sar_dict[self.filename] = [self.filename, width, height, width / height] # {sar : (filename, width, height)}
-		except:
-			sar_dict[self.filename] = [self.filename] # {no_sar : filename}
+		with open(sar_base, "w", encoding="utf-8") as sjf:
+			json.dump(sar_dict, ensure_ascii=False, indent=4, sort_keys=True)
 
-		if sar_dict:
-			with open(sar_base, "w", encoding="utf-8") as sjf:
-				json.dump(sar_dict, ensure_ascjii=False, indent=4, sort_keys=True)
-
-		par_dict: dict = {}
+		# @par_base
+		# (4/3) / (704/576) = 12/11 # (16/9) / (704/576) = 16/11 # PAR = DAR/SAR
+		par_list = []
+		par_dict = {}
 
 		try:
 			with open(par_base, encoding="utf-8") as pjf:
@@ -3114,24 +3129,16 @@ class Get_AR:
 			with open(par_base, "w", encoding="utf-8") as pjf:
 				json.dump(par_dict, ensure_ascii=False, indent=4, sort_keys=True)
 
-		# (4/3) / (704/576) = 12/11 # (16/9) / (704/576) = 16/11 # PAR = DAR/SAR
-		par_list = [] #; par_list = [float(dl / sl) for dl in dar_list for sl in sar_list if all((dl, sl))]
+		par_dict = {float(sd) / float(width/height):[self.filename, float(sd), float(width/height)] for sd in sar_dict.items()}
+		par_list = [*par_dict]
 
-		try:
-			par_list = [float(dl / sl) for dl in dar_list for sl in sar_list if all((dl, sl))] # par_by_job # is_json
-		except:
-			par_list = [] # no_par
+		with open(par_base, "w", encoding="utf-8") as pjf:
+			json.dump(par_dict, ensure_ascii=False, indent=4, sort_keys=True)
 
-		try:
-			par_dict = {self.filename: str(pl) for pl in par_list if pl} # {filename / par(value)}
-		except:
-			par_dict = {}
-
-		if par_dict:
-			with open(par_base, "w", encoding="utf-8") as pjf:
-				json.dump(par_dict, ensure_ascii=False, indent=4, sort_keys=True)
-
-		dar_dict: dict = {}
+		# @dar_base
+		# DAR = SAR * PAR
+		dar_list = []
+		dar_dict = {}
 
 		try:
 			with open(dar_base, encoding="utf-8") as djf:
@@ -3140,21 +3147,11 @@ class Get_AR:
 			with open(dar_base, "w", encoding="utf-8") as djf:
 				json.dump(dar_dict, ensure_ascii=False, indent=4, sort_keys=True)
 
-		dar_list = [] #; dar_list = [sl * pl for sl in sar_list for pl in par_list if all((sl, pl))]
+		dar_dict = {float(sd) * floar(pd): [self.filename, float(sd), float(pd)] for sd in sar_dict.items() for pd in dar_dict.items()}
+		dar_list = [*dar_dict]
 
-		try:
-			dar_list = [sl * pl for sl in sar_list for pl in par_list if all((sl, pl))] # dar_by_job
-		except:
-			dar_list = [] # no_dar
-
-		try:
-			dar_dict = {self.filename: str(dl) for dl in dar_list if dl} # {filename : dar(value)}
-		except:
-			dar_dict = {}
-
-		if dar_dict:
-			with open(dar_base, "w", encoding="utf-8") as djf:
-				json.dump(dar_dict, ensure_ascii=False, indent=4, sort_keys=True)
+		with open(dar_base, "w", encoding="utf-8") as djf:
+			json.dump(dar_dict, ensure_ascii=False, indent=4, sort_keys=True)
 
 		if any((dar_list, sar_list, par_list)):
 			print(Style.BRIGHT + Fore.WHITE + "%s" % self.filename,"D(isplay)AR: %s" % str(dar_list), "S(cale)AR: %s" % str(sar_list), "P(ixel)AR: %s" % str(par_list))
@@ -3170,79 +3167,26 @@ class Get_AR:
 				is_hd_sd = True
 				print("Scale for %dx%d is hd [%s] [%s]" % (width, height, self.filename, str(is_hd_sd)))
 
-		# sar_list2: list = []
+		if filename:  # only_with_filename(ar)
+			print(f"The file %s is %sx%s with SAR = %s , PAR = %s , DAR = %s (G-spot)" % (filename, width, height, sar, par, dar))
+			write_log("debug spd[ar]", "%s [%s]" % (filename, ";".join(["sar=" % sar,"par=" % par, "dar=" % dar])))
 
 		try:
-			# sar_list2 = list(ar_to_gen(sar_list, w=width, h=height)) # new(yes_gen) # [(640, 480, 1.3333333333333333)]
-			sar_list2 = [(width, height, sl) for sl in sar_list if
-							width / height == sl]
+			sar = str(sar_list) # SAR
 		except:
-			sar_list2 = []
-
-		if sar_list2:
-			for sl2 in sar_list2:
-				if all((sl2[0], sl2[1])):
-					print("x".join([str(sl2[0]), str(sl2[1])]),
-						  "SAR [%s]" % self.filename)  # debug/test # 640x480 SAR []
-			else:
-				print("SAR", sar_list2)
-
-		# par_list2: list = []
+			sar = str(None)
 
 		try:
-			# par_list2 = list(ar_to_gen(par_list, w=width, h=height)) # new(yes_gen)
-			par_list2 = [(width, height, pl) for pl in par_list if
-							width / height == pl]
+			par = str(par_list)  # PAR
 		except:
-			par_list2 = []
-
-		# for pl in par_list:  # old(no_gen)
-		# if width/height == pl:
-		# par_list2.append((w,h,pl))
-
-		if par_list2:
-			for pl2 in par_list2:
-				if all((pl2[0], pl2[1])):
-					print("x".join([str(pl2[0]), str(pl2[1])]), "PAR [%s]" % self.filename)  # debug/test
-			else:
-				print("PAR", par_list2)
-
-		def wh_to_ar(b, e, ar):
-			for w in range(1, b + 1):
-				for h in range(1, e + 1):
-					if w / h == ar:
-						yield (w, h)
+			par = str(None)
 
 		try:
-			# ar_list = [(w,h) for w in range(1,32) for h in range(1,32) if w/h == ar] # old(no_gen)
-			ar_list = list(wh_to_ar(32, 32, width / height)) # new(yes_gen)
+			dar = str(dar_list)  # DAR
 		except:
-			ar_list = []
+			dar = str(None)
 
-		if ar_list:
-
-			try:
-				sar = ":".join([str(ar_list[0][0]), str(ar_list[0][1])])
-			except:
-				sar = ""
-
-			par = str(round(width / height, 2))[0:]
-
-			if all((is_sd, not is_hd)):
-				dar = str("16:9")
-			elif all((is_hd, not is_sd)):
-				dar = str("4:3")
-
-			"""
-			if filename:  # only_with_filename(ar)
-				print(f"The file %s is %sx%s with SAR = %s , PAR = %s , DAR = %s (G-spot)" % (filename, width, height, sar, par, dar))
-				write_log("debug spd[ar]", "%s [%s]" % (filename, ";".join(["sar=" % sar,"par=" % par, "dar=" % dar])))
-			"""
-
-			return (sar, par, dar)
-
-		elif not ar_list:
-			return ("", "", "")
+		return (sar, par, dar)
 
 
 # 9
@@ -3256,7 +3200,7 @@ class MyMeta:
 	"""@unique_data.json"""
 
 
-	def get_meta(self, filename) -> bool:
+	def get_meta(self, filename) -> bool: #8
 
 		self.filename: str = filename
 
@@ -3286,7 +3230,7 @@ class MyMeta:
 				return False
 
 
-	def get_mkv_audio(self, filename, is_log: bool = True):
+	def get_mkv_audio(self, filename, is_log: bool = True): #4
 
 		self.filename: str = filename
 
@@ -3334,7 +3278,7 @@ class MyMeta:
 
 
 	# input.mkv
-	def get_codecs(self, filename, is_log: bool = True) -> list:
+	def get_codecs(self, filename, is_log: bool = True) -> list: #10
 
 		self.filename: str = filename
 
@@ -3369,7 +3313,7 @@ class MyMeta:
 			else:
 				if lst:
 
-					def codecs_gen(lst=lst):
+					def codecs_gen(lst=lst): #2
 						for l in filter(lambda l: l, tuple(lst)):
 							yield l.strip()
 
@@ -3393,7 +3337,7 @@ class MyMeta:
 
 
 	def get_width_height(self, filename, is_calc: bool = False, is_log: bool = True, is_def: bool = False,
-						 maxwidth: int = 640) -> tuple:
+						 maxwidth: int = 640) -> tuple: # 18
 
 		global job_count
 
@@ -3463,6 +3407,7 @@ class MyMeta:
 
 		sar = par = dar = ""
 
+		# sar/par/dar
 		if any((is_hd, is_sd)):
 			try:
 				sar, par, dar = ga.spd_ar(filename=self.filename, width=ga.width, height=ga.height, is_hd=is_hd, is_sd=is_sd) #calc_ar # is_assert_debug
@@ -3552,7 +3497,7 @@ class MyMeta:
 			return (int(is_nwidth), int(is_nheight), width > is_nwidth)  # logic1 # nwidth/nheight/calced(vwidth > owidth)
 
 
-	def get_length(self, filename) -> int:
+	def get_length(self, filename) -> int: #40
 
 		duration_list: list = []
 		duration_null: int = 0
@@ -3608,7 +3553,7 @@ class MyMeta:
 	# D:\Multimedia\Video\Big_Films\1947\Eta_zamechatelnaya_jizn(1947).mp4
 
 
-	def get_profile_and_level(self, filename) -> tuple:
+	def get_profile_and_level(self, filename) -> tuple: #8
 
 		self.filename: str = filename
 
@@ -3654,7 +3599,7 @@ class MyMeta:
 					pl_list[0].split("=")[-1].lower().strip(), pl_list[1].split("=")[-1].lower().strip())  # [main,30]
 
 
-	def get_fps(self, filename, is_calc: bool = False, is_log: bool = True):  # -> any
+	def get_fps(self, filename, is_calc: bool = False, is_log: bool = True):  # -> any #18
 
 		self.filename: str = filename
 
@@ -3831,7 +3776,7 @@ class MyMeta:
 		return fps  # no_fps(null)
 
 
-	def calc_vbr(self, width: int = 0, height: int = 0, filename: str = "") -> int:  # fps - r_frame_rate
+	def calc_vbr(self, width: int = 0, height: int = 0, filename: str = "") -> int:  # fps - r_frame_rate #33
 
 		self.filename: str = filename
 
@@ -4086,7 +4031,7 @@ class MyMeta:
 
 	Bitrate_kbps = (0.25 * 640 * 480 * 15) / 1024 = 1125 kbps
 	"""
-	def some_bitrate(self, filename, K: int = 0.25, width: int = 640, height: int = 480, fps: float = 15, ms: int = 1200):
+	def some_bitrate(self, filename, K: int = 0.25, width: int = 640, height: int = 480, fps: float = 15, ms: int = 1200): #6
 		try:
 			sb = (K * width * height * fps) // 1024 # ?kbps # is_assert_debug
 		except:
@@ -4095,7 +4040,7 @@ class MyMeta:
 		return (filename, width, height, fps, ms, sb) # bitrate_params(+result)
 
 
-	def get_gop(self, filename, fps: int = 0, is_log: bool = True) -> int:
+	def get_gop(self, filename, fps: int = 0, is_log: bool = True) -> int: #7
 
 		self.filename: str = filename
 
@@ -4130,7 +4075,7 @@ class MyMeta:
 		return self.gop
 
 
-	def calc_cbr(self, filename, abitrate: int = 128) -> int:
+	def calc_cbr(self, filename, abitrate: int = 128) -> int: #10
 		"""
 		Constant Bit Rate
 		You can target a bitrate with -b:v. This is best used with two-pass encoding. Adapting an example from the x264 encoding guide: your video is 10 minutes (600 seconds) long and an output of 50 MB is desired. Since bitrate = file size / duration:
@@ -4199,7 +4144,7 @@ class MyMeta:
 
 
 	def lossy_audio(self, filename, abitrate: int = 128, channels: int = 5, def_channels: int = 2,
-					audio_format: str = "aac") -> int:
+					audio_format: str = "aac") -> int: # 14
 		"""
 		Only certain audio codecs will be able to fit in your target output file.
 
@@ -4282,7 +4227,7 @@ class MyMeta:
 
 		return abr  # -b:a XXXk
 
-	def get_channels(self, filename, is_log: bool = True) -> int:
+	def get_channels(self, filename, is_log: bool = True) -> int: #5
 
 		self.filename: str = filename
 
@@ -4372,7 +4317,7 @@ class MyMeta:
 
 		return self.channel
 
-	def get_frame_quality(self, filename, is_log: bool = True) -> float:
+	def get_frame_quality(self, filename, is_log: bool = True) -> float: #2
 		"""
 		Let's try to understand this with some simple calculations, but as I said before are actually done by much more complex compression algorithms.
 		The calculation would be something like this:
@@ -4449,7 +4394,7 @@ class MyMeta:
 
 	# calc # is_run(script), is_zip(backup) # is_pad(unknown)
 	def sd_to_hd(self, input_file: str = "", swidth: int = 0, sheight: int = 0, is_run: bool = False,
-				 is_pad: bool = True, is_zip: bool = False, prefix: str = "_hd") -> str:
+				 is_pad: bool = True, is_zip: bool = False, prefix: str = "_hd") -> str: # 3
 
 		self.filename: str = input_file
 
@@ -4673,7 +4618,7 @@ class MyMeta:
 
 	# calc # is_run(script), is_zip(backup) # is_pad(.T.=sd_bars/.F.=hd_rescale)
 	def hd_to_sd(self, input_file: str = "", swidth: int = 0, sheight: int = 0, is_run: bool = False,
-			 is_pad: bool = True, is_zip: bool = False, prefix: str = "_sd") -> str:
+			 is_pad: bool = True, is_zip: bool = False, prefix: str = "_sd") -> str: # 3
 
 		self.filename: str = input_file
 
@@ -4892,7 +4837,7 @@ class MyTime:
 		self.seconds = seconds
 
 
-	def seconds_to_time(self, seconds: int) -> tuple:
+	def seconds_to_time(self, seconds: int) -> tuple: #5
 
 		try:
 			assert seconds, "Не указано время в ms для конвертации @seconds_to_time/seconds" # is_assert_debug
@@ -4940,7 +4885,7 @@ class MyTime:
 
 
 	# diff_date's -> hh:mm:ss
-	def seconds_to_hms(self, date1, date2) -> tuple:
+	def seconds_to_hms(self, date1, date2) -> tuple: #15
 
 		self.date1, self.date2 = date1, date2
 
@@ -4969,7 +4914,7 @@ class MyTime:
 			return (delta.days, delta.seconds // 3600, (delta.seconds // 60) % 60, delta.seconds % 60)
 
 
-	def sleep_with_count(self, ms: int = 2, is_log: bool = True): # ms = 2 # is_ms_not_global
+	def sleep_with_count(self, ms: int = 2, is_log: bool = True): # ms = 2 # is_ms_not_global #3
 		"""Подсчитать сколько времени задержка"""
 
 		# get_default
@@ -5018,7 +4963,7 @@ class MyString:
 		self.__time = time() # unix_time # hidden_attribute # self._MyString__time
 		pass # self.maintext, self.endtext, self.count, self.kw = maintext, endtext, count, kw
 
-	def last2str(self, maintxt: str = "", endtxt: str = "", count: int = 1, kw: str = "") -> str: # hide_args_use_slots
+	def last2str(self, maintxt: str = "", endtxt: str = "", count: int = 1, kw: str = "") -> str: # hide_args_use_slots #26
 		"""
 	описание (округление) количество ключевое-слово(для_словаря)
 	last2str(maintxt='кол-во', endtxt='в файле', count=1, kw='минут')
@@ -5140,7 +5085,7 @@ class File:
 
 
 # @log_error
-def clear_null_data_list(lst: list = []) -> list:
+def clear_null_data_list(lst: list = []) -> list: #4
 	"""Как удалить пустые строки из массива в python?"""
 
 	temp: list = []
@@ -5249,7 +5194,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 
 	files: list = []
 
-	def folder_gen2(folder_list=folder_list):
+	def folder_gen2(folder_list=folder_list): #4
 		for fl in folder_list:
 			if os.path.exists("".join([main_folder, fl])):
 				yield "".join([main_folder, fl])
@@ -5351,7 +5296,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 			if is_log:
 				write_log("debug vr_files", "ok [%s]" % str(datetime.now()))
 
-		def folder_gen21(files=files):
+		def folder_gen21(files=files): #2
 			for f in filter(lambda x: os.path.exists("\\".join(x.split("\\")[0:-1])), tuple(files)):
 				if all((os.listdir("\\".join(f.split("\\")[0:-1])), f)):
 					yield "\\".join(f.split("\\")[0:-1]).strip()
@@ -5700,7 +5645,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 							# debug/test
 
 							def diffreg(local_file: str = "",
-										nlocal_file: str = ""):  # local_shortfile(for_check) # nlocal_file(for_path)
+										nlocal_file: str = ""):  # local_shortfile(for_check) # nlocal_file(for_path) # 3
 
 								local_equal: list = []
 								nlocal_equal: list = []
@@ -5801,7 +5746,7 @@ move_files_list: list = []
 
 
 # @log_error
-async def process_move(file1: str = "", file2: str = "", is_copy: bool = False, is_eq: bool = True, avg_size: int = 0): # 27
+async def process_move(file1: str = "", file2: str = "", is_copy: bool = False, is_eq: bool = True, avg_size: int = 0): #40
 
 	global move_files_list
 
@@ -5924,7 +5869,7 @@ async def process_move(file1: str = "", file2: str = "", is_copy: bool = False, 
 
 
 # @log_error
-async def process_delete(file1: str = ""): #17
+async def process_delete(file1: str = ""): #14
 
 	try:
 		assert file1 and os.path.exists(file1), "Файл отсутствует @process_delete/file1" # is_assert_debug
@@ -5967,11 +5912,11 @@ async def process_delete(file1: str = ""): #17
 
 
 # @log_error
-def process_zip(cmd, filename):
+def process_zip(cmd, filename): #3
 	pass
 
 
-async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parsefile_to_normal_file
+async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parsefile_to_normal_file #7
 
 	write_log("debug start[seasonvar_parse]", "%s [%s]" % (filename, str(datetime.now())))
 
@@ -6016,7 +5961,7 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 	# 7f_The.White.Lotus.S02.E01.2022.WEB-DL.1080p.ExKinoRay.a1.31.10.22.mp4
 
 	# S01.E01 -> 01s01e # debug_by_some_name # debug/test # trouble_autorename -> parse_autorename
-	def trouble_autorename(filename):
+	def trouble_autorename(filename): #9
 		# clear_seasonvar_prefix_first
 
 		write_log("debug start[trouble_autorename]", "%s" % str(datetime.now()))
@@ -6041,7 +5986,7 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 		seep_regex = re.compile(r".*([sS]{1}[\d+]{1,2})\.([eE]{1}[\d+]{1,2}).*", re.I)
 		crop_filename_regex3 = re.compile(r"7f_(.*)\.[sS]{1}[\d+]{1,2}\.[eE]{1}[\d+]{1,2}", re.I)
 
-		def gen_to_list(filename=filename):
+		def gen_to_list(filename=filename): #2
 			for se in seep_regex.findall(filename):
 				for seval in se:
 					if seval:
@@ -6097,7 +6042,7 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 
 		return seep_str
 
-	async def soundtrack_save():
+	async def soundtrack_save(): #2
 		# вытащить_все_озвучки(поиграть_с_регистром)_из_списка_файлов(сохранить_их_в_логи)# debug/test
 
 		# @soundtrack.json(base) # @soundtrack.lst(only_soundtracks_seasonvar_311022) # logging_known_soundtrack_by_file # {filename:soundtrack}
@@ -6265,7 +6210,7 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 	# unique_filename_regex = re.compile(r"([^A-Za-zА-Яа-я0-9\-\.\(\)\[\]]{1,}|[nbsp]{4}|[\-]{2,})", re.I) # ([^A-Za-zА-Яа-я0-9\-\.\(\)\[\]]{1,}|[nbsp]{4}|[\-]{2,})) -> - # is_sep
 	# fname = unique_filename_regex.sub("", fname) ?-> fname = slugify(fname)
 
-	def parse_autorename(filename, ff_last: list = [], ind: int = 0) -> str:  # short/full/fullpath/listfiles # is_log=True
+	def parse_autorename(filename, ff_last: list = [], ind: int = 0) -> str:  # short/full/fullpath/listfiles # is_log=True #57
 
 		write_log("debug start[parse_autorename]", "%s" % str(datetime.now()))
 
@@ -7715,14 +7660,13 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 	return None  # if_not_found_template(None)
 
 
-def okay_parse(filename, is_log: bool = True):  # convert_parsefile_to_normal_file # debug/test
-
+def okay_parse(filename, is_log: bool = True):  # convert_parsefile_to_normal_file #1
 	return None  # pass
 
 if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 	# @optimial_time_for_jobs_by_xml(load)
-	async def load_timing_from_xml(ind: int = 0) -> tuple: # load_last_time # list -> tuple # debug(is_async)
+	async def load_timing_from_xml(ind: int = 0) -> tuple: # load_last_time # list -> tuple # debug(is_async) #20
 		timing = []
 
 		try:
@@ -7768,7 +7712,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			return (0, 0) # ok_but_null
 
 	# @log_error # get_time_if_have_ready_jobs_else_null_time
-	async def save_timing_to_xml(hours: int = 0, minutes: int = 0):
+	async def save_timing_to_xml(hours: int = 0, minutes: int = 0): #3
 
 		if hours > 24:
 			hours = hours % 24 # debug # if_more_24hour_find_mod
@@ -7831,7 +7775,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 	# update_is_ready_project # pass_x_of_4
 	# @log_error
-	async def project_done(path_to_done: str = path_to_done, is_debug: bool = False, is_learn: bool = False): # debug/test
+	async def project_done(path_to_done: str = path_to_done, is_debug: bool = False, is_learn: bool = False): #28
 
 		write_log("debug start[project_done]", "%s" % str(datetime.now()))
 
@@ -8689,7 +8633,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		write_log("debug end[project_done]", "%s" % str(datetime.now()))
 
 	# (2914 // 3600, (2914 // 60) % 60, 2914 % 60) # (0, 48, 34)
-	async def hh_mm_ss(legth: int = 0) -> str:
+	async def hh_mm_ss(legth: int = 0) -> str: #5
 
 		try:
 			assert length, "Ну указано сколько время ms надо конвертировать @hh_mm_ss/length" # is_assert_debug
@@ -8724,7 +8668,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 
 	# pass_x_of_4
-	async def project_update(is_debug: bool = False, is_copy_update: bool = False, is_skip_project: bool = False):  # update_downloaded_files(tvseries/cinema) # debug
+	async def project_update(is_debug: bool = False, is_copy_update: bool = False, is_skip_project: bool = False):  # update_downloaded_files(tvseries/cinema) #14
 		# copy_src - tvseries(update_folder), copy_src2 - cinema(update_folder), move_dst - @path_for_folder1(local_project)
 
 		path1: str = copy_src
@@ -8895,7 +8839,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		# filter_old_file_for_delete_by_compare
 
 		# @log_error
-		async def filter_date_file(lst: list = []):
+		async def filter_date_file(lst: list = []): #4
 
 			try:
 				# tmp = list(l_gen()) # new(yes_gen)
@@ -8934,7 +8878,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		# pass_1_of_2
 
-		def csl_date_filter(first=copy_src_list1, second=copy_src_list3):
+		def csl_date_filter(first=copy_src_list1, second=copy_src_list3): #3
 			for csl1 in first:
 				for csl3 in second:
 					if all((mdate_by_days(filename=csl1,is_any=True) > mdate_by_days(filename=csl3, is_any=True), csl1.split("\\")[-1] == csl3.split("\\")[-1], all((csl1 < csl3, csl1 != csl3)), csl1, csl3)):
@@ -9431,12 +9375,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		write_log("debug end[project_update]", "%s" % str(datetime.now()))
 
 
-	def some_formula(filename, is_log: bool = True):
+	def some_formula(filename, is_log: bool = True): #2
 		return
 
 
 	# @log_error
-	async def filter_from_list(lst: list = []) -> list:  # files -> current_files + base
+	async def filter_from_list(lst: list = []) -> list:  # files -> current_files + base #5
 
 		temp: list = []
 		some_files: list = []
@@ -9508,7 +9452,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 
 	# update_bigcinema_by_year # pass_x_of_4
-	async def update_bigcinema():
+	async def update_bigcinema(): #11
 
 		write_log("debug start[update_bigcinema]", "%s" % str(datetime.now()))
 
@@ -9660,13 +9604,13 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				delete_count: int = 0
 				rename_count: int = 0
 
-				def bc_gen(big_cinema=big_cinema):
+				def bc_gen(big_cinema=big_cinema): #2
 					for bc in filter(lambda x: x, tuple(big_cinema)):
 						yield bc.strip()
 
 				try:
 					tmp = list(bc_gen())  # new(yes_gen)
-				# tmp = [bc.strip() for bc in filter(lambda x: x, tuple(big_cinema))]
+					# tmp = [bc.strip() for bc in filter(lambda x: x, tuple(big_cinema))]
 				except:
 					tmp = []
 
@@ -9977,7 +9921,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 
 	# pass_x_of_4
-	async def true_project_rename(folder=path_for_folder1, folderlst=vr_folder):  # what_file_need_rename(try_change_project_folder_to_only_tv_series) # path_for_folder1 -> copy_src
+	async def true_project_rename(folder=path_for_folder1, folderlst=vr_folder):  # what_file_need_rename(try_change_project_folder_to_only_tv_series) # path_for_folder1 -> copy_src #18
 
 		# return
 
@@ -10650,10 +10594,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						if all((not sf in sfl, sf)):
 							sfl.append(sf.strip())
 
-				def short_files_gen(sfl=sfl):
+				def short_files_gen(sfl=sfl): #3
 					for s in filter(lambda x: x, tuple(sfl)):
 						yield s.strip()
-
 
 				if sfl:
 					try:
@@ -11080,7 +11023,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			temp = list(set(full_list))
 			lfiles = sorted(temp, reverse=False)
 
-		def files_to_short_by_full(lfiles=lfiles):
+		def files_to_short_by_full(lfiles=lfiles): #6
 			for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)):
 				if all((lf, crop_filename_regex.sub("", lf.split("\\")[-1]))):
 					yield lf.strip()
@@ -11879,7 +11822,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								write_log("debug favg_classify", "%s" % str(
 									{"big": favg_classify.count(1), "small": favg_classify.count(0)}))
 
-				async def crop_video_to_slices(splitLength: int = 5, flenname: list = flength_and_fname):
+				async def crop_video_to_slices(splitLength: int = 5, flenname: list = flength_and_fname): #2
 
 					set_line = set()
 
@@ -11951,7 +11894,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			"""
 
 			# filename = r"c:\downloads\mytemp\hello.mp4"
-			def extract_metadata(filename: str = ""): # is_no_async
+			def extract_metadata(filename: str = ""): # is_no_async #1
 
 				try:
 					assert filename and os.path.exists(filename), ""
@@ -11963,7 +11906,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				return ".".join([filename.split(".")[0],"txt"]) # metadata_by_source_in_folder_where_file
 
-			def import_metadata(inputfilename: str = "", metafilename: str = "", outputfilename: str = ""): # is_no_async
+			def import_metadata(inputfilename: str = "", metafilename: str = "", outputfilename: str = ""): # is_no_async #4
 				# ffmpeg -i original.mov -f ffmetadata -i metadata.txt compressed.mp4
 				# cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -f ffmetadata -i \"%s\" "%s" " % (inputfilename, metafilename, outputfilename)
 
@@ -11996,7 +11939,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			year_filter: list = []
 
 
-			def filebase_to_year(filecmdbase_dict=filecmdbase_dict):
+			def filebase_to_year(filecmdbase_dict=filecmdbase_dict): #6
 				for k, v in filecmdbase_dict.items():
 					if year_regex.findall(k):
 						yield k.strip()
@@ -12493,7 +12436,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			temp = list(set(full_list))
 			lfiles = sorted(temp, reverse=False)
 
-		def files_to_short_by_full(lfiles=lfiles):
+		def files_to_short_by_full(lfiles=lfiles): #6
 			for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)):
 				if all((lf, crop_filename_regex.sub("", lf.split("\\")[-1]))):
 					if lf:
@@ -12530,7 +12473,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		some_files = some_files[0:1000] if len(some_files) >= 1000 else some_files # no_limit(if_hide) # (5)
 
-		def files_to_short(some_files=some_files):
+
+		def files_to_short(some_files=some_files): #7
 			for sm in filter(lambda x: os.path.exists(x), tuple(some_files)):
 				if sm:
 					yield crop_filename_regex.sub("", sm.split("\\")[-1]).strip()
@@ -12728,7 +12672,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			temp = list(set(lfiles_sizes))
 			lfiles_sizes = sorted(temp, reverse=False)  # True = cba(sort) # False = abc(sort)
 
-			def files_by_sizes(lfiles_sizes=lfiles_sizes, lfiles=lfiles):
+			def files_by_sizes(lfiles_sizes=lfiles_sizes, lfiles=lfiles): #2
 				for ls in lfiles_sizes:
 					for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)):
 						if all((lf, os.path.getsize(lf) == ls, os.path.getsize(lf))):
@@ -13960,7 +13904,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			temp = list(set(full_list))  # unique_filenames
 			sorted_files = sorted(temp, reverse=False)
 
-		def files_to_short_by_full(sorted_files=sorted_files):
+
+		def files_to_short_by_full(sorted_files=sorted_files): #6
 			for sf in filter(lambda x: os.path.exists(x), tuple(sorted_files)):
 				if all((sf, crop_filename_regex.sub("", sf.split("\\")[-1]))):
 					if sf:
@@ -14056,7 +14001,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				fbhf.writelines("%d\n" % int(mhl) for mhl in filter(lambda x: x, tuple(max_hour_list))) # save_total_time_run_by_hour
 
 		if max_hour_list:  # hour_variables
-			temp = list(set([mhl.strip() for mhl in filter(lambda x: x, tuple(max_hour_list)) if
+			temp = list(set([int(mhl) for mhl in filter(lambda x: x, tuple(max_hour_list)) if
 							all((int(mhl) >= 0, mhl != None))]))  # hours_list(string)
 			max_hour_list = sorted(temp, reverse=False)  # abc(by_hours)
 
@@ -14158,7 +14103,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			# xml(job(src=k/len=length(k)/dst=v.split(" ")[-1])) # save_job_to_xml(mp4)
 
 			# @log_error
-			async def save_job_to_xml(src: str = "", dst: str = ""): # save_last_job # need_multiple_record
+			async def save_job_to_xml(src: str = "", dst: str = ""): # save_last_job # need_multiple_record #5
 
 				if src and not os.path.exists(src): # any((not src, not dst)) # null_path # not dst # no_dst # no_assert
 					return
@@ -14217,7 +14162,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					'''
 
 			# @optimial_job_for_jobs_by_xml(load)
-			async def load_job_from_xml() -> list: # load_last_job # dict_in_list
+			async def load_job_from_xml() -> list: # load_last_job # dict_in_list #4
 				jobs = []
 
 				try:
@@ -14454,14 +14399,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			'''
 
 			# database_backup_to_sql # is_database_backup
-			async def database_backup(file="video_resize.sql"):
+			async def database_backup(file="video_resize.sql"): #4
 				with open("".join([script_path, "\\%s" % file]), "w") as f:
 					for line in conn.iterdump():
 						f.write("%s\n" % line)
 
 			# database_recovery_from_sql # is_database_recovery
 			'''
-			async def database_recovery(file="video_resize.sql"):
+			async def database_recovery(file="video_resize.sql"): #4
 				sql_script: list = []
 
 				with open("".join([script_path, "\\%s" % file, "r") as f:
@@ -14518,7 +14463,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			# @create_function_for_sql(mutiple_data) # is_debug
 			'''
-			def logging_files(lst=multiple_data):
+			def logging_files(lst=multiple_data): #4
 
 				files_lst = []
 
@@ -14659,7 +14604,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			MM = MyMeta()
 
-			async def fcmd_generate():
+			async def fcmd_generate(): #2
 
 				global fcmd_filter
 
@@ -14752,7 +14697,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			fsizes2: int = 0
 			fsizes_max: int = 0
 
-			async def fsizes_generate():
+			async def fsizes_generate(): #2
 				global fsizes
 
 				for k, v in filecmdbase_dict.items():
@@ -15350,7 +15295,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			del MT
 
 
-			async def clear_m3u8(): # clear_old_m3u8_playlists
+			async def clear_m3u8(): # clear_old_m3u8_playlists #2
 				# current_files(dict)
 				try:
 					with open(vr_files, encoding="utf-8") as vff:
@@ -15382,7 +15327,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 					sleep(0.50)
 
-			async def update_combine_jobs(): # delete_not_exists_job
+			async def update_combine_jobs(): # delete_not_exists_job #2
 				try:
 					with open(vr_files, encoding="utf-8") as vff:
 						ff_last = json.load(vff)
@@ -15874,7 +15819,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						year_regex = re.compile(r"[\d+]{4}")
 						year_filter = []
 
-						def filebase_to_year(fb_dict=fb_dict):
+						def filebase_to_year(fb_dict=fb_dict): #6
 							for k, v in fb_dict.items():
 								if year_regex.findall(k):
 									yield k.strip()
