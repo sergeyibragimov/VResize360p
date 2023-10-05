@@ -620,10 +620,15 @@ async def date_to_week() -> dict:
 		except:
 			mts = ("", 0)
 
+		# temporary_hidden # debug
+		"""
 		try:
 			cnod = await calc_number_of_day(day=todays_date.day, month=todays_date.month, year=todays_date.year)
 		except:
 			cnod = (0,0,0,0, str(todays_date))
+		"""
+
+		cnod = (0, 0, 0, 0, str(todays_date))
 
 		# Using the isoweekday() function to
 		# retrieve the day of the given date
@@ -754,17 +759,15 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 	# delete_last_list_by_language # debug
 
-	need_delete = False
+	"""
+	# need_delete = False
 
 	try:
 		if os.path.exists(mydir3):
-			need_delete = True # if_need_delete(if_exists)
+			os.remove(mydir3) # if_need_delete(if_exists)
 	except BaseException as e:
-		need_delete = False # if_some_error(skip_delete)
 		logging.error("%s" % str(e))
-	finally:
-		if need_delete:
-			os.remove(mydir3)
+	"""
 
 	rus_regex = re.compile("_Rus", re.M)
 
@@ -1298,17 +1301,16 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 			with open(mydir2, "w", encoding="utf-8") as mf: # resave # debug # top_file_by_lang
 				mf.writelines("%s\n" % fs.strip() for fs in filter(lambda x: any((x[0] == x[0].upper(), x[0].isnumeric())), tuple(folder_scan))) # int/str # is_by_count(top)
 
-	need_delete = False
+	# temporary_hidden # debug
+	# """
+	# need_delete = False
 
 	try:
 		if os.path.exists(mydir3) and folder_scan:
-			need_delete = True # if_need_delete(if_exists)
+			os.remove(mydir3) # if_need_delete(if_exists)
 	except BaseException as e:
-		need_delete = False # if_some_error(skip_delete)
 		logging.error("%s" % str(e))
-	finally:
-		if need_delete:
-			os.remove(mydir3)
+	# """
 
 	# if folder_scan:
 		# print(folder_scan)
@@ -1527,6 +1529,7 @@ if curProcesses:
 	else: # is_no_break
 		print("Процессы проанализированы")
 
+	# debug
 	# exit
 
 	if any((big_process, pid_process)):
@@ -1579,7 +1582,7 @@ except:
 		json.dump(log_dict, lbf, ensure_ascii=False, indent=4)
 
 
-def write_log(desc: str = "", txt: str = str(None), is_error: bool = False, is_logging: bool = False):  # event_log(is_all)
+def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging: bool = False):  # event_log(is_all)
 
 	try:
 		assert desc and txt, "Пустое описание или комментарий @write_log/desc/txt" # is_assert_debug
@@ -1851,8 +1854,9 @@ async def myboottime() -> tuple:
 
 	return (hbd, is_hd_status)
 
-dayago, is_hd_status = asyncio.run(myboottime())
+# dayago, is_hd_status = asyncio.run(myboottime()) # temporary_hidden
 
+"""
 try:
 	if dayago != 666:
 		if is_hd_status:
@@ -1861,8 +1865,12 @@ try:
 			print("Hours ago %d" % dayago)
 except:
 	write_log("debug worktime[mac]", "Unknown days/hours")
+"""
 
 write_log("debug start", f"{str(datetime.now())}")
+
+# debug
+# exit()
 
 lanmacs: dict = {}
 
@@ -2181,7 +2189,7 @@ else:
 
 # debug
 # sys.exit() # spyder_debug
-exit() # python_debug(no_run) # debug # stop_if_some_error(is_long)
+# exit() # python_debug(no_run) # debug # stop_if_some_error(is_long)
 
 # dsize = dsize2 = 0
 
@@ -3101,7 +3109,7 @@ class Get_AR:
 
 		# @sar_base
 		# SAR of 640 / 480 = 4:3
-		sar_list = []
+		sar_list: list = []
 		sar_dict: dict = {}
 
 		try:
@@ -3119,8 +3127,8 @@ class Get_AR:
 
 		# @par_base
 		# (4/3) / (704/576) = 12/11 # (16/9) / (704/576) = 16/11 # PAR = DAR/SAR
-		par_list = []
-		par_dict = {}
+		par_list: list = []
+		par_dict: dict = {}
 
 		try:
 			with open(par_base, encoding="utf-8") as pjf:
@@ -3137,8 +3145,8 @@ class Get_AR:
 
 		# @dar_base
 		# DAR = SAR * PAR
-		dar_list = []
-		dar_dict = {}
+		dar_list: list = []
+		dar_dict: dict = {}
 
 		try:
 			with open(dar_base, encoding="utf-8") as djf:
@@ -3491,7 +3499,7 @@ class MyMeta:
 			return (int(width), int(height), False)  # logic2 # owidth/oheight/error(no_calc)
 		except BaseException as e: # if_error
 			logging.error("Нет данных для обновления маштаба или файл уже обработан @get_width_height/%s/%s [%s]" % (self.filename, "x".join([str(is_nwidth), str(is_nheight), str(width)]), str(e)))
-			return (int(width), int(height), False)
+			return (int(width), int(height), False) # logic3 # owidth/oheight/error(no_calc)
 		else:
 			logging.info("Данные по маштабу получены @get_width_height/%s/%s" % (self.filename, "x".join([str(width), str(height), str(width > is_nwidth)])))
 			return (int(is_nwidth), int(is_nheight), width > is_nwidth)  # logic1 # nwidth/nheight/calced(vwidth > owidth)
@@ -3789,9 +3797,22 @@ class MyMeta:
 
 		vbr_var: list = []
 
+		try:
+			assert width and height, "Высота или ширина указаны не верно @calc_vbr/width/height" # is_assert_debug
+		except AssertionError as err:
+			width, height, is_change = self.get_width_height(
+				filename=self.filename)  # pass_1_of_3 # no_calc("find_scale_and_status") # debug
+			logging.warning("Высота или ширина указаны не верно @calc_vbr/width/height/%s" % self.filename)
+			raise err
+		except BaseException as e:
+			logging.error("Высота или ширина указаны не верно @calc_vbr/width/height/%s [%s]" % (self.filename, str(e)))
+
+		# temporary_hidden
+		"""
 		if any((not width, not height)):
 			width, height, is_change = self.get_width_height(
 				filename=self.filename)  # pass_1_of_3 # no_calc("find_scale_and_status")
+		"""
 
 		if not os.path.exists(self.filename) or any(
 				(not filename, not width, not height)) or not fname:  # not_exists # if_some_null
@@ -12988,11 +13009,17 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		optimal_height: int = 0
 
 		try:
-			sb_calc = MM.some_bitrate(filename=lf, width=width, height=height, fps=MM.get_fps(lf), ms=MM.get_length(lf)) # check_assert # is_assert_debug
+			sb_calc = MM.some_bitrate(filename=lf, width=width, height=height, fps=MM.get_fps(lf), ms=MM.get_length(lf))
+			assert sb_calc, "" # check_assert # is_assert_debug
+		except AssertionError as err:
+			sb_calc = ()
+			print(Style.BRIGHT + Fore.RED + "%s" % lf)
+			raise err
+			logging.warning("debug some_bitrate[assert] %s" % lf)
 		except BaseException as e:
 			sb_calc = ()
-
 			print(Style.BRIGHT + Fore.RED + "%s [%s]" % (lf, str(e)))
+			logging.error("debug some_bitrate[error] %s [%s]" % (lf, str(e)))
 			write_log("debug some_bitrate[error]", "%s [%s]" % (lf, str(e)), is_error=True)
 		else:
 			# debug some_bitrate:c:\downloads\new\Gruz_proshlogo_01s01e.mp4 [('c:\\downloads\\new\\Gruz_proshlogo_01s01e.mp4', 640, 360, 25, 2821, 1406.25)]
@@ -13034,6 +13061,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			if all((optimal_height, optimal_height != height)): # logging_if_another
 				try:
 					optimal_width = (width / height) * optimal_height
+					assert width and height, "Высота или ширина указаны не верно @?/width/height" # is_assert_debug
+				except AssertionError as err:
+					optimal_width = None
+					logging.warning("Высота или ширина указаны не верно @?/width/height")
+					raise err
 				except ZeroDivisionError:
 					optimal_width = None
 
@@ -13157,7 +13189,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			abr = 0
 
 			print(Style.BRIGHT + Fore.RED + "%s [%s]" % (lf, str(e)))
-
 			write_log("debug lossy_audio[error]", "%s [%s]" % (lf, str(e)))
 
 		"""
@@ -15562,7 +15593,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					full_time = None
 					logging.error("Ошибка значения единицы времени %d/%d/%d [%s]" % (hh, mm, ss, str(e)))
 				else:
-					full_time = "{hh}:{mm}:{ss}" % (hh, mm, ss)
+					full_time = "%s:%s:%s" % (hh, mm, ss)
 
 				if full_time != None:
 					print(f"Сбор дполнительной информации об текущих устройствах... Готово!!! Найдено [{len(lanmacs)}] [{full_time}]") # is_color
