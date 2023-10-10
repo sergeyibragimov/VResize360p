@@ -823,27 +823,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 			fsf_set = set()
 
-			for fsf in folder_scan_full:
-
-				try:
-					assert folder_scan_full, "Пустой список или нет папок @folders_from_path/folder_scan_full" # is_assert_debug
-				except AssertionError as err: # if_null
-					logging.warning("Пустой список или нет папок @folders_from_path/folder_scan_full")
-					raise err
-					break
-				except BaseException as e: # if_error
-					logging.error("Пустой список или нет папок @folders_from_path/folder_scan_full [%s]" % str(e))
-					break
-
-				try:
-					assert fsf, "Нет имени папки @folders_from_path/fsf" # is_assert_debug
-				except AssertionError as err: # if_null
-					logging.warning("Нет имени папки @folders_from_path/fsf")
-					raise err
-					continue
-				except BaseException as e: # if_error
-					logging.error("Нет имени папки @folders_from_path/fsf [%s]" % str(e))
-					continue
+			for fsf in filter(lambda x: x, tuple(folder_scan_full)):
 
 				if not fsf.strip() in fsf_set:
 					fsf_set.add(fsf.strip()) # add_if_not_runned
@@ -878,7 +858,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 				# abspath_for_file
 				'''
-				for lf in list_files:
+				for lf in filter(lambda x: x, tuple(list_files)):
 					try:
 						ap = (os.path.abspath(lf))
 						isfile = (not os.path.isdir(lf))
@@ -916,7 +896,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 					dlist = []
 
-					for fl in full_list:
+					for fl in filter(lambda x: x, tuple(full_list)):
 
 						try:
 							with open(fl, encoding="utf-8") as flf: # codepage1
@@ -952,13 +932,15 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 							except:
 								dlist = []
 
-					for dl in dlist: # only_first_line # debug
+					for dl in filter(lambda x: x, tuple(dlist)): # only_first_line # debug
 
+						"""
 						if not dlist:
 							break # stop_if_null
 
 						if not dl:
 							continue # skip_null_line
+						"""
 
 						parse_list = []
 
@@ -1343,7 +1325,7 @@ async def ffp_generate():
 
 	await asyncio.gather(*ffp) # ok_if_runned / debug(is_no_return) # old
 
-asyncio.run(ffp_generate())
+# asyncio.run(ffp_generate()) # if_off_some_disk
 # '''
 
 # x[0].isalpha() -> x[0] == x[0].upper()
@@ -1362,6 +1344,8 @@ all_list_status = "Общий список в %d папках" % len(all_list) i
 
 print(Style.BRIGHT + Fore.YELLOW + "%d" % len(all_list), Style.BRIGHT + Fore.WHITE + "%s" % all_list_status)
 
+# if_off_some_disk
+"""
 try:
 	assert all_list, "Пустой список all_list" # is_assert_debug
 except AssertionError as err: # if_null
@@ -1371,6 +1355,7 @@ except AssertionError as err: # if_null
 except BaseException as e: # if_error
 	logging.error("Пустой список all_list [%s]" % str(e))
 	exit()
+"""
 
 abc_or_num_regex = re.compile(r"^[A-Z0-9].*", re.I)
 
@@ -1638,15 +1623,6 @@ def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging:
 		for lp in filter(lambda x: x, tuple(lprint)):
 
 			try:
-				assert lprint, "" # is_assert_debug
-			except AssertionError as err: # if_null
-				raise err
-				break
-			except BaseException as e: # if_error
-				raise e
-				break
-
-			try:
 				assert len(lp.strip()) > 0, "" # is_assert_debug
 			except AssertionError as err: # if_null
 				raise err
@@ -1854,9 +1830,8 @@ async def myboottime() -> tuple:
 
 	return (hbd, is_hd_status)
 
-# dayago, is_hd_status = asyncio.run(myboottime()) # temporary_hidden
+dayago, is_hd_status = asyncio.run(myboottime()) # temporary_hidden
 
-"""
 try:
 	if dayago != 666:
 		if is_hd_status:
@@ -1865,7 +1840,6 @@ try:
 			print("Hours ago %d" % dayago)
 except:
 	write_log("debug worktime[mac]", "Unknown days/hours")
-"""
 
 write_log("debug start", f"{str(datetime.now())}")
 
@@ -2289,9 +2263,9 @@ async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 # dspace(+reserve) # midnight - 6am # 11pm # no_overload # 2
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22))) # dspace(is_need_hide) / less_7am_or_more_10pm
 # dspace(+reserve) # midnight - 6am # no_overload # 3
-is_status: tuple = (not dsize2, ctme.hour < mytime["sleeptime"][1]) # dspace(is_need_hide) / less_7am
+# is_status: tuple = (not dsize2, ctme.hour < mytime["sleeptime"][1]) # dspace(is_need_hide) / less_7am
 # dspace(+reserve) # midnight - 6am # 11pm # filter_run_time # no_overload # 4
-# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22, ctme.hour + dayago > 23))) # dspace(is_need_hide) / less_7am_or_more_10pm_or_optimal_run_hours
+is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22, ctme.hour + dayago > 23))) # dspace(is_need_hide) / less_7am_or_more_10pm_or_optimal_run_hours
 # no_dspace # midnight - 6am # 11pm # no_overload # 5
 # is_status: tuple = (ctme.hour < mytime["sleeptime"][1], ctme.hour > 22) # less_7am_or_more_10pm
 
@@ -2548,27 +2522,7 @@ async def days_by_list(lst: list = [], is_avg: bool = False): #8
 		lst: list = []
 
 	with unique_semaphore:
-		for l in lst:
-
-			try:
-				assert lst, "Пустой список или нет файлов @days_by_list/lst" # is_assert_debug
-			except AssertionError as err: # if_null
-				logging.warning("Пустой список или нет файлов @days_by_list/lst")
-				raise err
-				break
-			except BaseException as e: # if_error
-				logging.error("Пустой список или нет файлов @days_by_list/lst [%s]" % str(e))
-				break
-
-			try:
-				assert l, "Пустое значение списка @days_by_list/l" # is_assert_debug
-			except AssertionError as err: # if null:
-				logging.warning("Пустое значение списка @days_by_list/l")
-				raise err
-				continue
-			except BaseException as e: # if_error
-				logging.error("Пустое значение списка @days_by_list/l [%s]" % str(e))
-				continue
+		for l in filter(lambda x: x, tuple(lst)):
 
 			try:
 				fdate = os.path.getmtime(l)  # unixdate
@@ -4024,7 +3978,7 @@ class MyMeta:
 		else:
 			if all((width, height)):
 				if all((height < 720, motion <= 2)):
-					vbr_var.append(int(width * height + fps + 8) // 1000)
+					vbr_var.append(int(width * height * fps * 8) // 1000)
 				elif all((height >= 720, motion == 4)):
 					vbr_var.append(int(width * height * fps * motion * 0.07) // 1000)
 		'''
@@ -5242,25 +5196,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 		full_folder2 = sorted(tmp, reverse=False)
 
 		with unique_semaphore:
-			for ff2 in full_folder2:
-
-				try:
-					assert full_folder2, "Пустой список или нет списка папок @folders_filter/full_folder2" # is_assert_debug
-				except AssertionError as err: # if_null
-					logging.warning("Пустой список или нет списка папок @folders_filter/full_folder2")
-					raise err
-					break
-				except BaseException as e: # if_error
-					logging.error("Пустой список или нет списка папок @folders_filter/full_folder2 [%s]" % str(e))
-					break
-
-				try:
-					assert ff2, "" # is_assert_debug # assert os.path.exists(ff2)
-				except AssertionError as err: # if_null
-					raise err
-					continue
-				except BaseException: # if_error
-					continue
+			for ff2 in filter(lambda x: x, tuple(full_folder2)):
 
 				if os.path.exists(ff2):
 					try:
@@ -5356,27 +5292,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 					except:
 						check_folders: list = []
 					else:
-						for cf in check_folders:
-
-							try:
-								assert check_folders, "Пустой список или нет списка папок @folders_filter/check_folders" # is_assert_debug
-							except AssertionError as err: # if_null
-								logging.warning("Пустой список или нет списка папок @folders_filter/check_folders")
-								raise err
-								break
-							except BaseException as e: # if_error
-								logging.error("Пустой список или нет списка папок @folders_filter/check_folders [%s]" % str(e))
-								break
-
-							try:
-								assert cf and os.path.exists(cf), "Папка не существует @folders_filter/cf" # is_assert_debug
-							except AssertionError as err: # if_null
-								logging.warning("Папка не существует @folders_filter/%s" % cf)
-								raise err
-								continue
-							except BaseException as e: # if_error
-								logging.error("Папка не существует @folders_filter/%s [%s]" % (cf, str(e)))
-								continue
+						for cf in filter(lambda x: x, tuple(check_folders)):
 
 							if not os.path.exists(cf):
 								write_log("debug check_folders", "Папка %s не найдена [%s]" % (
@@ -5487,8 +5403,8 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 	max_cnt: int = len(lst)
 
 	# pass_1_of_2
-	for l in lst:
-		for ff in full_folder:
+	for l in filter(lambda x: x, tuple(lst)):
+		for ff in filter(lambda y: y, tuple(full_folder)):
 
 			try:
 				fname = l.split("\\")[-1].strip()  # short_job(src)
@@ -7920,27 +7836,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		MM = MyMeta() #1
 
-		for pf in proj_files:
-
-			try:
-				assert proj_files, "Пустой список или нет файлов @project_done/proj_files" # is_assert_debug
-			except AssertionError as err: # if_null
-				logging.warning("Пустой список или нет файлов @project_done/proj_files")
-				raise err
-				break
-			except BaseException as e: # if_error
-				logging.error("Пустой список или нет файлов @project_done/proj_files [%s]" % str(e))
-				break
-
-			try:
-				assert pf and os.path.exists(pf), "Файл отсутствует @project_done/pf" # is_assert_debug
-			except AssertionError as err: # if_null
-				logging.warning("Файл отсутствует @project_done/%s" % pf)
-				raise err
-				continue
-			except BaseException as e: # if_error
-				logging.warning("Файл отсутствует @project_done/%s [%s]" % (pf, str(e)))
-				continue
+		for pf in filter(lambda x: x, tuple(proj_files)):
 
 			try:
 				gl = MM.get_length(pf)
@@ -8583,25 +8479,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					  "Осталось %d задач(и), которые надо очистить" % temp.count(True))
 
 					with unique_semaphore:
-						for pf in proj_files:
-
-							try:
-								assert proj_files, "Пустой список или нет файлов @project_done/proj_files" # is_assert_debug
-							except AssertionError as err: # if_null
-								logging.warning("Пустой список или нет файлов @project_done/proj_files")
-								raise err
-								break
-							except BaseException as e: # if_error
-								logging.error("Пустой список или нет файлов @project_done/proj_files [%s]" % str(e))
-								break
-
-							try:
-								assert pf, "" # is_assert_debug # assert os.path.exists(pf)
-							except AssertionError as err: # if_null
-								raise err
-								continue
-							except BaseException: # if_error
-								continue
+						for pf in filter(lambda x: x, tuple(proj_files)):
 
 							try:
 								fname = pf.split("\\")[-1].strip()
@@ -8872,21 +8750,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			lst = tmp # sorted/sort
 
-			for l in lst:  # filter(lambda x: os.path.exists(x), tuple(lst)):  # new(yes_gen)
-
-				try:
-					assert lst, "" # is_assert_debug
-				except AssertionError: # if_null
-					break
-				except BaseException: # if_error
-					break
-
-				try:
-					assert l, "" # is_assert_debug
-				except AssertionError: # if_null
-					continue
-				except BaseException: # if_error
-					continue
+			for l in filter(lambda x: x, tuple(lst)): # new(yes_gen)
 
 				if os.path.exists(l) and not is_skip_project:
 					os.remove(l)
@@ -8956,22 +8820,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			list_total = tmp # sorted/sort
 
-			for lt in list_total:
-
-				try:
-					assert list_total, "" # is_assert_debug
-				except AssertionError: # if_null
-					break
-				except BaseException: # if_error
-					break
-
-				try:
-					assert lt, "" # is_assert_debug
-				except AssertionError: # if_null
-					continue
-				except BaseException: # if_error
-					continue
-
+			for lt in filter(lambda x: x, tuple(list_total)):
+				
 				try:
 					fname = lt.split("\\")[-1].strip()
 				except:
@@ -9097,17 +8947,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			skip_file = set()
 
 			with unique_semaphore:
-				for fl in copy_src_list3:  # new_files(project) # dont_check_exists
-
-					try:
-						assert copy_src_list3, "Пустой список или нет файлов @project_update/copy_src_list3" # is_assert_debug
-					except AssertionError as err: # if_null
-						logging.warning("Пустой список или нет файлов @project_update/copy_src_list3")
-						raise err
-						break
-					except BaseException as e: # if_error
-						logging.error("Пустой список или нет файлов @project_update/copy_src_list3 [%s]" % str(e))
-						break
+				for fl in filter(lambda x: x, tuple(copy_src_list3)):  # new_files(project) # dont_check_exists
 
 					try:
 						fname = fl.split("\\")[-1].strip()
@@ -9130,25 +8970,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						# continue
 
 			with unique_semaphore:
-				for fl in copy_src_list3:  # dont_check_exists
-
-					try:
-						assert copy_src_list3, "Пустой список или нет файлов @project_update/copy_src_list3" # is_assert_debug
-					except AssertionError as err: # if_null
-						logging.warning("Пустой список или нет файлов @project_update/copy_src_list3")
-						raise err
-						break
-					except BaseException as e: # if_error
-						logging.error("Пустой список или нет файлов @project_update/copy_src_list3 [%s]" % str(e))
-						break
-
-					try:
-						assert fl, "" # is_assert_debug # assert os.path.exists(fl)
-					except AssertionError as err: # if_null
-						raise err
-						continue
-					except BaseException: # if_error
-						continue
+				for fl in filter(lambda x: x, tuple(copy_src_list3)):  # dont_check_exists
 
 					try:
 						fname = fl.split("\\")[-1].strip()
@@ -9197,7 +9019,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		skip_file = set()
 
-		for ffj in files2:  # is_dict
+		for ffj in files2:  # for k, v in files2.items() # is_dict
 
 			try:
 				assert files2, "Пустой список или нет файлов files2" # is_assert_debug
@@ -9546,13 +9368,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			pb_status = len(project_bigcinema) if len(project_bigcinema) > 0 else 0 # is_no_lambda
 			write_log("debug project_bigcinema[count]", "%d" % pb_status)
 
-		for pb in project_bigcinema:
+		for pb in filter(lambda x: x, tuple(project_bigcinema)):
 
 			if not project_bigcinema:
 				break
-
-			if not pb:
-				continue
 
 			try:
 				clear_year = "".join([file_cinema, pb]).strip()
@@ -9625,158 +9444,145 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				delete_count: int = 0
 				rename_count: int = 0
 
-				def bc_gen(big_cinema=big_cinema): #2
-					for bc in filter(lambda x: x, tuple(big_cinema)):
-						yield bc.strip()
+				for bc in filter(lambda x: x, tuple(big_cinema)): # os.path.exists(x) -> x # new(yes_gen)
 
-				try:
-					tmp = list(bc_gen())  # new(yes_gen)
-					# tmp = [bc.strip() for bc in filter(lambda x: x, tuple(big_cinema))]
-				except:
-					tmp = []
+					try:
+						fname2 = bc.split("\\")[-1].strip()
+					except:
+						fname2 = ""
 
-				big_cinema = tmp
-				if big_cinema:
+					fext = ""
 
-					for bc in big_cinema:  # filter(lambda x: x, tuple(big_cinema)):  # os.path.exists(x) -> x # new(yes_gen)
+					if all((fname1 == fname2, fname1, fname2)):
+						fext = fname1.split("\\")[-1].split(".")[0].strip() + ".bak"
 
-						try:
-							fname2 = bc.split("\\")[-1].strip()
-						except:
-							fname2 = ""
+					# original_error_meta_or_null_size_or_null_length
 
-						fext = ""
+					is_error = False
 
-						if all((fname1 == fname2, fname1, fname2)):
-							fext = fname1.split("\\")[-1].split(".")[0].strip() + ".bak"
+					if any((MM.get_meta(bc) == False, os.path.getsize(bc) == 0, MM.get_length(bc) == 0)) and all((fext, k.split("\\")[-1] == bc.split("\\")[-1])) or not os.path.exists(bc):  # meta(error) # null_size(0) # null_length(0) # ready_and_project_equal_shortfilename
 
-						# original_error_meta_or_null_size_or_null_length
+						if MM.get_meta(bc) == False:
+							error_dict[bc.strip()] = "get_meta[error] [%s]" % str(datetime.now())
 
-						is_error = False
+						if os.path.getsize(bc) == 0:
+							error_dict[bc.strip()] = "get_size[error] [%s]" % str(datetime.now())
 
-						if any((MM.get_meta(bc) == False, os.path.getsize(bc) == 0, MM.get_length(bc) == 0)) and all((fext, k.split("\\")[-1] == bc.split("\\")[-1])) or not os.path.exists(bc):  # meta(error) # null_size(0) # null_length(0) # ready_and_project_equal_shortfilename
+						if MM.get_length(bc) == 0:
+							error_dict[bc.strip()] = "get_length[error] [%s]" % str(datetime.now())
 
-							if MM.get_meta(bc) == False:
-								error_dict[bc.strip()] = "get_meta[error] [%s]" % str(datetime.now())
+						bigcinema_folder = "\\".join(bc.split("\\")[:-1]) + "\\"
 
-							if os.path.getsize(bc) == 0:
-								error_dict[bc.strip()] = "get_size[error] [%s]" % str(datetime.now())
+						mp4_to_bak = "".join([bigcinema_folder, fext])
 
-							if MM.get_length(bc) == 0:
-								error_dict[bc.strip()] = "get_length[error] [%s]" % str(datetime.now())
+						# move(bc, mp4_to_bak) # rename_original_to_bak_if_error_meta
 
-							bigcinema_folder = "\\".join(bc.split("\\")[:-1]) + "\\"
+						# write_log("debug mp4_to_back", "%s" % mp4_to_bak)
+						write_log("debug mp4_to_back!", "%s" % mp4_to_bak)
 
-							mp4_to_bak = "".join([bigcinema_folder, fext])
+						rename_count += 1
 
-							# move(bc, mp4_to_bak) # rename_original_to_bak_if_error_meta
+						print(Style.BRIGHT + Fore.RED + "-(%s)-" % mp4_to_bak, "[%d]" % rename_count,
+							  end="\n")  # rename_by_error_length
+						write_log("debug bigcinema[rename]", "-(%s)-" % mp4_to_bak,
+								  "[%d]" % rename_count)  # delete -> rename
 
-							# write_log("debug mp4_to_back", "%s" % mp4_to_bak)
-							write_log("debug mp4_to_back!", "%s" % mp4_to_bak)
+						is_error = True
 
-							rename_count += 1
+						if all((fname1 == fname2, fname1, fname2, not is_error)):  # equal_filename_without_errors
 
-							print(Style.BRIGHT + Fore.RED + "-(%s)-" % mp4_to_bak, "[%d]" % rename_count,
-								  end="\n")  # rename_by_error_length
-							write_log("debug bigcinema[rename]", "-(%s)-" % mp4_to_bak,
-									  "[%d]" % rename_count)  # delete -> rename
+							try:
+								gl1 = MM.get_length(k)
+							except:
+								gl1 = 0
 
-							is_error = True
+							try:
+								gl2 = MM.get_length(bc)
+							except:
+								gl2 = 0
 
-							if all((fname1 == fname2, fname1, fname2, not is_error)):  # equal_filename_without_errors
+							is_clean = all((gl1 in range(gl2, gl2 - 5, -1), gl1, gl2))  # big_cinema
 
+							if is_clean and os.path.exists(k):
+
+								# load_meta_jobs(filter) #5
 								try:
-									gl1 = MM.get_length(k)
+									with open(some_base, encoding="utf-8") as sbf:
+										somebase_dict = json.load(sbf)
 								except:
-									gl1 = 0
+									somebase_dict = {}
 
-								try:
-									gl2 = MM.get_length(bc)
-								except:
-									gl2 = 0
+									with open(some_base, "w", encoding="utf-8") as sbf:
+										json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 
-								is_clean = all((gl1 in range(gl2, gl2 - 5, -1), gl1, gl2))  # big_cinema
+								first_len: int = len(somebase_dict)
 
-								if is_clean and os.path.exists(k):
+								# clean_project_from_base.append(fullname2)
 
-									# load_meta_jobs(filter) #5
+								somebase_dict = {k: v for k, v in somebase_dict.items() if os.path.exists(k)}  # exists_only # pass_1_of_2
+								somebase_dict = {k: v for k, v in somebase_dict.items() if k != bc}  # clear_if_ready(delete)  # big_cinema # pass_2_of_2
+
+								second_len: int = len(somebase_dict)
+
+								if all((second_len, second_len <= first_len)):  # clear_ready(big_cinema)
+									with open(some_base, "w", encoding="utf-8") as sbf:
+										json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
+
+									print(Style.BRIGHT + Fore.YELLOW + "Подготовка к переносу файла",
+										Style.BRIGHT + Fore.WHITE + "%s" % bc)
+									write_log("debug bc[move]", "Подготовка к переносу файла %s" % bc)
+
 									try:
-										with open(some_base, encoding="utf-8") as sbf:
-											somebase_dict = json.load(sbf)
+										fsize: int = os.path.getsize(k)
+										dsize: int = disk_usage(bc[0] + ":\\").free
 									except:
-										somebase_dict = {}
+										fsize: int = 0
+										dsize: int = 0
+									else:
+										if all((fsize, dsize, int(fsize // (dsize / 100)) <= 100)):
+											move(k, bc)  # update_if_ok_length_by_move
 
-										with open(some_base, "w", encoding="utf-8") as sbf:
-											json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
+											move_count += 1
 
-									first_len: int = len(somebase_dict)
+											print(Style.BRIGHT + Fore.YELLOW +
+												"%s [%d]" % ("-=>".join([k, bc]), move_count))  # update_by_length
 
-									# clean_project_from_base.append(fullname2)
+											write_log("debug bigcinema[move]", "%s [%d]" % ("-=>".join([k, bc]), move_count))
 
-									somebase_dict = {k: v for k, v in somebase_dict.items() if os.path.exists(k)}  # exists_only # pass_1_of_2
-									somebase_dict = {k: v for k, v in somebase_dict.items() if k != bc}  # clear_if_ready(delete)  # big_cinema # pass_2_of_2
+										elif all((fsize >= 0, dsize, int(fsize // (dsize / 100)) > 100)) or not dsize: # fspace(bad) # dspace(bad)
+											print(Style.BRIGHT + Fore.YELLOW + "debug bigcinema[fspace] \'%s\'" % full_to_short(bc))
+											write_log("debug bigcinema[fspace]", "%s" % bc)
+											MyNotify(txt="%s" % full_to_short(bc), icon=icons["error"])
+											continue
 
-									second_len: int = len(somebase_dict)
+									# @load_current_jobs
+									try:
+										with open(filecmd_base, encoding="utf-8") as fbf:
+											fcmd = json.load(fbf)
+									except:
+										fcmd = {}
 
-									if all((second_len, second_len <= first_len)):  # clear_ready(big_cinema)
-										with open(some_base, "w", encoding="utf-8") as sbf:
-											json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
+										with open(filecmd_base, "w", encoding="utf-8") as fbf:
+											json.dump(fcmd, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
-										print(Style.BRIGHT + Fore.YELLOW + "Подготовка к переносу файла",
-											Style.BRIGHT + Fore.WHITE + "%s" % bc)
-										write_log("debug bc[move]", "Подготовка к переносу файла %s" % bc)
+									first_len = len(fcmd)
 
-										try:
-											fsize: int = os.path.getsize(k)
-											dsize: int = disk_usage(bc[0] + ":\\").free
-										except:
-											fsize: int = 0
-											dsize: int = 0
-										else:
-											if all((fsize, dsize, int(fsize // (dsize / 100)) <= 100)):
-												move(k, bc)  # update_if_ok_length_by_move
+									if all((fcmd, somebase_dict)):
+										fcmd = {k:v for k, v in fcmd.items() if os.path.exists(k) and any((k.strip() in [*somebase_dict], not [*somebase_dict]))}
 
-												move_count += 1
+									second_len = len(fcmd)
 
-												print(Style.BRIGHT + Fore.YELLOW +
-													"%s [%d]" % ("-=>".join([k, bc]), move_count))  # update_by_length
+									if all((second_len, second_len <= first_len)):
+										with open(filecmd_base, "w", encoding="utf-8") as fbf:
+											json.dump(fcmd, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
-												write_log("debug bigcinema[move]", "%s [%d]" % ("-=>".join([k, bc]), move_count))
+							elif not is_clean and os.path.exists(k):
+								os.remove(k)  # del_ready_with_error_length
 
-											elif all((fsize >= 0, dsize, int(fsize // (dsize / 100)) > 100)) or not dsize: # fspace(bad) # dspace(bad)
-												print(Style.BRIGHT + Fore.YELLOW + "debug bigcinema[fspace] \'%s\'" % full_to_short(bc))
-												write_log("debug bigcinema[fspace]", "%s" % bc)
-												MyNotify(txt="%s" % full_to_short(bc), icon=icons["error"])
-												continue
+								delete_count += 1
 
-										# @load_current_jobs
-										try:
-											with open(filecmd_base, encoding="utf-8") as fbf:
-												fcmd = json.load(fbf)
-										except:
-											fcmd = {}
-
-											with open(filecmd_base, "w", encoding="utf-8") as fbf:
-												json.dump(fcmd, fbf, ensure_ascii=False, indent=4, sort_keys=False)
-
-										first_len = len(fcmd)
-
-										if all((fcmd, somebase_dict)):
-											fcmd = {k:v for k, v in fcmd.items() if os.path.exists(k) and any((k.strip() in [*somebase_dict], not [*somebase_dict]))}
-
-										second_len = len(fcmd)
-
-										if all((second_len, second_len <= first_len)):
-											with open(filecmd_base, "w", encoding="utf-8") as fbf:
-												json.dump(fcmd, fbf, ensure_ascii=False, indent=4, sort_keys=False)
-
-								elif not is_clean and os.path.exists(k):
-									os.remove(k)  # del_ready_with_error_length
-
-									delete_count += 1
-
-									print(Style.BRIGHT + Fore.RED + "-(%s)- [%d]" % (k, rename_count), end="\n")
-									write_log("debug bigcinema[delete]", "-(%s)- [%d]" % (k, rename_count))
+								print(Style.BRIGHT + Fore.RED + "-(%s)- [%d]" % (k, rename_count), end="\n")
+								write_log("debug bigcinema[delete]", "-(%s)- [%d]" % (k, rename_count))
 
 			if error_dict: # some_errors
 				error_dict = {k: v for k, v in error_dict.items() if os.path.exists(k)} # exists_only
@@ -9834,7 +9640,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						avg_size = 0
 
 				with unique_semaphore:
-					for l1 in list1:
+					for l1 in filter(lambda x: x, tuple(list1)):
 
 						try:
 							assert list1, "Пустой список list1" # is_assert_debug
@@ -9845,14 +9651,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						except BaseException as e: # if_error
 							logging.error("Пустой список list1 [%s]" % str(e))
 							break
-
-						try:
-							assert l1, "" # is_assert_debug # assert os.path.exists(l1)
-						except AssertionError as err: # if_null
-							raise err
-							continue
-						except BaseException: # if_error
-							continue
 
 						try:
 							fname = l1.split("\\")[-1].strip()
@@ -10986,7 +10784,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					break
 
 				try:
-					assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert_debug
+					assert os.path.exists(lf), "Файл отсутствует lf" # is_assert_debug
 				except AssertionError: # as err: # if_null
 					logging.warning("Файл отсутствует %s" % lf)
 					# raise err
@@ -11169,27 +10967,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		date1 = datetime.now()
 
 		with unique_semaphore:
-			for lf in filter(lambda x: x, tuple(lfiles)):  # filter(lambda x: os.path.exists(x), tuple(lfiles)):  # new(yes_gen)
-
-				try:
-					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
-				except AssertionError as err: # if_null
-					logging.warning("Пустой список или нет файлов lfiles")
-					raise err
-					break
-				except BaseException as e: # if_error
-					logging.error("Пустой список или нет файлов lfiles [%s]" % str(e))
-					break
-
-				try:
-					assert lf and os.path.exists(lf), "Файл отсутствует lf"
-				except AssertionError: # as err: # if_null
-					logging.warning("Файл отсутствует %s" % lf)
-					# raise err
-					continue
-				except BaseException as e: # if_error
-					logging.error("Файл отсутствует %s [%s]" % (lf, str(e)))
-					continue
+			for lf in filter(lambda x: x, tuple(lfiles)): # new(yes_gen)
 
 				cnt += 1
 
@@ -11648,27 +11426,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		h, m = 0, 0
 
 	with unique_semaphore:
-		for lf in lfiles:  # filter(lambda x: os.path.exists(x), tuple(lfiles)):
-
-			try:
-				assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
-			except AssertionError as err: # if_null
-				logging.warning("Пустой список или нет файлов lfiles")
-				raise err
-				break
-			except BaseException as e: # if_error
-				logging.error("Пустой список или нет файлов lfiles [%s]" % str(e))
-				break
-
-			try:
-				assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert_debug
-			except AssertionError: # as err: # if_null
-				logging.warning("Файл отсутствует %s" % lf)
-				# raise err
-				continue
-			except BaseException as e: # if_error
-				logging.error("Файл отсутствует %s [%s]" % (lf, str(e)))
-				continue
+		for lf in filter(lambda x: x, tuple(lfiles)):
 
 			cnt += 1
 
@@ -11843,12 +11601,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								write_log("debug favg_classify", "%s" % str(
 									{"big": favg_classify.count(1), "small": favg_classify.count(0)}))
 
-				async def crop_video_to_slices(splitLength: int = 5, flenname: list = flength_and_fname): #2
+				async def crop_video_to_slices(splitLength: int = 5, filename: list = flength_and_fname): #2
 
 					set_line = set()
 
 					try:
-						assert flenname, "" # is_assert_debug
+						assert filename, "" # is_assert_debug
 					except AssertionError as err: # if_null
 						raise err # logging
 						return
@@ -11856,7 +11614,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						return
 					else:
 						# splitLength = 5
-						for fln in flenname:
+						for fln in filename:
 							for i in range(int(fln[0]/splitLength)):
 								start = i * 60
 								length= splitLength * 60
@@ -12386,27 +12144,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			h, m = 0, 0
 
 		with unique_semaphore:
-			for lf in lfiles:
-
-				try:
-					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
-				except AssertionError as err: # if_null
-					logging.warning("Пустой список или нет файлов lfiles")
-					raise err
-					break
-				except BaseException as e: # if_error
-					logging.error("Пустой список или нет файлов lfiles [%s]" % str(e))
-					break
-
-				try:
-					assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert_debug
-				except AssertionError: # as err: # if_null
-					logging.warning("Файл отсутствует %s" % lf)
-					# raise err
-					continue
-				except BaseException as e: # if_error
-					logging.error("Файл отсутствует %s [%s]" % (lf, str(e)))
-					continue
+			for lf in filter(lambda x: x, tuple(lfiles)):
 
 				cnt += 1
 
@@ -12592,27 +12330,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		date1 = datetime.now()
 
 		with unique_semaphore:
-			for lf in filter(lambda x: x, tuple(lfiles)):  # filter(lambda x: os.path.exists(x), tuple(lfiles)):
-
-				try:
-					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
-				except AssertionError as err: # if_null
-					logging.warning("Пустой список или нет файлов lfiles")
-					raise err
-					break
-				except BaseException as e: # if_error
-					logging.error("Пустой список или нет файлов lfiles [%s]" % str(e))
-					break
-
-				try:
-					assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert_debug
-				except AssertionError as err: # if_null
-					logging.warning("Файл отсутствует %s" % lf)
-					raise err
-					continue
-				except BaseException as e: # if_error
-					logging.error("Файл отсутствует %s [%s]" % (lf, str(e)))
-					continue
+			for lf in filter(lambda x: x, tuple(lfiles)):
 
 				try:
 					fname = lf.strip("\\")[-1]
@@ -12753,27 +12471,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	date1 = datetime.now()
 
 	# with unique_semaphore:
-	for lf in lfiles:
-
-		try:
-			assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
-		except AssertionError as err: # if_null
-			logging.warning("Пустой список или нет файлов lfiles")
-			raise err
-			break
-		except BaseException as e: # if_error
-			logging.error("Пустой список или нет файлов lfiles [%s]" % str(e))
-			break
-
-		try:
-			assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert_debug
-		except AssertionError as err: # if_null
-			logging.warning("Файл отсутствует %s" % lf)
-			raise err
-			continue
-		except BaseException as e: # if_error
-			logging.error("Файл отсутствует %s [%s]" % (lf, str(e)))
-			continue
+	for lf in filter(lambda x: x, tuple(lfiles)):
 
 		cnt += 1
 
@@ -13388,7 +13086,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						json.dump(fcmd, fbf, ensure_ascii=False, indent=4, sort_keys=False)
 
 			else:
-				# --- (is_not_optimized/is_optimized) ---
+				# --- (is_unknown) ---
 
 				try:
 					write_log("debug somebase_dict[3]", "%s [%s] [%s]" % (lf.strip(), ":".join(
@@ -13502,7 +13200,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		if all((is_change, width, height, vfile, afile,
 				bitrate_data)):  # optimize_width # width*height # vcodec(acodec) # is_bitrate
 
-			# is_add_meta
+			# is_add_meta / tvseries
 			if all((is_profile, is_level, not year_regex.findall(lf.split("\\")[-1]))):
 				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -vf \"scale=%s:%s\" -profile:v main -level 30 -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
 							   lf, vfile, str(width), str(height), afile, project_file)
@@ -13527,26 +13225,26 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				write_log("debug is_add_meta[unknown]", "%s" % lf) # some_paramaters
 				logging.info("debug is_add_meta[unknown]")
 
-			# is_skip_meta
+			# is_skip_meta(bad_for_android_with_poster) / bigcinema
 			if all((is_profile, is_level, year_regex.findall(lf.split("\\")[-1]))):
-				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -vf \"scale=%s:%s\" -profile:v main -level 30 -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
+				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -vf \"scale=%s:%s\" -profile:v main -level 30 -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
 							   lf, vfile, str(width), str(height), afile, project_file)
-				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf \"scale=%s:%s\" -profile:v main -level 30 -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
+				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf \"scale=%s:%s\" -profile:v main -level 30 -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
 								lf, vfile, svbr, svbr, svbr2, str(width), str(height), afile, sabr, project_file)
 			elif all((is_profile, not is_level, year_regex.findall(lf.split("\\")[-1]))):
-				cmd_file = "cmd /c " + "".join([path_for_queue,	"ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -vf \"scale=%s:%s\" -profile:v main -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
+				cmd_file = "cmd /c " + "".join([path_for_queue,	"ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -vf \"scale=%s:%s\" -profile:v main -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
 							   lf, vfile, str(width), str(height), afile, project_file)
-				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf  \"scale=%s:%s\" -profile:v main -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
+				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf  \"scale=%s:%s\" -profile:v main -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
 								lf, vfile, svbr, svbr, svbr2, str(width), str(height), afile, sabr, project_file)
 			elif all((not is_profile, is_level, year_regex.findall(lf.split("\\")[-1]))):
-				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -vf \"scale=%s:%s\" -level 30 -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
+				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -vf \"scale=%s:%s\" -level 30 -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
 							   lf, vfile, str(width), str(height), afile, project_file)
-				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf \"scale=%s:%s\" -level 30 -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
+				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf \"scale=%s:%s\" -level 30 -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
 								lf, vfile, svbr, svbr, svbr2, str(width), str(height), afile, sabr, project_file)
 			elif all((not is_profile, not is_level, year_regex.findall(lf.split("\\")[-1]))):
-				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -vf \"scale=%s:%s\" -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
+				cmd_file = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -vf \"scale=%s:%s\" -movflags faststart -threads 2 -c:a %s -af \"dynaudnorm\" %s " % (
 							   lf, vfile, str(width), str(height), afile, project_file)
-				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf \"scale=%s:%s\" -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
+				cmd_file2 = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) + " -hide_banner -y -i \"%s\" -map_metadata -1 -threads 2 -c:v %s -b:v %s -maxrate %s -bufsize %s -vf \"scale=%s:%s\" -movflags faststart -threads 2 -c:a %s -b:a %s -af \"dynaudnorm\" %s " % (
 								lf, vfile, svbr, svbr, svbr2, str(width), str(height), afile, sabr, project_file)
 			else:
 				write_log("debug is_skip_meta[unknown]", "%s" % lf) # some_paramaters
@@ -13598,7 +13296,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			write_log("debug unknown_parameters", "%s" % unknown_convert)  # machine_learning
 
 		if cmd_file:
-			filecmdbase_dict[lf.strip()] = cmd_file.strip() ### debug ###
+			filecmdbase_dict[lf.strip()] = cmd_file.strip()
 
 			write_log("debug withoutvbr/withoutabr", "%s" % cmd_file)
 
@@ -13622,8 +13320,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		except:
 			hms_avg: int = 0
 
-		write_log("debug hms_avg", "%d [%d] [%s]" % (
-			hms_avg, hms_len, str(datetime.now())))  # avg_size_by_length # length_data # datetime
+		write_log("debug hms_avg", "%s [%d] [%s]" % (
+			hms(hms_avg), hms_len, str(datetime.now())))  # avg_size_by_length(avg_framecount/convert_to_time) # length_data # datetime
 
 	#not_mp4_format
 	'''
@@ -13731,17 +13429,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			else:
 				# with unique_semaphore:
-				for jl in jobs_list:
-
-					try:
-						assert jobs_list, "Пустой список или нет задач jobs_list" # is_assert_debug
-					except AssertionError as err: # if_null
-						logging.warning("Пустой список или нет задач jobs_list")
-						raise err
-						break
-					except BaseException as e: # if_error
-						logging.error("Пустой список или нет задач jobs_list [%s]" % str(e))
-						break
+				for jl in filter(lambda x: x, tuple(jobs_list)):
 
 					try:
 						assert jl and os.path.exists(jl), "Файл отсутствует jl" # is_assert_debug
@@ -13895,11 +13583,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						  indent=4) # sort_keys=False
 
 		# with unique_semaphore:
-		# for k, v in filecmdbase_dict.items():
-		# print(Style.BRIGHT + Fore.WHITE + "Файл %s будет обработан [level=%d]" % (k.strip(), count_level_from_full(k))) # level=6
+			# for k, v in filecmdbase_dict.items():
+				# print(Style.BRIGHT + Fore.WHITE + "Файл %s будет обработан [level=%d]" % (k.strip(), count_level_from_full(k))) # level=6
 
 		# if filecmdbase_dict:
-		# print()
+			# print()
 
 		sorted_files = list(filecmdbase_dict.keys())  # sort_current_jobs(pass_1_of_2)
 
@@ -13912,7 +13600,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		finally:
 			sorted_files = sorted(tmp, reverse=False)
 
-		for sf in sorted_files:  # filter(lambda x: x, tuple(tmp))
+		for sf in filter(lambda x: x, tuple(sorted_files)):
 
 			if not sorted_files:  # skip_if_nulllist
 				break
@@ -13987,6 +13675,16 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			except BaseException as e: # if_error
 				logging.error("Пустой список или нет задач filecmdbase_dict [%s]" % str(e))
 				break
+
+			try:
+				assert os.path.exists(k), "Файл отсутствует"
+			except AssertionError as err: # if_null
+				logging.warning("Файл отсутствует %s" % k)
+				raise err
+				continue
+			except BaseException as e: # if_error
+				logging.error("Файл отсутствует %s [%s]" % (k, str(e)))
+				continue
 
 			try:
 				fname1 = v.split(" ")[-1].split("\\")[-1].strip()
@@ -14312,6 +14010,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			fcbd: list = []
 			fcbd_sorted: list = []
 
+			short_count: dict = {}
+
 			for k, v in filecmdbase_dict.items():
 
 				try:
@@ -14323,6 +14023,15 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				except BaseException as e: # if_error
 					logging.error("Пустой словарь или нет задач filecmdbase_dict [%s]" % str(e))
 					break
+
+				try:
+					assert os.path.exists(k), "Файл отсутствует"
+				except AssertionError as err: # if_null
+					logging.warning("Файл отсутствует %s" % k)
+					continue
+				except BaseException as e: # if_error
+					logging.error("Файл отсутствует %s [%s]" % (k, str(e)))
+					continue
 
 				try:
 					fname = k.split("\\")[-1].strip()
@@ -14344,24 +14053,19 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						short = crop_filename_regex.sub("", fname).strip() # regex
 					except:
 						short = ""
-					# else: # hide_count
-						# if short:
-							# try:
-								# short_count[short.strip()] = short_count.get(short, 0) + 1 # short_count
-							# except:
-								# continue # skip_if_some_error
+					else: # is_hide_count
+						if short:
+							short_count[short.strip()] = short_count.get(short.strip(), 0) + 1 # short_count
+							logging.info("Шаблон[1]: %s, количесто найденных элементов %d, время: %s" % (short, short_count[short], str(datetime.now())))
 
 					try:
 						seas_or_year = crop_filename_regex.findall(fname)[0][0].strip() # regex(short) # type1
 						# seas_or_year2 = "".join(crop_filename_regex.findall(fname.split(".")[0])[0]) # .replace("_", "").replace("(", "").replace(")", "") # is_crop_syms # str(short) # type2
 					except:
 						seas_or_year = ""
-					# else: # hide_count
+					# else: # is_hide_count
 						# if seas_or_year:
-							# try:
-								# seasyear_count[seas_or_year.strip()] = seasyear_count.get(seas_or_year.strip(), 0) + 1 # seas_or_year_count
-							# except:
-								# continue # skip_if_some_error
+							# seasyear_count[seas_or_year.strip()] = seasyear_count.get(seas_or_year.strip(), 0) + 1 # seas_or_year_count
 
 					# fname = "hello_world_01s01e" -> "01s01e" # fname = "my_name_is(2000)" -> "2000"
 
@@ -14742,6 +14446,16 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					except BaseException as e: # if_error
 						logging.error("Пустой словарь или нет задач filecmdbase_dict [%s]" % str(e))
 						break
+						
+					try:
+						assert os.path.exists(k), "Файл отсутствует" # is_assert_debug
+					except AssertionError as err: # if_null
+						logging.warning("Файл отсутствует %s" % k)
+						raise err
+						continue
+					except BaseException as e: # if_error
+						logging.error("Файл отсутствует %s [%s]" % (k, str(e)))
+						continue
 
 					if os.path.exists(k):
 						try:
@@ -14793,6 +14507,16 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				except BaseException as e: # if_error
 					logging.error("Пустой словарь или нет задач filecmdbase_dict [%s]" % str(e))
 					break
+					
+				try:
+					assert os.path.exists(k), "Файл отсутствует" # is_asssert_debug
+				except AssertionError as err: # if_null
+					logging.warning("Файл отсутствует %s" % k)
+					raise err
+					continue
+				except BaseException as e: # if_error
+					logging.error("Файл отсутствует %s [%s]" % (k, str(e)))
+					continue
 
 				try:
 					fname = k.split("\\")[-1]
@@ -14803,10 +14527,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					fsize = os.path.getsize(k)
 				except:
 					fsize = 0
-
-				if fsize:
-					summ += fsize
-					fsizes_lst.append(fsize)
+				else:
+					if fsize:
+						summ += fsize
+						fsizes_lst.append(fsize)
 
 				try:
 					gl = MM.get_length(k)
@@ -14914,6 +14638,16 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					break
 				except BaseException: # if_error
 					break
+					
+				try:
+					assert "Файл отсутствует" # is_assert_debug
+				except AssertionError as err: # if_null
+					logging.warning("Файл отсутствует %s" % k)
+					raise err
+					continue
+				except BaseException as e: # if_error
+					logging.error("Файл отсутствует %s [%s]" % (k, str(e)))
+					continue
 
 				try:
 					fsize = os.path.getsize(k)
@@ -14976,6 +14710,16 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				except BaseException as e: # if_error
 					logging.error("Пустой словарь или нет задач filecmdbase_dict [%s]" % str(e))
 					break
+
+				try:
+					assert os.path.exists(k), "Файл отсутствует" # is_assert_debug
+				except AssertionError as err: # if_null
+					logging.warning("Файл отсутвтует %s" % k)
+					raise err
+					continue
+				except BaseException as e: # if_error
+					logging.error("Файл отсутвтует %s" % k)
+					continue
 
 				lastfile.append(v.split(" ")[-1]) # save_to_xml_for_backup(clear_last) # @last.xml
 
@@ -15583,7 +15327,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				full_time = None
 
 				try:
-					# if any((hh, mm, ss)): # limit_scan_time
 					assert any((hh, mm, ss)), "Ошибка значения единицы времени hh/mm/ss" # is_assert_debug
 				except AssertionError as err: # if_null
 					full_time = None
