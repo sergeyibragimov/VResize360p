@@ -1413,12 +1413,12 @@ if all((filter_top_list, len(somebase_dict) >= 0)):
 	filter_top_by_folders = list(set([ftl.strip() for ftl in filter_top_list for k, v in somebase_dict.items() if
 								  len(ftl.strip()) > 0 and k.split("\\")[-1].startswith(ftl)]))
 
-	# get_by_1000_if_more(filter_top_by_folders)
-	'''
-	filter_get1000 = filter_top_by_folders[0:1000] if len(filter_top_by_folders) > 1000 else filter_top_by_folders # only_1000(optimal) # top_1000
-	if all((filter_get1000, len(filter_get1000) <= len(filter_top_by_folders))):
-		filter_top_by_folders = filter_get1000
-	'''
+	# get_by_100_if_more(filter_top_by_folders)
+	# '''
+	filter_get100 = filter_top_by_folders[0:100] if len(filter_top_by_folders) > 100 else filter_top_by_folders # only_100(optimal)/only_1000(long) # top_100(1000)
+	if all((filter_get100, len(filter_get100) <= len(filter_top_by_folders))):
+		filter_top_by_folders = filter_get100
+	# '''
 
 	dt = datetime.now()
 
@@ -1428,12 +1428,12 @@ if all((filter_top_list, len(somebase_dict) >= 0)):
 	# filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = 0, is_dir=False, is_less=False, is_any=True)[0] != None])) # by_Year
 	filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = 12*days, is_dir=False, is_less=True, is_any=False)[0] != None])) # 12_year_and_less
 
-	# get_by_1000_if_more(filter_for_new_backup)
-	'''
-	filter_get1000 = filter_for_new_backup[0:1000] if len(filter_for_new_backup) > 1000 else filter_for_new_backup # only_1000(for_fast) # top_1000
-	if all((filter_get1000, len(filter_get1000) <= len(filter_for_new_backup))):
-		filter_for_new_backup = filter_get1000
-	'''
+	# get_by_100_if_more(filter_for_new_backup)
+	# '''
+	filter_get100 = filter_for_new_backup[0:100] if len(filter_for_new_backup) > 100 else filter_for_new_backup # only_100(optimal)/only_1000(long) # top_100(1000)
+	if all((filter_get100, len(filter_get100) <= len(filter_for_new_backup))):
+		filter_for_new_backup = filter_get100
+	# '''
 
 	# x[0].isaplha() -> x[0] == x[0].upper()
 
@@ -2259,13 +2259,13 @@ async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 # cpu_overload(try_stop_SysMain/Superfetch)
 
 # # dspace(+reserve) # midnight - 6am # 11pm # overload(85) # 1
-# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22)), mem >= 85) # dspace(is_need_hide) / less_7am_or_more_10pm / overload(80->85)
+is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22)), mem >= 80) # dspace(is_need_hide) / less_7am_or_more_10pm / overload(80->85)
 # dspace(+reserve) # midnight - 6am # 11pm # no_overload # 2
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22))) # dspace(is_need_hide) / less_7am_or_more_10pm
 # dspace(+reserve) # midnight - 6am # no_overload # 3
 # is_status: tuple = (not dsize2, ctme.hour < mytime["sleeptime"][1]) # dspace(is_need_hide) / less_7am
 # dspace(+reserve) # midnight - 6am # 11pm # filter_run_time # no_overload # 4
-is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22, ctme.hour + dayago > 23))) # dspace(is_need_hide) / less_7am_or_more_10pm_or_optimal_run_hours
+# is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22, ctme.hour + dayago > 23))) # dspace(is_need_hide) / less_7am_or_more_10pm_or_optimal_run_hours
 # no_dspace # midnight - 6am # 11pm # no_overload # 5
 # is_status: tuple = (ctme.hour < mytime["sleeptime"][1], ctme.hour > 22) # less_7am_or_more_10pm
 
@@ -13712,7 +13712,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		hours_set = set()
 
-		# clean_hours_cfg_by_schedule
+		# clean_hours_cfg_by_schedule # if_need_hide
 
 		dt = datetime.now()
 
@@ -13724,7 +13724,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			with open(files_base["hours"], encoding="utf-8") as fbhf:
 				max_hour_list = fbhf.readlines()
 		except:
-			max_hour_list = [2] # default = 2
+			max_hour_list = [4] # default = 4
 
 			with open(files_base["hours"], "w", encoding="utf-8") as fbhf:
 				fbhf.writelines("%d\n" % int(mhl) for mhl in filter(lambda x: x, tuple(max_hour_list))) # save_total_time_run_by_hour
