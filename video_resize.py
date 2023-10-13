@@ -1413,11 +1413,12 @@ if all((filter_top_list, len(somebase_dict) >= 0)):
 	filter_top_by_folders = list(set([ftl.strip() for ftl in filter_top_list for k, v in somebase_dict.items() if
 								  len(ftl.strip()) > 0 and k.split("\\")[-1].startswith(ftl)]))
 
-	# get_by_100_if_more(filter_top_by_folders)
+	# get_by_100(less_100)_if_more(filter_top_by_folders) # debug
 	# '''
-	filter_get100 = filter_top_by_folders[0:100] if len(filter_top_by_folders) > 100 else filter_top_by_folders # only_100(optimal)/only_1000(long) # top_100(1000)
-	if all((filter_get100, len(filter_get100) <= len(filter_top_by_folders))):
-		filter_top_by_folders = filter_get100
+	# filter_get100 = filter_top_by_folders[0:100] if len(filter_top_by_folders) > 100 else filter_top_by_folders # only_100/less_100
+	filter_get_middle = filter_top_by_folders[0:len(filter_top_by_folders)//2] if len(filter_top_by_folders) > 100 else filter_top_by_folders # middle(less/100)
+	if all((filter_get_middle, len(filter_get_middle) <= len(filter_top_by_folders))): # all((filter_get100, len(filter_get100) <= len(filter_top_by_folders))): # 100(1) -> middle(2)
+		filter_top_by_folders = sorted(filter_get_middle, reverse=False) # filter_get100(isSort)
 	# '''
 
 	dt = datetime.now()
@@ -1428,11 +1429,12 @@ if all((filter_top_list, len(somebase_dict) >= 0)):
 	# filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = 0, is_dir=False, is_less=False, is_any=True)[0] != None])) # by_Year
 	filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = 12*days, is_dir=False, is_less=True, is_any=False)[0] != None])) # 12_year_and_less
 
-	# get_by_100_if_more(filter_for_new_backup)
+	# get_by_100(less_100)_if_more(filter_for_new_backup) # debug
 	# '''
-	filter_get100 = filter_for_new_backup[0:100] if len(filter_for_new_backup) > 100 else filter_for_new_backup # only_100(optimal)/only_1000(long) # top_100(1000)
-	if all((filter_get100, len(filter_get100) <= len(filter_for_new_backup))):
-		filter_for_new_backup = filter_get100
+	# filter_get100 = filter_for_new_backup[0:100] if len(filter_for_new_backup) > 100 else filter_for_new_backup # only_100/less_100
+	filter_get_middle = filter_for_new_backup[0:len(filter_for_new_backup) // 2] if len(filter_for_new_backup) > 100 else filter_for_new_backup # middle(less/100)
+	if all((filter_get_middle, len(filter_get_middle) <= len(filter_for_new_backup) )): # all((filter_get100, len(filter_get100) <= len(filter_for_new_backup))): # 100(1) -> middle(2)
+		filter_for_new_backup = sorted(filter_get_middle, reverse=False) # filter_get100(isSort)
 	# '''
 
 	# x[0].isaplha() -> x[0] == x[0].upper()
@@ -2259,7 +2261,7 @@ async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 # cpu_overload(try_stop_SysMain/Superfetch)
 
 # # dspace(+reserve) # midnight - 6am # 11pm # overload(85) # 1
-is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22)), mem >= 80) # dspace(is_need_hide) / less_7am_or_more_10pm / overload(80->85)
+is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22)), mem >= 85) # dspace(is_need_hide) / less_7am_or_more_10pm / overload(80->85)
 # dspace(+reserve) # midnight - 6am # 11pm # no_overload # 2
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22))) # dspace(is_need_hide) / less_7am_or_more_10pm
 # dspace(+reserve) # midnight - 6am # no_overload # 3
