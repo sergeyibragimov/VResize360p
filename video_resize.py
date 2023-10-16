@@ -220,10 +220,10 @@ copy_src2: str = "C:\\Downloads\\Combine\\Original\\BigFilms\\".lower()
 envdict = os.getenv.__globals__ # переменные_среды
 
 # error_save_json
-'''
+# '''
 environ_file: str = "".join([path_for_queue, "environ.json"])
 try:
-	environ_dict = envdict["environ"]
+	environ_dict = dict(envdict["environ"])
 	assert environ_dict, ""
 except AssertionError: # as err: # if_null
 	environ_dict = {}
@@ -233,7 +233,7 @@ except BaseException: # if_some_error
 finally:
 	with open(environ_file, "w", encoding="utf-8") as eff:
 		json.dump(environ_dict, eff, ensure_ascii=False, indent=4) # environ_dict(some) / environ_dict(null)
-'''
+# '''
 
 # environ_block(windows) # debug(is_error)
 userprofile: str = envdict["environ"]["userprofile"].lower() # os.getenv("USERPROFILE") # r"c:\\users\\sergey
@@ -934,13 +934,8 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 					for dl in filter(lambda x: x, tuple(dlist)): # only_first_line # debug
 
-						"""
 						if not dlist:
 							break # stop_if_null
-
-						if not dl:
-							continue # skip_null_line
-						"""
 
 						parse_list = []
 
@@ -2527,6 +2522,16 @@ async def days_by_list(lst: list = [], is_avg: bool = False): #8
 		for l in filter(lambda x: x, tuple(lst)):
 
 			try:
+				assert lst, "Пустой список @days_by_list/lst" # is_assert_debug
+			except AssertionError as err: # if_null
+				logging.warning("Пустой список @days_by_list/lst")
+				raise err
+				break
+			except BaseException as e: # if_error
+				logging.error("Пустой список @days_by_list/lst")
+				break
+
+			try:
 				fdate = os.path.getmtime(l)  # unixdate
 				ndate = datetime.fromtimestamp(fdate)  # datetime
 			except:
@@ -2917,10 +2922,12 @@ class Get_AR:
 
 	def __init__(self, width, height):
 		# self.__time = time() # unix_time # hidden_attribute # self._GET_AR__time
+		# self.filename = filename
 		self.width = width
 		self.height = height
 
-	def width_to_ar(self, width: int = 0, height: int = 0, owidth: int = 640) -> tuple:  # width=640,height=360 #5
+	def width_to_ar(self, width: int = 0, height: int = 0,
+	                owidth: int = 640) -> tuple:  # width=640,height=360 #5 #debug
 
 		try:
 			assert width and height, "Ширина или высота пустая @width_to_ar/width/height" # is_assert_debug
@@ -2929,7 +2936,7 @@ class Get_AR:
 			# raise err
 			return (0, 0, 0)
 		except BaseException as e: # if_error
-			logging.error("Ширина или высота пустая @width_to_ar/%d/%d [%s]" % (width, height, str(e)))
+			logging.error("Ширина или высота пустая @width_to_ar/%d/%ds [%s]" % (width, height, str(e)))
 			return (0, 0, 0)
 
 		"""Specify the Width To Retain the Aspect Ratio"""
@@ -2962,15 +2969,16 @@ class Get_AR:
 								width_calc = she[0] - 1 if she[0] % 2 != 0 else she[0]  # -1
 							except:
 								width_calc = 0
+								break
 							else:
 								she[0] = width_calc
 
-							try:
+								logging.info("Оптимальный маштаб(высота) для маштабируемого файла %s %s" % (
+									"x".join([str(swe[0]), str(swe[1])]), fname))
+
 								print(Style.BRIGHT + Fore.YELLOW + "Оптимальный маштаб(высота) для маштабируемого файла",
 									Style.BRIGHT + Fore.WHITE + "%s" % "x".join([str(she[0]), str(she[1])]))  # is_color
-							except:
-								continue
-							else:
+
 								write_log("debug scale_height_equal!", "%s" % ":".join([str(she[0]), str(she[1])]))
 				else:
 					print(Style.BRIGHT + Fore.YELLOW + "Оптимальный маштаб(высота) для маштабируемого файла",
@@ -2983,7 +2991,7 @@ class Get_AR:
 			return (0, 0, 0)
 
 	def height_to_ar(self, width: int = 0, height: int = 0,
-					 oheight: int = 360) -> tuple:  # width=640,height=360 # islogic=(False, 640) # 4
+					 oheight: int = 360) -> tuple:  # width=640,height=360 # islogic=(False, 640) # 4 # debug
 
 		try:
 			assert width and height, "Высота пустая @height_to_ar/width/height" # is_assert_debug
@@ -3026,15 +3034,16 @@ class Get_AR:
 								height_calc = swe[1] - 1 if swe[1] % 2 != 0 else swe[1]  # -1 or +1
 							except:
 								height_calc = 0
+								break
 							else:
 								swe[1] = height_calc
 
-							try:
+								logging.info("Оптимальный маштаб(длина) для маштабируемого файла %s %s" % (
+									"x".join([str(swe[0]), str(swe[1])]), fname))
+
 								print(Style.BRIGHT + Fore.YELLOW + "Оптимальный маштаб(длина) для маштабируемого файла",
 									Style.BRIGHT + Fore.WHITE + "%s" % "x".join([str(swe[0]), str(swe[1])]))  # is_color
-							except:
-								continue
-							else:
+
 								write_log("debug scale_width_equal!", "%s" % ":".join([str(swe[0]), str(swe[1])]))
 				else:
 					print(Style.BRIGHT + Fore.YELLOW + "Оптимальный маштаб(длина) для маштабируемого файла",
@@ -3489,25 +3498,36 @@ class MyMeta:
 		if os.path.exists(fdi):
 			os.remove(fdi)
 
-		# snapshot_at_end
-		"""
-		time = float(probe['streams'][0]['duration']) // 2 # 7529.731 //= 2 # 3764.8655
-
-		parts = 7 # 9
-
-		intervals = time // parts
-		intervals = int(intervals)
-		interval_list = [(i * intervals, (i + 1) * intervals) for i in range(parts)] # [(0, 537), (537, 1074), (1074, 1611), (1611, 2148), (2148, 2685), (2685, 3222), (3222, 3759)]
-
-		# ffmpeg.input(YOUR_FILE, ss=item[1]).filter('scale', width, -1).output('Image' + str(i) + '.jpg', vframes=1) # ffmpeg_script
-		# ffmpeg -hide_banner -y -i {filename} -ss {item[1]} -vf 'scale=width:-1' -vframes 1 image0%d.jpg # debug
-		"""
-
 		try:
 			duration_null: int = int(duration_list[0].split(".")[0])  # if duration_list # is_assert_debug # duration_null //= 2 # is_true_time
 		except:
 			duration_null: int = 0
 		finally:
+			'''
+			# snapshot_at_end
+			if duration_null:
+				try:
+					parts = 10
+
+					intervals = duration_null // parts
+					intervals = int(intervals)
+					interval_list = [(i * intervals, (i + 1) * intervals) for i in range(
+						parts)]  # [(0, 537), (537, 1074), (1074, 1611), (1611, 2148), (2148, 2685), (2685, 3222), (3222, 3759)]
+
+					ffmpeg_path = path_for_queue + "ffmpeg.exe"
+					script_path = path_for_queue
+
+				except:
+					return duration_null # exit_without_changes
+				else:
+					for il in interval_list:
+						try:
+							cmd_snapshot = "%s -hide_banner -y -i %s -ss %d -vf 'scale=width:-1' -vframes 1 %s\image0%d.jpg" % (ffmpeg_path, self.filename, il, script_path)
+							os.system(cmd_snapshot)  # is_generate_slideshow_for_current_file
+						except:
+							continue # break
+
+			'''
 			return duration_null
 
 	# ffprobe -v error -select_streams v:0 -show_entries stream=level -of default=noprint_wrappers=1 <filepath> # level=50
@@ -3925,7 +3945,7 @@ class MyMeta:
 			width, height = owidth, oheight  # restore(width/height)
 
 		if any((oheight != height, owidth / oheight != width / height)) and all(
-				(width >= height, height)):  # owidth != width # filter("width"/height/ar)
+				(width, height)):  # width >= height(some_display)
 
 			try:
 				oscale2, nscale2 = "x".join([str(owidth), str(oheight)]), "x".join([str(width), str(height)])
@@ -13821,9 +13841,10 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			fsizes: int = 0
 
-			disk_space_limit: int = 0
-			# disk_space_limit: int = 16 * (1024**3) # 16Gb
+			default_dspace: int = 8
 
+			# disk_space_limit: int = 0
+			disk_space_limit: int = default_dspace * (1024**3) # 16Gb -> 8Gb
 
 			lastfile: list = []
 
@@ -14769,7 +14790,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						break
 
 					# "debug dspace[mp4][limit]": "139/604/512/768;18/980/154/701;8/589/934/592;2023-04-03 11:03:23.116395",
-					if all((dsize, fsizes, (disk_space_limit // (1024**3)) < 16, (disk_space_limit // (1024**3)) > 0)): # if_less_limit_job(16Gb)
+					if all((dsize, fsizes, (disk_space_limit // (1024**3)) < default_dspace, (disk_space_limit // (1024**3)) > 0)): # if_less_limit_job(16Gb)
 						print(dsize, fsizes, disk_space_limit, k) # is_color
 						write_log("debug dspace[mp4][limit]", ";".join([str(dsize), str(fsizes), str(disk_space_limit), str(datetime.now())]))
 						break
