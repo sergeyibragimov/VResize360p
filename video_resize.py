@@ -4834,7 +4834,7 @@ class MyTime:
 		self.seconds = seconds
 
 
-	def seconds_to_time(self, seconds: int) -> tuple: #5
+	def seconds_to_time(self, seconds: int = 2) -> tuple: #5
 
 		try:
 			assert seconds, "Не указано время в ms для конвертации @seconds_to_time/seconds" # is_assert_debug
@@ -13841,7 +13841,26 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			fsizes: int = 0
 
-			default_dspace: int = 8
+			# run_jobs_by_workspace_filesize(gb)
+			# """
+			count_fsize: int = 0
+			default_dspace: int = 8 # use_by_default_dspace
+
+			for k, v in filecmdbase_dict.items():
+				try:
+					count_fsize += os.path.getsize(k) # calc_filesize
+				except:
+					continue # if_not_exist
+
+			if count_fsize:
+				if count_fsize // (1024**3) > 0:
+					default_dspace: int = count_fsize // (1024**3) # dspace_by_filesize_jobs
+				else:
+					default_dspace: int = 8 # return_default_dspace
+
+				write_log("debug default_space", "%s" % "%".join([str(default_dspace), str(count_fsize), str(datetime.now())]))
+			# """
+			# default_dspace: int = 8
 
 			# disk_space_limit: int = 0
 			disk_space_limit: int = default_dspace * (1024**3) # 16Gb -> 8Gb
