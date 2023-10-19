@@ -4923,7 +4923,7 @@ class MyTime:
 
 		stime = datetime.now()
 
-		sleep(self.seconds * 60) # debug
+		sleep(self.ms * 60) # debug # seconds -> ms
 
 		etime = datetime.now()
 
