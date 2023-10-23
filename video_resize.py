@@ -1585,7 +1585,7 @@ def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging:
 		with open(log_base, "w", encoding="utf-8") as lbf:
 			json.dump(log_dict, lbf, ensure_ascii=False, indent=4)
 	finally:
-		if all((desc, txt)):
+		if all((desc != None, txt != None)):
 			if any(("error" in txt.lower().strip(), "error" in desc.lower().strip(), is_error == True)):
 				logging.error(txt.strip())  # logging_with_error
 			if all((txt.strip(), is_logging == True, is_error != True)):
@@ -1618,7 +1618,7 @@ def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging:
 		for lp in filter(lambda x: x, tuple(lprint)):
 
 			try:
-				assert len(lp.strip()) > 0, "" # is_assert_debug
+				assert lp.strip() > "", "" # is_assert_debug
 			except AssertionError as err: # if_null
 				raise err
 				continue
@@ -2258,7 +2258,7 @@ async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 # dspace(+reserve) # midnight - 6am # 11pm # no_overload # 2
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22))) # dspace(is_need_hide) / less_7am_or_more_10pm
 # dspace(+reserve) # midnight - 6am # no_overload # 3
-is_status: tuple = (not dsize2, ctme.hour < mytime["sleeptime"][1]) # dspace(is_need_hide) / less_7am
+is_status: tuple = (not dsize2, ctme.hour < mytime["sleeptime"][1], all((dayago >= 12, is_hd_status))) # dspace(is_need_hide) / less_7am / run_more_12h
 # dspace(+reserve) # midnight - 6am # 11pm # filter_run_time # no_overload # 4
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22, ctme.hour + dayago > 23))) # dspace(is_need_hide) / less_7am_or_more_10pm_or_optimal_run_hours
 # no_dspace # midnight - 6am # 11pm # no_overload # 5
@@ -5194,7 +5194,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 
 	try:
 		# tmp2 = list(folder_gen2()) # new(yes_gen)
-		tmp2: list = liset(set(["".join([main_folder, fl]) for fl in folder_list if
+		tmp2: list = list(set(["".join([main_folder, fl]) for fl in folder_list if
 							os.path.exists("".join([main_folder, fl]))]))
 	except BaseException as e:
 		tmp2: list = []
@@ -8222,6 +8222,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			# clean_project_from_base: list = []
 
+			processes_ram: list = []
+			processes_ram2: list = []
+
 			with unique_semaphore:
 				for dl in datelist:
 
@@ -9575,11 +9578,15 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 									try:
 										fsize: int = os.path.getsize(k)
 										dsize: int = disk_usage(bc[0] + ":\\").free
+										try:
+											fsize2: int = os.path.getsize(bc)
+										except:
+											fsize2: int = 0
 									except:
 										fsize: int = 0
 										dsize: int = 0
 									else:
-										if all((fsize, dsize, int(fsize // (dsize / 100)) <= 100)):
+										if all((fsize, dsize, int(fsize // (dsize / 100)) <= 100, fsize != fsize2)):
 											move(k, bc)  # update_if_ok_length_by_move
 
 											move_count += 1
@@ -9588,11 +9595,21 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 												"%s [%d]" % ("-=>".join([k, bc]), move_count))  # update_by_length
 
 											write_log("debug bigcinema[move]", "%s [%d]" % ("-=>".join([k, bc]), move_count))
+											MyNotify(txt="%s" % full_to_short(bc), icon=icons["different"])
 
 										elif all((fsize >= 0, dsize, int(fsize // (dsize / 100)) > 100)) or not dsize: # fspace(bad) # dspace(bad)
 											print(Style.BRIGHT + Fore.YELLOW + "debug bigcinema[fspace] \'%s\'" % full_to_short(bc))
 											write_log("debug bigcinema[fspace]", "%s" % bc)
 											MyNotify(txt="%s" % full_to_short(bc), icon=icons["error"])
+											continue
+										elif all((fsize, fsize2, fsize == fsize2)):
+											print(Style.BRIGHT + Fore.WHITE + "debug bigcinema[equals] \'%s\'" % full_to_short(bc))
+											write_log("debug bigcinema[equals]", "%s" % bc)
+											# MyNotify(txt="%s" % full_to_short(bc), icon=icons["error"]) # os.remove(k)
+
+											if os.path.exists(bc):
+												if k[0] < bc[0] and k.split("\\")[-1] == bc.split("\\")[-1]:
+													write_log("debug delete[k/bc]!", "%s" % ";".join([k, bc])) # os.remove(k)
 											continue
 
 									# @load_current_jobs
