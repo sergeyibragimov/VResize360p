@@ -733,7 +733,7 @@ top_folder2: str = "c:\\downloads\\soft\\for_usb_ffmpeg(projects)\\curr.lst" # e
 all_list: list = []
 lang_list: list = []
 
-# generate_paths_for_manual_run
+# generate_paths_for_manual_run # debug # top100_rus.lst # top100_eng.lst
 async def folders_from_path(is_rus: bool = False, template: list = [], need_clean: bool = False): # -> list:
 
 	global all_list
@@ -815,144 +815,134 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 					dsc_cnt = abs(len(desc_dict_filter) - len(desc_dict))
 
-					print(Style.BRIGHT + Fore.CYAN + "будет обновлено",
-						Style.BRIGHT + Fore.WHITE + "%d" % dsc_cnt,
-						Style.BRIGHT + Fore.YELLOW + "записей")
+					if dsc_cnt:
+						print(Style.BRIGHT + Fore.CYAN + "будет обновлено",
+							Style.BRIGHT + Fore.WHITE + "%d" % dsc_cnt,
+							Style.BRIGHT + Fore.YELLOW + "записей")
 
 					desc_dict.update(desc_dict_filter)
 
-			fsf_set = set()
+		fsf_set = set()
 
-			for fsf in filter(lambda x: x, tuple(folder_scan_full)):
+		for fsf in filter(lambda x: x, tuple(folder_scan_full)):
 
-				if not fsf.strip() in fsf_set:
-					fsf_set.add(fsf.strip()) # add_if_not_runned
-				else:
-					continue # skip_if_runned
+			if not fsf.strip() in fsf_set:
+				fsf_set.add(fsf.strip()) # add_if_not_runned
+			else:
+				continue # skip_if_runned
 
-				is_found: bool = False
-				is_not_found: bool = False
-				is_two_desc: bool = False
+			is_found: bool = False
+			is_not_found: bool = False
+			is_two_desc: bool = False
 
-				# is_folder: bool = False
+			# is_folder: bool = False
 
-				try:
-					if not os.path.isfile(fsf):
-						list_files = os.listdir(fsf)
-						assert list_files, "Нет файлов в папке %s" % fsf # is_assert_debug
-						# is_folder = True
-				except AssertionError as err: # if_null
-					# list_files = [] # BaseException
-					logging.warning("Нет файлов в папке %s" % fsf)
-					raise err
-					continue
-				except BaseException as e: # if_error
-					logging.error("Нет файлов в папке %s [%s]" % (fsf, str(e)))
-					continue
-				else:
-					is_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 1) # desc(1) / files(0/1)
-					is_not_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) == 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 0) # desc(0) / files(0)
-					is_two_desc = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 2) # desc(2) / files(0/1)
+			try:
+				if not os.path.isfile(fsf):
+					list_files = os.listdir(fsf)
+					assert list_files, "Нет файлов в папке %s" % fsf # is_assert_debug
+					# is_folder = True
+			except AssertionError as err: # if_null
+				# list_files = [] # BaseException
+				logging.warning("Нет файлов в папке %s" % fsf)
+				raise err
+				continue
+			except BaseException as e: # if_error
+				logging.error("Нет файлов в папке %s [%s]" % (fsf, str(e)))
+				continue
+			else:
+				is_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 1) # desc(1) / files(0/1)
+				is_not_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) == 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 0) # desc(0) / files(0)
+				is_two_desc = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 2) # desc(2) / files(0/1)
 
-				# some_find: int = 0
+			# path_to_description
+			try:
+				full_list = list(set(["\\".join([fsf, ol]).strip() for ol in filter(lambda x: "txt" in x, tuple(list_files)) if ol]))
+			except BaseException: # as err:
+				full_list = []
+				logging.warning("Пустой список или нет описаний full_list")
+				# raise err
+			else:
+				full_list.sort(reverse=False)
+				logging.info("Список из описаний найдено full_list [%d]" % len(full_list))
 
-				# abspath_for_file
-				'''
-				for lf in filter(lambda x: x, tuple(list_files)):
+			# descriptions # debug
+			# """
+			if len(list(filter(lambda x: "txt" in x, tuple(list_files)))) > 0 and full_list:
+
+				# "﻿10 причин моей ненависти": "﻿10 причин моей ненависти;(10 Things I Hate About You);7 Jul 2009"
+				# "Адаптация": "Адаптация;6 Feb 2017"
+
+				# 911 (9-1-1) 3 Jan 2018 # 911 (9-1-1) 3.01.2018 # one_info_different_date_types
+
+				desc_regex = re.compile(r"(.*)\s\((.*)\)\s([\d+]{1,2}\s[A-Z]{3}\s[\d+]{4})", re.I) # rus / eng / date
+
+				dlist = []
+
+				for fl in tuple(full_list):
+
 					try:
-						ap = (os.path.abspath(lf))
-						isfile = (not os.path.isdir(lf))
+						with open(fl, encoding="utf-8") as flf: # codepage1
+							dlist = flf.readlines()
 					except:
-						continue # skip_if_some_error(next)
-					else:
-						if all((ap, isfile)):
-							# current_file(no_path) / is_abspath(is_full_path) / is_file(is_no_dir) # is_color
-							print(Style.BRIGHT + Fore.WHITE + "%s %s" % (lf, "<->".join([str(ap), str(isfile)]))) # logging_file(abs_path/file) # all_true
-						else:
-							print(Style.BRIGHT + Fore.YELLOW + "%s %s" % (lf, "<->".join([str(ap), str(isfile)]))) # another # is_some_false
-				'''
+						dlist = []
 
-				# path_to_description
-				try:
-					full_list = list(set(["\\".join([fsf, ol]).strip() for ol in filter(lambda x: "txt" in x, tuple(list_files)) if ol]))
-				except BaseException: # as err:
-					full_list = []
-					logging.warning("Пустой список или нет описаний full_list")
-					# raise err
-				else:
-					full_list.sort(reverse=False)
-					logging.info("Список из описаний найдено full_list [%d]" % len(full_list))
-
-				# descriptions # debug
-				# """
-				if len(list(filter(lambda x: "txt" in x, tuple(list_files)))) > 0 and full_list:
-
-					# "﻿10 причин моей ненависти": "﻿10 причин моей ненависти;(10 Things I Hate About You);7 Jul 2009"
-					# "Адаптация": "Адаптация;6 Feb 2017"
-
-					# 911 (9-1-1) 3 Jan 2018 # 911 (9-1-1) 3.01.2018 # one_info_different_date_types
-
-					desc_regex = re.compile(r"(.*)\s\((.*)\)\s([\d+]{1,2}\s[A-Z]{3}\s[\d+]{4})", re.I) # rus / eng / date
-
-					dlist = []
-
-					for fl in filter(lambda x: x, tuple(full_list)):
-
+					if not dlist:
 						try:
-							with open(fl, encoding="utf-8") as flf: # codepage1
+							with open(fl, encoding="cp1251") as flf: # codepage2
 								dlist = flf.readlines()
 						except:
 							dlist = []
 
-						if not dlist:
-							try:
-								with open(fl, encoding="cp1251") as flf: # codepage2
-									dlist = flf.readlines()
-							except:
-								dlist = []
+					if not dlist:
+						try:
+							with open(fl, encoding="cp866") as flf: # codepage3
+								dlist = flf.readlines()
+						except:
+							dlist = []
 
-						if not dlist:
-							try:
-								with open(fl, encoding="cp866") as flf: # codepage3
-									dlist = flf.readlines()
-							except:
-								dlist = []
+					if not dlist:
+						try:
+							with open(fl, encoding="iso8859_5") as flf: # codepage4
+								dlist = flf.readlines()
+						except:
+							dlist = []
 
-						if not dlist:
-							try:
-								with open(fl, encoding="iso8859_5") as flf: # codepage4
-									dlist = flf.readlines()
-							except:
-								dlist = []
+					if not dlist:
+						try:
+							with open(fl, encoding="koi8_r") as flf: # codepage5
+								dlist = flf.readlines()
+						except:
+							dlist = []
 
-						if not dlist:
-							try:
-								with open(fl, encoding="koi8_r") as flf: # codepage5
-									dlist = flf.readlines()
-							except:
-								dlist = []
+				for dl in tuple(dlist): # only_first_line # debug
 
-					for dl in filter(lambda x: x, tuple(dlist)): # only_first_line # debug
+					try:
+						assert dlist, "Пустой список @folders_from_path/dlist" # is_assert_debug
+					except AssertionError as err: # if_null
+						raise err
+						logging.warning("Пустой список @folders_from_path/dlist [%s]" % str(datetime.now()))
+						break
+					finally:
+						if not dl: # if_empty_line(no_logging)
+							continue
 
-						if not dlist:
-							break # stop_if_null
+					parse_list = []
 
-						parse_list = []
+					# txt = "Две девицы на мели (2 Broke Girls) 19 Sep 2011"
+					# list(desc_regex.findall(txt)[0]) # ('Две девицы на мели', '2 Broke Girls', '19 Sep 2011')
 
-						# txt = "Две девицы на мели (2 Broke Girls) 19 Sep 2011"
-						# list(desc_regex.findall(txt)[0]) # ('Две девицы на мели', '2 Broke Girls', '19 Sep 2011')
+					# txt = "13 клиническая () 22 Dec 2022"
+					# list(desc_regex.findall(txt)[0]) # ['13 клиническая', '', '22 Dec 2022']
 
-						# txt = "13 клиническая () 22 Dec 2022"
-						# list(desc_regex.findall(txt)[0]) # ['13 клиническая', '', '22 Dec 2022']
+					if desc_regex.findall(dl):
+						parse_list = list(desc_regex.findall(dl)[0])
 
-						if desc_regex.findall(dl):
-							parse_list = list(desc_regex.findall(dl)[0])
+					if all((parse_list, dl)):
+						filter_list = [l.strip() for l in parse_list if l] # 3(eng) # 2(rus)
 
-						if all((parse_list, dl)):
-							filter_list = [l.strip() for l in parse_list if l] # 3(eng) # 2(rus)
-
-							if any((filter_list[0][0].isalpha(), filter_list[0][0].isnumeric())): # check_first_syms
-								desc_dict[filter_list[0].strip()] = ";".join(filter_list[1:]).strip()
+						if any((filter_list[0][0].isalpha(), filter_list[0][0].isnumeric())): # check_first_syms
+							desc_dict[filter_list[0].strip()] = ";".join(filter_list[1:]).strip()
 
 				if desc_dict: # some_data # data
 
@@ -970,8 +960,8 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 				days = 366 if dt.year % 4 == 0 else 365 # by_year # is_no_lambda
 
 				try:
-					#ftd = ff_to_days(ff=fsf, period=days, is_dir=False, is_less=False, is_any=True) # period=30(is_month)/days(is_year) # by_Year
-					ftd = ff_to_days(ff=fsf, period=12*days, is_dir=False, is_less=True, is_any=False) # period=30(is_month)/days(is_year) # 12_Year_and_less
+					ftd = ff_to_days(ff=fsf, period=days, is_dir=False, is_less=False, is_any=True) # period=30(is_month)/days(is_year) # by_Year # type1
+					# ftd = ff_to_days(ff=fsf, period=12*days, is_dir=False, is_less=True, is_any=False) # period=30(is_month)/days(is_year) # 12_Year_and_less # type2
 				except:
 					ftd = (None, ) # if_error2(None)
 
@@ -1010,9 +1000,9 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 						logging.warning("Пустой словарь или нет отсортированных папок @folders_from_path/fad_dict")
 						raise err
 						break
-					except BaseException as e: # if_error
-						logging.error("Пустой словарь или нет отсортированных папок @folders_from_path/fad_dict [%s]" % str(e))
-						break
+					# except BaseException as e: # if_error
+						# logging.error("Пустой словарь или нет отсортированных папок @folders_from_path/fad_dict [%s]" % str(e))
+						# break
 
 					print(Style.BRIGHT + Fore.WHITE + "%s %s" % (k, v)) # folder(file) / days_ago
 
@@ -1036,7 +1026,6 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 						desc_list: list = []
 						parse_list: list = []
 						# parse_filename: list = []
-
 
 						def http_trace_to_soundtrack_parse(line: str = ""):
 
@@ -1079,7 +1068,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 							dsize: int = 0
 
 						is_backup: bool = False
-						is_backup = (dt.hour <= 21, dsize // (1024 ** 2) > 0) # debug # midnght-9pm # limit_1mb(ok) # is_default
+						is_backup = (dt.hour <= 22, dsize // (1024 ** 2) > 0) # debug # midnght-10pm # limit_1mb(ok) # is_default
 
 						try:
 							desc_list = [ld.strip() for ld in os.listdir(fsf) if ld.lower().endswith(".txt")]
@@ -1088,7 +1077,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 							logging.warning("%s" % ";".join([fsf, str(err)]))
 							# raise err
 
-						if all((len(desc_list) == 1, is_backup)):
+						if all((len(desc_list) == 1, is_backup.count(True))):
 							try:
 								with open("\\".join([fsf, desc_list[-1]]), encoding="utf-8") as fdf:
 									parse_list = fdf.readlines()
@@ -1254,27 +1243,27 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 	os.chdir(mydir)
 
-	cmd = os.system("%s -> %s" % (ccmd, mydir3)) # is_list_in_current_folder # 0 - ok, 1 - error
+	cmd = os.system("%s >> %s" % (ccmd, mydir3)) # is_list_in_current_folder # 0 - ok, 1 - error
 
 	if cmd == 0:
 		sleep(30) # if_ok_wait_30ms
 
 	try:
-		with open(mydir3) as mdf:
+		with open(mydir3, encoding="utf-8") as mdf:
 			lang_list = mdf.readlines()
 	except:
 		lang_list = []
-	else:
-		if len(lang_list) > 0:
-			# is_languages
-			folder_scan = [rus_regex.sub("", ll).strip() if rus_regex.sub("", ll) != ll else ll for ll in filter(lambda x: x, tuple(lang_list))] # debug
-			folder_scan = folder_scan[::-1] # reverse(newer_to_oldest)
-			# folder_scan = folder_scan[0:1000] if len(folder_scan) > 1000 else folder_scan # limit_folders_for_scan
 
-			# x[0].isalpha() -> x[0] == x[0].upper()
+	# if len(lang_list) > 0: # skip_logic
+	# is_languages
+	folder_scan = [rus_regex.sub("", ll).strip() if rus_regex.sub("", ll) != ll else ll for ll in filter(lambda x: x, tuple(lang_list))] # debug
+	folder_scan = folder_scan[::-1] # reverse(newer_to_oldest)
+	# folder_scan = folder_scan[0:1000] if len(folder_scan) > 1000 else folder_scan # limit_folders_for_scan
 
-			with open(mydir2, "w", encoding="utf-8") as mf: # resave # debug # top_file_by_lang
-				mf.writelines("%s\n" % fs.strip() for fs in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(folder_scan))) # int/str # is_by_count(top)
+	# x[0].isalpha() -> x[0] == x[0].upper()
+
+	with open(mydir2, "w", encoding="utf-8") as mf: # resave # debug # top_file_by_lang
+		mf.writelines("%s\n" % fs.strip() for fs in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(folder_scan))) # int/str # is_by_count(top)
 
 	# temporary_hidden # debug
 	# """
@@ -1321,48 +1310,31 @@ async def ffp_generate():
 # asyncio.run(ffp_generate()) # if_off_some_disk
 # '''
 
-# x[0].isalpha() -> x[0] == x[0].upper()
-
 # current_list(is_full) # is_ok
 if all_list:
 	try:
 		tmp = list(set([al.strip() for al in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(all_list)) if al])) # unique
 	except:
 		tmp = [] # null_if_error
-
-		all_list = tmp # is_no_lambda
+	else:
+		all_list = tmp # int/str(no_error)
 
 # 1684 [None, None] Текущий список папок, общий список папок # current_list_length / is_full_list / status's
 all_list_status = "Общий список в %d папках" % len(all_list) if all_list else "Общего списка в папках не найдено" # str(debug) -> int(count) # is_no_lambda
 
 print(Style.BRIGHT + Fore.YELLOW + "%d" % len(all_list), Style.BRIGHT + Fore.WHITE + "%s" % all_list_status)
 
-# if_off_some_disk
-"""
-try:
-	assert all_list, "Пустой список all_list" # is_assert_debug
-except AssertionError as err: # if_null
-	logging.warning("Пустой список all_list")
-	raise err
-	exit()
-except BaseException as e: # if_error
-	logging.error("Пустой список all_list [%s]" % str(e))
-	exit()
-"""
-
-abc_or_num_regex = re.compile(r"^[A-Z0-9].*", re.I)
-
-# x[0].isalpha() -> x[0] == x[0].upper()
+# abc_or_num_regex = re.compile(r"^[A-Z0-9]", re.I)
 
 try:
 	# temp = list(set([al.strip() for al in all_list if abc_or_num_regex.findall(al)])) # filter_by_regex
-	temp = list(set([al.strip() for al in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(all_list))])) # int/str
+	temp = list(set([al.strip() for al in tuple(all_list) if al]))
 except:
 	temp = []
-
-if all((temp, len(temp) <= len(all_list))):
-	all_list = sorted(temp, reverse=False) # sort_by_string
-	# all_list = sorted(temp, key=len, reverse=False) # sort_by_legnth
+finally:
+	if all((temp, len(temp) <= len(all_list))):
+		all_list = sorted(temp, reverse=False) # sort_by_string
+		# all_list = sorted(temp, key=len, reverse=False) # sort_by_legnth
 
 os.chdir(r"c:\\downloads\\mytemp") # is_change_drive_and_folder
 
@@ -1380,15 +1352,11 @@ os.chdir(r"c:\\downloads\\mytemp") # is_change_drive_and_folder
 
 # top100(rus+eng)_save # pass_1_of_4 # pass # @curr_top.lst(default)
 with open(top_folder, "w", encoding="utf-8") as tff:
-	tff.writelines("%s\n" % al.strip() for al in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(all_list))) # int/str # is_top
+	tff.writelines("%s\n" % al.strip() for al in tuple(all_list)) # is_top
 
-top_list: list = []
+# top_list = all_list
 
-# top100(rus+eng)_load # @cur_top.lst # original
-with open(top_folder, encoding="utf-8") as tff:
-	top_list = tff.readlines()
-
-filter_top_list = [tl.strip() for tl in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(top_list)) if tl] # shorts
+filter_top_list = [al.strip() for al in tuple(all_list) if al] # shorts
 
 # load_meta_base(fitler) #1
 try:
@@ -1404,40 +1372,36 @@ if all((filter_top_list, len(somebase_dict) >= 0)):
 
 	# old # only_folders / no_backup # is_count_equal_template
 	filter_top_by_folders = list(set([ftl.strip() for ftl in filter_top_list for k, v in somebase_dict.items() if
-								  len(ftl.strip()) > 0 and k.split("\\")[-1].startswith(ftl)]))
+						ftl.strip() and k.split("\\")[-1].startswith(ftl)]))
 
 	# get_by_100(less_100)_if_more(filter_top_by_folders) # debug
-	# '''
+
 	# filter_get100 = filter_top_by_folders[0:100] if len(filter_top_by_folders) > 100 else filter_top_by_folders # only_100/less_100
 	filter_get_middle = filter_top_by_folders[0:len(filter_top_by_folders)//2] if len(filter_top_by_folders) > 100 else filter_top_by_folders # middle(less/100)
 	if all((filter_get_middle, len(filter_get_middle) <= len(filter_top_by_folders))): # all((filter_get100, len(filter_get100) <= len(filter_top_by_folders))): # 100(1) -> middle(2)
 		filter_top_by_folders = sorted(filter_get_middle, reverse=False) # filter_get100(isSort)
-	# '''
 
 	dt = datetime.now()
 
 	days = 366 if dt.year % 4 == 0 else 365 # by_year # is_no_lambda
 
 	# new # no_folders / only_backup # is_count_equal_template # default(30_days)
-	# filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = 0, is_dir=False, is_less=False, is_any=True)[0] != None])) # by_Year
-	filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = 12*days, is_dir=False, is_less=True, is_any=False)[0] != None])) # 12_year_and_less
+	filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = days, is_dir=False, is_less=False, is_any=True)[0] != None])) # by_Year # type1
+	# filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = 12*days, is_dir=False, is_less=True, is_any=False)[0] != None])) # 12_year_and_less # type2
 
 	# get_by_100(less_100)_if_more(filter_for_new_backup) # debug
-	# '''
+
 	# filter_get100 = filter_for_new_backup[0:100] if len(filter_for_new_backup) > 100 else filter_for_new_backup # only_100/less_100
 	filter_get_middle = filter_for_new_backup[0:len(filter_for_new_backup) // 2] if len(filter_for_new_backup) > 100 else filter_for_new_backup # middle(less/100)
 	if all((filter_get_middle, len(filter_get_middle) <= len(filter_for_new_backup) )): # all((filter_get100, len(filter_get100) <= len(filter_for_new_backup))): # 100(1) -> middle(2)
 		filter_for_new_backup = sorted(filter_get_middle, reverse=False) # filter_get100(isSort)
-	# '''
-
-	# x[0].isaplha() -> x[0] == x[0].upper()
 
 	# top100(rus+eng)_by_template # pass_2_of_4 # pass # @cur_top.lst
 	if filter_top_by_folders:
 		with open(top_folder, "w", encoding="utf-8") as tff:
 			tff.writelines("%s\n" % ftbf.strip() for ftbf in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(filter_top_by_folders))) # int/str # is_top
 
-	if os.path.exists(top_folder): # update_top_file
+	if any((filter_top_by_folders, filter_for_new_backup)): # os.path.exists(top_folder) # find_some_filter
 		# top100(rus+eng)_copy # pass_3_of_4 # pass # cur_top.lst -> curr.lst
 		copy(top_folder, top_folder2)
 
@@ -1458,7 +1422,7 @@ if all((filter_top_list, len(somebase_dict) >= 0)):
 	# put_files_by_top_and_recovery # pass_4_of_4 # pass # @current.lst
 	if all((filter_for_new_backup, not clb)): # if_file_null_try_update # save_by_key(is_short)
 		with open(files_base["backup"], "w", encoding="utf-8") as bjf: # try_save_new_backup
-			bjf.writelines("%s\n" % ffnb.strip() for ffnb in filter(lambda x: x, tuple(filter_for_new_backup))) # not_null(current_jobs)
+			bjf.writelines("%s\n" % ffnb.strip() for ffnb in filter(lambda x: x[0] == x[0].isalpha(), tuple(filter_for_new_backup))) # current_jobs(drive_letter_filter)
 
 
 async def memory_usage_psutil(proc_id) -> any:
@@ -1585,6 +1549,12 @@ def write_log(desc: str = "", txt: str = "", is_error: bool = False, is_logging:
 		with open(log_base, "w", encoding="utf-8") as lbf:
 			json.dump(log_dict, lbf, ensure_ascii=False, indent=4)
 	finally:
+		try:
+			assert txt, "" # is_assert_debug
+		except AssertionError as err:
+			raise err
+			txt = None
+
 		if all((desc != None, txt != None)):
 			if any(("error" in txt.lower().strip(), "error" in desc.lower().strip(), is_error == True)):
 				logging.error(txt.strip())  # logging_with_error
@@ -2257,8 +2227,8 @@ async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22)), mem >= 85) # dspace(is_need_hide) / less_7am_or_more_10pm / overload(80->85)
 # dspace(+reserve) # midnight - 6am # 11pm # no_overload # 2
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22))) # dspace(is_need_hide) / less_7am_or_more_10pm
-# dspace(+reserve) # midnight - 6am # no_overload # 3
-is_status: tuple = (not dsize2, ctme.hour < mytime["sleeptime"][1], all((dayago >= 12, is_hd_status))) # dspace(is_need_hide) / less_7am / run_more_12h
+# dspace(+reserve) # midnight - 6am # stop_after_18h # no_overload # 3
+is_status: tuple = (not dsize2, ctme.hour < mytime["sleeptime"][1], all((dayago > 18, is_hd_status))) # dspace(is_need_hide) / less_7am / run_more_18h
 # dspace(+reserve) # midnight - 6am # 11pm # filter_run_time # no_overload # 4
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22, ctme.hour + dayago > 23))) # dspace(is_need_hide) / less_7am_or_more_10pm_or_optimal_run_hours
 # no_dspace # midnight - 6am # 11pm # no_overload # 5
@@ -8122,9 +8092,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				try:
 					assert last_file, "Нет выбранного файла @project_done/last_file" # is_assert_debug
-				except AssertionError as err: # if_null
+				except AssertionError: # as err: # if_null
 					logging.warning("Нет выбранного файла @project_done/last_file")
-					raise err
+					# raise err
 					continue
 				except BaseException as e: # if_error
 					logging.error("Нет выбранного файла @project_done/last_file [%s]" % str(e))
@@ -12668,6 +12638,23 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			write_log("debug get_width_height[error]", "%s [%s]" % (lf, str(e)), is_error=True)
 			continue  # skip_if_no_scale
 
+		try:
+			par: float = width / height
+		except:
+			par: float = -1 # if_error
+
+		sar: float = 1/1
+
+		dar: float = 0
+
+		dar_list = sorted(list(set([(v1,v2) for v1 in range(1, 17) for v2 in range(1, 17) if par == (sar) * (v1/v2)])), reverse=False) # display_ratio(16)
+		if len(dar_list) > 0:
+			dar = dar_list[-1][0]/dar_list[-1][1] # get_last_display_ratio
+		else:
+			dar = -1 # if_null
+
+		write_log("debug par/sar/dar/filename/date", "%s" % ";".join([str(par), str(sar), str(dar), lf, str(datetime.now())])) # skip_width_and_height
+
 		# optimal_hd
 
 		# rescale_any_tv(hd <-> sd) # 1:1
@@ -14313,13 +14300,13 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			for k, v in filecmdbase_dict.items(): # somebase_dict # cbf_dict
 
 				try:
-					assert filecmdbase_dict, "Пустой вловарь или нет задач filecmdbase_dict" # is_assert_debug
+					assert filecmdbase_dict, "Пустой словарь или нет задач filecmdbase_dict" # is_assert_debug
 				except AssertionError as err: # if_null
-					logging.warning("Пустой вловарь или нет задач filecmdbase_dict")
+					logging.warning("Пустой словарь или нет задач filecmdbase_dict")
 					raise err
 					break
 				except BaseException as e: # if_error
-					logging.error("Пустой вловарь или нет задач filecmdbase_dict [%s]" % str(e))
+					logging.error("Пустой словарь или нет задач filecmdbase_dict [%s]" % str(e))
 					break
 
 				try:
