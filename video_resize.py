@@ -781,455 +781,457 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 		folder_scan_full = list(set(["".join([mydir, df]) for df in os.listdir(mydir) if os.path.exists("".join([mydir, df])) and df])) # os.listdir("".join([mydir, df])
 	except:
 		folder_scan_full = []
+
+	folder_scan_full.sort(reverse=False) # sort_by_abc
+
+	try:
+		with open(desc_base, encoding="utf-8") as dbf:
+			desc_dict = json.load(dbf)
+	except:
+		desc_dict = {}
+
+		with open(desc_base, "w", encoding="utf-8") as dbf:
+			json.dump(desc_dict, dbf, ensure_ascii=False, indent=4, sort_keys=True)
+
+	"""
+	try:
+		with open(desc_base_temp, encoding="utf-8") as dbtf:
+			desc_dict2 = json.load(dbtf)
+	except:
+		desc_dict2 = {}
+	"""
+
+	desc_dict_filter: dict = {}
+
+	# clear_old_desc # replace)1)/is_old(0)
+	try:
+		desc_dict_filter = {k.strip(): v.replace(";(", ";").replace(");", ";").strip() if
+							v != v.replace(";(", ";").replace(");", ";") else v.strip() for k, v in desc_dict.items() }
+	except:
+		desc_dict_filter = {}
 	else:
-		if folder_scan_full:
-			folder_scan_full.sort(reverse=False) # sort_by_abc
+		if all((desc_dict_filter, len(desc_dict_filter) <= len(desc_dict))): # desc_dict
 
-			try:
-				with open(desc_base, encoding="utf-8") as dbf:
-					desc_dict = json.load(dbf)
-			except:
-				desc_dict = {}
+			dsc_cnt = abs(len(desc_dict_filter) - len(desc_dict))
 
-				with open(desc_base, "w", encoding="utf-8") as dbf:
-					json.dump(desc_dict, dbf, ensure_ascii=False, indent=4, sort_keys=True)
+			if dsc_cnt:
+				print(Style.BRIGHT + Fore.CYAN + "будет обновлено",
+					Style.BRIGHT + Fore.WHITE + "%d" % dsc_cnt,
+					Style.BRIGHT + Fore.YELLOW + "записей")
 
-			"""
-			try:
-				with open(desc_base_temp, encoding="utf-8") as dbtf:
-					desc_dict2 = json.load(dbtf)
-			except:
-				desc_dict2 = {}
-			"""
+			desc_dict.update(desc_dict_filter)
 
-			desc_dict_filter: dict = {}
+	fsf_set = set()
 
-			# clear_old_desc # replace)1)/is_old(0)
-			try:
-				desc_dict_filter = {k.strip(): v.replace(";(", ";").replace(");", ";").strip() if
-									v != v.replace(";(", ";").replace(");", ";") else v.strip() for k, v in desc_dict.items() }
-			except:
-				desc_dict_filter = {}
-			else:
-				if all((desc_dict_filter, len(desc_dict_filter) <= len(desc_dict))): # desc_dict
+	for fsf in filter(lambda x: x, tuple(folder_scan_full)):
 
-					dsc_cnt = abs(len(desc_dict_filter) - len(desc_dict))
+		if not fsf.strip() in fsf_set:
+			fsf_set.add(fsf.strip()) # add_if_not_runned
+		else:
+			continue # skip_if_runned
 
-					if dsc_cnt:
-						print(Style.BRIGHT + Fore.CYAN + "будет обновлено",
-							Style.BRIGHT + Fore.WHITE + "%d" % dsc_cnt,
-							Style.BRIGHT + Fore.YELLOW + "записей")
+		is_found: bool = False
+		is_not_found: bool = False
+		is_two_desc: bool = False
 
-					desc_dict.update(desc_dict_filter)
+		# is_folder: bool = False
 
-		fsf_set = set()
+		try:
+			if not os.path.isfile(fsf):
+				list_files = os.listdir(fsf)
+				assert list_files, "Нет файлов в папке %s" % fsf # is_assert_debug
+				# is_folder = True
+		except AssertionError as err: # if_null
+			# list_files = [] # BaseException
+			logging.warning("Нет файлов в папке %s [%s]" % (fsf, str(datetime.now())))
+			raise err
+			continue
+		except BaseException as e: # if_error
+			logging.error("Нет файлов в папке %s [%s] [%s]" % (fsf, str(e), str(datetime.now())))
+			continue
+		else:
+			is_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 1) # desc(1) / files(0/1)
+			is_not_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) == 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 0) # desc(0) / files(0)
+			is_two_desc = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 2) # desc(2) / files(0/1)
 
-		for fsf in filter(lambda x: x, tuple(folder_scan_full)):
+			logging.info("Файлы в папке %s [%s]" % (str(len(folder_scan_full)), str(datetime.now())))
 
-			if not fsf.strip() in fsf_set:
-				fsf_set.add(fsf.strip()) # add_if_not_runned
-			else:
-				continue # skip_if_runned
+		# path_to_description
+		try:
+			full_list = list(set(["\\".join([fsf, ol]).strip() for ol in filter(lambda x: "txt" in x, tuple(list_files)) if ol]))
+			assert full_list, "Пустой список или нет описаний @folder_from_path/full_list" # is_assert_debug
+		except AssertionError as err: # if_null
+			logging.warning("Пустой список или нет описаний @folder_from_path/full_list [%s]" % str(datetime.now()))
+			raise err
+		except BaseException as e: # if_error
+			logging.error("Пустой список или нет описаний @folder_from_path/full_list [%s] [%s]" % (str(e), str(datetime.now())))
+		else:
+			full_list.sort(reverse=False)
+			logging.info("Список из описаний найдено @folder_from_path/full_list %s [%s]" % (str(len(full_list)), str(datetime.now())))
 
-			is_found: bool = False
-			is_not_found: bool = False
-			is_two_desc: bool = False
+		# descriptions # debug
+		# """
+		if len(list(filter(lambda x: "txt" in x, tuple(list_files)))) > 0 and full_list:
 
-			# is_folder: bool = False
+			# "﻿10 причин моей ненависти": "﻿10 причин моей ненависти;(10 Things I Hate About You);7 Jul 2009"
+			# "Адаптация": "Адаптация;6 Feb 2017"
 
-			try:
-				if not os.path.isfile(fsf):
-					list_files = os.listdir(fsf)
-					assert list_files, "Нет файлов в папке %s" % fsf # is_assert_debug
-					# is_folder = True
-			except AssertionError as err: # if_null
-				# list_files = [] # BaseException
-				logging.warning("Нет файлов в папке %s" % fsf)
-				raise err
-				continue
-			except BaseException as e: # if_error
-				logging.error("Нет файлов в папке %s [%s]" % (fsf, str(e)))
-				continue
-			else:
-				is_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 1) # desc(1) / files(0/1)
-				is_not_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) == 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 0) # desc(0) / files(0)
-				is_two_desc = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 2) # desc(2) / files(0/1)
+			# 911 (9-1-1) 3 Jan 2018 # 911 (9-1-1) 3.01.2018 # one_info_different_date_types
 
-			# path_to_description
-			try:
-				full_list = list(set(["\\".join([fsf, ol]).strip() for ol in filter(lambda x: "txt" in x, tuple(list_files)) if ol]))
-			except BaseException: # as err:
-				full_list = []
-				logging.warning("Пустой список или нет описаний full_list")
-				# raise err
-			else:
-				full_list.sort(reverse=False)
-				logging.info("Список из описаний найдено full_list [%d]" % len(full_list))
+			desc_regex = re.compile(r"(.*)\s\((.*)\)\s([\d+]{1,2}\s[A-Z]{3}\s[\d+]{4})", re.I) # rus / eng / date
 
-			# descriptions # debug
-			# """
-			if len(list(filter(lambda x: "txt" in x, tuple(list_files)))) > 0 and full_list:
+			dlist = []
 
-				# "﻿10 причин моей ненависти": "﻿10 причин моей ненависти;(10 Things I Hate About You);7 Jul 2009"
-				# "Адаптация": "Адаптация;6 Feb 2017"
+			for fl in tuple(full_list): # description_files
 
-				# 911 (9-1-1) 3 Jan 2018 # 911 (9-1-1) 3.01.2018 # one_info_different_date_types
+				try:
+					with open(fl, encoding="utf-8") as flf: # codepage1
+						dlist = flf.readlines()
+				except:
+					dlist = []
 
-				desc_regex = re.compile(r"(.*)\s\((.*)\)\s([\d+]{1,2}\s[A-Z]{3}\s[\d+]{4})", re.I) # rus / eng / date
-
-				dlist = []
-
-				for fl in tuple(full_list):
-
+				if not dlist:
 					try:
-						with open(fl, encoding="utf-8") as flf: # codepage1
+						with open(fl, encoding="cp1251") as flf: # codepage2
 							dlist = flf.readlines()
 					except:
 						dlist = []
 
-					if not dlist:
-						try:
-							with open(fl, encoding="cp1251") as flf: # codepage2
-								dlist = flf.readlines()
-						except:
-							dlist = []
-
-					if not dlist:
-						try:
-							with open(fl, encoding="cp866") as flf: # codepage3
-								dlist = flf.readlines()
-						except:
-							dlist = []
-
-					if not dlist:
-						try:
-							with open(fl, encoding="iso8859_5") as flf: # codepage4
-								dlist = flf.readlines()
-						except:
-							dlist = []
-
-					if not dlist:
-						try:
-							with open(fl, encoding="koi8_r") as flf: # codepage5
-								dlist = flf.readlines()
-						except:
-							dlist = []
-
-				for dl in tuple(dlist): # only_first_line # debug
-
+				if not dlist:
 					try:
-						assert dlist, "Пустой список @folders_from_path/dlist" # is_assert_debug
-					except AssertionError as err: # if_null
-						raise err
-						logging.warning("Пустой список @folders_from_path/dlist [%s]" % str(datetime.now()))
-						break
-					finally:
-						if not dl: # if_empty_line(no_logging)
-							continue
+						with open(fl, encoding="cp866") as flf: # codepage3
+							dlist = flf.readlines()
+					except:
+						dlist = []
 
-					parse_list = []
+				if not dlist:
+					try:
+						with open(fl, encoding="iso8859_5") as flf: # codepage4
+							dlist = flf.readlines()
+					except:
+						dlist = []
 
-					# txt = "Две девицы на мели (2 Broke Girls) 19 Sep 2011"
-					# list(desc_regex.findall(txt)[0]) # ('Две девицы на мели', '2 Broke Girls', '19 Sep 2011')
+				if not dlist:
+					try:
+						with open(fl, encoding="koi8_r") as flf: # codepage5
+							dlist = flf.readlines()
+					except:
+						dlist = []
 
-					# txt = "13 клиническая () 22 Dec 2022"
-					# list(desc_regex.findall(txt)[0]) # ['13 клиническая', '', '22 Dec 2022']
-
-					if desc_regex.findall(dl):
-						parse_list = list(desc_regex.findall(dl)[0])
-
-					if all((parse_list, dl)):
-						filter_list = [l.strip() for l in parse_list if l] # 3(eng) # 2(rus)
-
-						if any((filter_list[0][0].isalpha(), filter_list[0][0].isnumeric())): # check_first_syms
-							desc_dict[filter_list[0].strip()] = ";".join(filter_list[1:]).strip()
-
-				if desc_dict: # some_data # data
-
-					with open(desc_base, "w", encoding="utf-8") as dbf:
-						json.dump(desc_dict, dbf, ensure_ascii=False, indent=4, sort_keys=True)
-				# """
-
-				# config = {"ff": fsf, "period": days, "is_dir": False, "is_less": False, "is_any": True} # **config # fsf(default) -> None(debug)
-				# ff_to_days(ff=fsf, period=days, is_dir=False, is_less=False, is_any=True)
-
-				fold_and_date: list = []
-
-				dt = datetime.now()
-
-				days = 366 if dt.year % 4 == 0 else 365 # by_year # is_no_lambda
+			for dl in tuple(dlist): # only_first_line # debug
 
 				try:
-					ftd = ff_to_days(ff=fsf, period=days, is_dir=False, is_less=False, is_any=True) # period=30(is_month)/days(is_year) # by_Year # type1
-					# ftd = ff_to_days(ff=fsf, period=12*days, is_dir=False, is_less=True, is_any=False) # period=30(is_month)/days(is_year) # 12_Year_and_less # type2
+					assert dlist, "Пустой список описаний @folders_from_path/dlist" # is_assert_debug
+				except AssertionError as err: # if_null
+					logging.warning("Пустой список описаний @folders_from_path/dlist [%s]" % str(datetime.now()))
+					raise err
+					break
+				finally:
+					if not dl: # if_empty_line(no_logging)
+						continue
+					else:
+						logging.info("Список описаний @folders_from_path/dlist [%s] [%s]" % (str(len(dlist)), str(datetime.now())))
+
+				parse_list = []
+
+				# txt = "Две девицы на мели (2 Broke Girls) 19 Sep 2011"
+				# list(desc_regex.findall(txt)[0]) # ('Две девицы на мели', '2 Broke Girls', '19 Sep 2011')
+
+				# txt = "13 клиническая () 22 Dec 2022"
+				# list(desc_regex.findall(txt)[0]) # ['13 клиническая', '', '22 Dec 2022']
+
+				if desc_regex.findall(dl):
+					parse_list = list(desc_regex.findall(dl)[0])
+
+				if all((parse_list, dl)):
+					filter_list = [l.strip() for l in parse_list if l] # 3(eng) # 2(rus)
+
+					if any((filter_list[0][0].isalpha(), filter_list[0][0].isnumeric())): # check_first_syms
+						desc_dict[filter_list[0].strip()] = ";".join(filter_list[1:]).strip()
+
+			if desc_dict: # some_data # data
+
+				with open(desc_base, "w", encoding="utf-8") as dbf:
+					json.dump(desc_dict, dbf, ensure_ascii=False, indent=4, sort_keys=True)
+			# """
+
+			# config = {"ff": fsf, "period": days, "is_dir": False, "is_less": False, "is_any": True} # **config # fsf(default) -> None(debug)
+			# ff_to_days(ff=fsf, period=days, is_dir=False, is_less=False, is_any=True)
+
+			fold_and_date: list = []
+
+			dt = datetime.now()
+
+			days = 366 if dt.year % 4 == 0 else 365 # by_year # is_no_lambda
+
+			try:
+				ftd = ff_to_days(ff=fsf, period=days, is_dir=False, is_less=False, is_any=True) # period=30(is_month)/days(is_year) # by_Year # type1
+				# ftd = ff_to_days(ff=fsf, period=12*days, is_dir=False, is_less=True, is_any=False) # period=30(is_month)/days(is_year) # 12_Year_and_less # type2
+			except:
+				ftd = (None, ) # if_error2(None)
+
+			if len(ftd) > 1 and os.path.exists(ftd[0]) and ftd[0] != None: # ftd[1] >= 0:
+				try:
+					folder_or_file = "Папка: %s" % fsf if ftd[-1] else "Файл: %s " % ftd[0] # is_no_lambda # type1
+					days_ago = "%d месяцев назад" % (ftd[1] // 30) if ftd[1] // 30 > 0 else "%d дней назад" % ftd[1]
 				except:
-					ftd = (None, ) # if_error2(None)
-
-				if len(ftd) > 1 and os.path.exists(ftd[0]) and ftd[0] != None: # ftd[1] >= 0:
+					folder_or_file = "Папка: %s" % fsf if ftd[-1] else "Файл: %s" % ftd[0] # is_no_lambda # type2
+				finally:
 					try:
-						folder_or_file = "Папка: %s" % fsf if ftd[-1] else "Файл: %s " % ftd[0] # is_no_lambda # type1
-						days_ago = "%d месяцев назад" % (ftd[1] // 30) if ftd[1] // 30 > 0 else "%d дней назад" % ftd[1]
-					except:
-						folder_or_file = "Папка: %s" % fsf if ftd[-1] else "Файл: %s" % ftd[0] # is_no_lambda # type2
-					finally:
-						try:
-							assert ftd[1] >= 0, ""
-						except AssertionError as err:
-							raise err
-							print(Style.BRIGHT + Fore.YELLOW + "%s [%s]" % (folder_or_file, str(datetime.now()))) # folder(file) / datetime
-							logging.warning("%s [%s]" % (folder_or_file, str(datetime.now()))) # if_null(is_color)
-						except BaseException as e:
-							print(Style.BRIGHT + Fore.RED + "%s [%s] [%s]" % (folder_or_file, str(datetime.now()), str(e))) # folder(file) / datetime / error
-							logging.error("%s [%s] [%s]" % (folder_or_file, str(datetime.now()), str(e))) # if_error(is_color)
-						else:
-							fold_and_date.append((folder_or_file, days_ago, str(datetime.now())))
-							# print(Style.BRIGHT + Fore.WHITE + "%s %s [%s]" % (folder_or_file, str(days_ago), str(datetime.now()))) # folder(file) / dayago /datetime # is_color
-							logging.info("%s %s [%s]" % (folder_or_file, str(days_ago), str(datetime.now()))) # if_ok(is_color)
-
-				fold_and_date_sorted: list = []
-
-				fold_and_date_sorted = sorted(fold_and_date, key=lambda fold_and_date: fold_and_date[1])
-
-				fad_dict = {fads[0]: fads[1] for fads in fold_and_date_sorted for fad in fold_and_date if fads[0] == fad[0]} # type / days_ago
-
-				for k, v in fad_dict.items():
-
-					try:
-						assert fad_dict, "Пустой словарь или нет отсортированных папок @folders_from_path/fad_dict" # is_assert_debug
-					except AssertionError as err: # if_null
-						logging.warning("Пустой словарь или нет отсортированных папок @folders_from_path/fad_dict")
+						assert ftd[1] >= 0, ""
+					except AssertionError as err:
 						raise err
-						break
-					# except BaseException as e: # if_error
-						# logging.error("Пустой словарь или нет отсортированных папок @folders_from_path/fad_dict [%s]" % str(e))
-						# break
+						print(Style.BRIGHT + Fore.YELLOW + "%s [%s]" % (folder_or_file, str(datetime.now()))) # folder(file) / datetime
+						logging.warning("%s [%s]" % (folder_or_file, str(datetime.now()))) # if_null(is_color)
+					except BaseException as e:
+						print(Style.BRIGHT + Fore.RED + "%s [%s] [%s]" % (folder_or_file, str(datetime.now()), str(e))) # folder(file) / datetime / error
+						logging.error("%s [%s] [%s]" % (folder_or_file, str(e), str(datetime.now()))) # if_error(is_color)
+					else:
+						fold_and_date.append((folder_or_file, days_ago, str(datetime.now())))
+						# print(Style.BRIGHT + Fore.WHITE + "%s %s [%s]" % (folder_or_file, str(days_ago), str(datetime.now()))) # folder(file) / dayago /datetime # is_color
+						logging.info("%s %s [%s]" % (folder_or_file, str(days_ago), str(datetime.now()))) # if_ok(is_color)
 
-					print(Style.BRIGHT + Fore.WHITE + "%s %s" % (k, v)) # folder(file) / days_ago
+			fold_and_date_sorted: list = []
 
-				# find_folders_by_month(by_time) # is_all_days
-				if all((len(ftd) > 1, ftd[0] != None, ftd[1] >= 0)): # period=30 -> period=days
-					if is_found: # desc(0/1), files(1) # some_found
+			fold_and_date_sorted = sorted(fold_and_date, key=lambda fold_and_date: fold_and_date[1])
 
-						if template:
-							tmp = [lf.strip() for t in template for lf in list_files if all((t, lf, lf.lower().endswith(t.lower())))]
+			fad_dict = {fads[0]: fads[1] for fads in fold_and_date_sorted for fad in fold_and_date if fads[0] == fad[0]} # type / days_ago
 
-							if tmp: # add_with_template
-								folder_desc_files.append(fsf)
+			for k, v in fad_dict.items():
 
-						elif not template:
-							folder_desc_files.append(fsf) # add_without_template_by_count
+				try:
+					assert fad_dict, "Пустой словарь или нет отсортированных папок @folders_from_path/fad_dict" # is_assert_debug
+				except AssertionError as err: # if_null
+					logging.warning("Пустой словарь или нет отсортированных папок @folders_from_path/fad_dict [%s]" % str(datetime.now()))
+					raise err
+					break
+				else:
+					logging.info("@folders_from_path/fad_dict %s [%s]" % (";".join([str(k), str(v)]), str(datetime.now())))
 
-						found_list.append(fsf.split("\\")[-1]) # file_or_folder
+				print(Style.BRIGHT + Fore.WHITE + "%s %s" % (k, v)) # folder(file) / days_ago
 
-						# folder_desc_files # parse_soundtracks_from_filename
+			# find_folders_by_month(by_time) # is_all_days
+			if all((len(ftd) > 1, ftd[0] != None, ftd[1] >= 0)): # period=30 -> period=days
+				if is_found: # desc(0/1), files(1) # some_found
 
-						desc_list: list = []
-						parse_list: list = []
-						# parse_filename: list = []
+					if template:
+						tmp = [lf.strip() for t in template for lf in list_files if all((t, lf, lf.lower().endswith(t.lower())))]
 
-						def http_trace_to_soundtrack_parse(line: str = ""):
+						if tmp: # add_with_template
+							folder_desc_files.append(fsf)
 
-							# global parse_filename
+					elif not template:
+						folder_desc_files.append(fsf) # add_without_template_by_count
 
-							no_prot_ext: str = ""
+					found_list.append(fsf.split("\\")[-1]) # file_or_folder
 
-							try:
-								assert line, "Пустая строка @http_trace_to_soundtrack_parse/line" # is_assert_debug
-							except AssertionError as err: # if_null
-								logging.warning("Пустая строка @http_trace_to_soundtrack_parse/line")
-								raise err
-								return no_prot_ext
-							except BaseException as e:
-								logging.error("Пустая строка @http_trace_to_soundtrack_parse/line [%s]" % str(e))
-								return no_prot_ext
+					# folder_desc_files # parse_soundtracks_from_filename
 
-							parse_regex = re.compile(r"http(.*)\.mp4", re.I)
+					desc_list: list = []
+					parse_list: list = []
+					# parse_filename: list = []
 
-							filename = line # "http://data11-cdn.datalock.ru/fi2lm/7d2b2f94011f33cd73b7dbf603374c89/7f_The.Hundred.S07E11.720p.rus.LostFilm.TV.a1.14.08.20.mp4"
-							try:
-								no_prot_ext = parse_regex.findall(filename)[0] # ://data11-cdn.datalock.ru/fi2lm/7d2b2f94011f33cd73b7dbf603374c89/7f_The.Hundred.S07E11.720p.rus.LostFilm.TV.a1.14.08.20
-							except:
-								no_prot_ext = ""
+					def http_trace_to_soundtrack_parse(line: str = ""):
 
-							if all((no_prot_ext, no_prot_ext.count("/") > 0)):
-								no_prot_ext = no_prot_ext.split("/")[-1].replace("7f_", "").replace(".", "_").strip() # The_Hundred_S07E11_720p_rus_LostFilm_TV_a1_14_08_20
+						# global parse_filename
 
-								# parse_filename.append(no_prot_ext)
-
-								return no_prot_ext
-							else:
-								return no_prot_ext
-
-						dt = datetime.now()
+						no_prot_ext: str = ""
 
 						try:
-							dsize: int = disk_usage("d:\\").free
+							assert line, "Пустая строка @http_trace_to_soundtrack_parse/line" # is_assert_debug
+						except AssertionError as err: # if_null
+							logging.warning("Пустая строка @http_trace_to_soundtrack_parse/line")
+							raise err
+							return no_prot_ext
+						except BaseException as e:
+							logging.error("Пустая строка @http_trace_to_soundtrack_parse/line [%s]" % str(e))
+							return no_prot_ext
+
+						parse_regex = re.compile(r"http(.*)\.mp4", re.I)
+
+						filename = line # "http://data11-cdn.datalock.ru/fi2lm/7d2b2f94011f33cd73b7dbf603374c89/7f_The.Hundred.S07E11.720p.rus.LostFilm.TV.a1.14.08.20.mp4"
+						try:
+							no_prot_ext = parse_regex.findall(filename)[0] # ://data11-cdn.datalock.ru/fi2lm/7d2b2f94011f33cd73b7dbf603374c89/7f_The.Hundred.S07E11.720p.rus.LostFilm.TV.a1.14.08.20
 						except:
-							dsize: int = 0
+							no_prot_ext = ""
 
-						is_backup: bool = False
-						is_backup = (dt.hour <= 22, dsize // (1024 ** 2) > 0) # debug # midnght-10pm # limit_1mb(ok) # is_default
+						if all((no_prot_ext, no_prot_ext.count("/") > 0)):
+							no_prot_ext = no_prot_ext.split("/")[-1].replace("7f_", "").replace(".", "_").strip() # The_Hundred_S07E11_720p_rus_LostFilm_TV_a1_14_08_20
+
+							# parse_filename.append(no_prot_ext)
+
+							return no_prot_ext
+						else:
+							return no_prot_ext
+
+					dt = datetime.now()
+
+					try:
+						dsize: int = disk_usage("d:\\").free
+					except:
+						dsize: int = 0
+
+					is_backup: bool = False
+					is_backup = (dt.hour <= 22, dsize // (1024 ** 2) > 0) # debug # midnght-10pm # limit_1mb(ok) # is_default
+
+					try:
+						desc_list = [ld.strip() for ld in os.listdir(fsf) if ld.lower().endswith(".txt")]
+					except BaseException as err:
+						desc_list = []
+						logging.warning("%s" % ";".join([fsf, str(err)]))
+						# raise err
+
+					if all((len(desc_list) == 1, is_backup.count(True))):
+						try:
+							with open("\\".join([fsf, desc_list[-1]]), encoding="utf-8") as fdf:
+								parse_list = fdf.readlines()
+						except:
+							parse_list = []
+
+						# if_look_like_download_path_change_soundtracks # save_to(soundtrack_base)
+						try:
+							tmp = ["\\".join(["c:\\downloads\\combine\\original\\tvseries", ".".join([http_trace_to_soundtrack_parse(pl), "mp4"])]) for pl in filter(lambda x: x, tuple(parse_list)) if http_trace_to_soundtrack_parse(pl)] # http(s)...mp4
+
+							assert tmp, "Пустой список файлов @folders_from_path/tmp/#notvseries" # is_assert_debug
+						except AssertionError: # as err:
+							tmp = []
+							logging.warning("Пустой список файлов @folders_from_path/tmp/#notvseries/%s" % str(datetime.now())) # when_null_folder
+							# raise err
+						except BaseException as e:
+							tmp = []
+							logging.error("Пустой список файлов @folders_from_path/tmp/#notvseries/%s [%s]" % (str(datetime.now()), str(e))) # when_null_folder
+						finally:
+							if tmp:
+								print("%d downloaded projects" % len(tmp)) #print(";".join(tmp)) #; print() # need_another_comment
+								sleep(0.5)
+
+						st_list: list = []
 
 						try:
-							desc_list = [ld.strip() for ld in os.listdir(fsf) if ld.lower().endswith(".txt")]
-						except BaseException as err:
-							desc_list = []
-							logging.warning("%s" % ";".join([fsf, str(err)]))
-							# raise err
+							with open(files_base["stracks"], encoding="utf-8") as sf:
+								st_list = sf.readlines()
+						except:
+							st_list = []
 
-						if all((len(desc_list) == 1, is_backup.count(True))):
-							try:
-								with open("\\".join([fsf, desc_list[-1]]), encoding="utf-8") as fdf:
-									parse_list = fdf.readlines()
-							except:
-								parse_list = []
+						try:
+							with open(soundtrack_base, encoding="utf-8") as sbf:
+								soundtrack_dict = json.load(sbf)
+						except:
+							soundtrack_dict = {}
 
-							# if_look_like_download_path_change_soundtracks # save_to(soundtrack_base)
-							try:
-								tmp = ["\\".join(["c:\\downloads\\combine\\original\\tvseries", ".".join([http_trace_to_soundtrack_parse(pl), "mp4"])]) for pl in filter(lambda x: x, tuple(parse_list)) if http_trace_to_soundtrack_parse(pl)] # http(s)...mp4
+						is_error = False
 
-								assert tmp, "Пустой список файлов @folders_from_path/tmp/#notvseries" # is_assert_debug
-							except AssertionError: # as err:
-								tmp = []
-								logging.warning("Пустой список файлов @folders_from_path/tmp/#notvseries/%s" % str(datetime.now())) # when_null_folder
-								# raise err
-							except BaseException as e:
-								tmp = []
-								logging.error("Пустой список файлов @folders_from_path/tmp/#notvseries/%s [%s]" % (str(datetime.now()), str(e))) # when_null_folder
-							finally:
-								if tmp:
-									print("%d downloaded projects" % len(tmp)) #print(";".join(tmp)) #; print() # need_another_comment
-									sleep(0.5)
-
-							st_list: list = []
-
-							try:
-								with open(files_base["stracks"], encoding="utf-8") as sf:
-									st_list = sf.readlines()
-							except:
-								st_list = []
-
-							try:
-								with open(soundtrack_base, encoding="utf-8") as sbf:
-									soundtrack_dict = json.load(sbf)
-							except:
-								soundtrack_dict = {}
-
+						# x[0].isalpha() -> x[0] == x[0].upper() # pass_1_of_2
+						try:
+							soundtrack_filter = {t.strip(): sl.strip() for sl in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(st_list)) for t in tmp if
+													any((sl.lower().strip() in t.lower().strip(), sl.strip() in t)) and tmp} # t.replace(sl, "*" * len(sl)).strip() # descrypt/debug
+						except:
+							soundtrack_filter = {}
+							is_error = True
+						else:
 							is_error = False
 
-							# x[0].isalpha() -> x[0] == x[0].upper() # pass_1_of_2
+						soundtrack_filter_top = {}
+
+						# update_havent_soundtracks(filter) # pass_2_of_2
+						soundtrack_filter_top = {k: v for k, v in soundtrack_filter.items() if all((k, not k in [*soundtrack_dict]))} # if_new_soundtrack(filter_current_files)
+
+						if any((not soundtrack_filter, not soundtrack_filter_top)): # if_some_null
+							continue # skip_desc_if_no_soundtrack
+
+						if soundtrack_filter_top:
+							soundtrack_filter = {}
+							soundtrack_filter.update(soundtrack_filter_top)
+
+						if all((soundtrack_filter_top, len(soundtrack_dict) >= 0, is_error == False)): # it_was_new(else_skip) # some_soundtracks(or_newbase) # soundtrack_filter
+							soundtrack_dict.update(soundtrack_filter) # update_base_from_filter
+
+							# soundtrack_tbase(decrypt/debug/backup) -> soundtrack_base(original) # file
+							# soundtrack_filter(decrypt/debug) # soundtrack_dict(original/backup) # json
+
+							# filter(lambda x: lst.count(x) != list(set(lst)).count(x), tuple(lst)) # search_moda
+
+							# soundtrack_dict -> soundtrack_filter
+
 							try:
-								soundtrack_filter = {t.strip(): sl.strip() for sl in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(st_list)) for t in tmp if
-														any((sl.lower().strip() in t.lower().strip(), sl.strip() in t)) and tmp} # t.replace(sl, "*" * len(sl)).strip() # descrypt/debug
+								soundtrack_count = [(v.strip(), list(soundtrack_dict.values()).count(v.strip)) for k, v in soundtrack_dict.items() if
+											sl.lower().strip() in k.lower().strip()]
 							except:
-								soundtrack_filter = {}
-								is_error = True
+								soundtrack_count = []
 							else:
-								is_error = False
+								if soundtrack_count:
 
-							soundtrack_filter_top = {}
+									soundtrack_count_sorted = sorted(soundtrack_count, key=lambda soundtrack_count: soundtrack_count[1]) # sorted_by_value
+									soundtrack_count = [(scs[0], int(scs[1])) for scs in soundtrack_count_sorted if isinstance(soundtrack_count_sorted, tuple)]
 
-							# update_havent_soundtracks(filter) # pass_2_of_2
-							soundtrack_filter_top = {k: v for k, v in soundtrack_filter.items() if all((k, not k in [*soundtrack_dict]))} # if_new_soundtrack(filter_current_files)
+									print(Style.BRIGHT + Fore.CYAN + "debug soundtrack_count[low] \'%d soundtrack count\'" % len(soundtrack_count)) # is_color # %s/str
 
-							if any((not soundtrack_filter, not soundtrack_filter_top)): # if_some_null
-								continue # skip_desc_if_no_soundtrack
+							try:
+								soundtrack_count = {v.strip(): str(list(soundtrack_dict.values()).count(v.strip())) for k, v in
+											soundtrack_dict.items()}
+							except:
+								soundtrack_count = {}
+							else:
+								if soundtrack_count:
 
-							if soundtrack_filter_top:
-								soundtrack_filter = {}
-								soundtrack_filter.update(soundtrack_filter_top)
+									soundtrack_count_list = [(k, int(v)) for k, v in soundtrack_count.items()]
+									soundtrack_count_sorted = sorted(soundtrack_count_list, key=lambda soundtrack_count_list: soundtrack_count_list[1]) # sorted_by_value
+									stc = {scs[0]: scs[1] for scs in soundtrack_count_sorted} # sorted_json
+									soundtrack_count = stc if stc else {} # is_no_lambda
 
-							if all((soundtrack_filter_top, len(soundtrack_dict) >= 0, is_error == False)): # it_was_new(else_skip) # some_soundtracks(or_newbase) # soundtrack_filter
-								soundtrack_dict.update(soundtrack_filter) # update_base_from_filter
+									print(Style.BRIGHT + Fore.WHITE + "debug soundtrack_count[combine] \'%s\'" % str(soundtrack_count)) # is_color # %d/len
 
-								# soundtrack_tbase(decrypt/debug/backup) -> soundtrack_base(original) # file
-								# soundtrack_filter(decrypt/debug) # soundtrack_dict(original/backup) # json
-
-								# filter(lambda x: lst.count(x) != list(set(lst)).count(x), tuple(lst)) # search_moda
-
-								# soundtrack_dict -> soundtrack_filter
-
-								try:
-									soundtrack_count = [(v.strip(), list(soundtrack_dict.values()).count(v.strip)) for k, v in soundtrack_dict.items() if
-												sl.lower().strip() in k.lower().strip()]
-								except:
-									soundtrack_count = []
-								else:
-									if soundtrack_count:
-
-										soundtrack_count_sorted = sorted(soundtrack_count, key=lambda soundtrack_count: soundtrack_count[1]) # sorted_by_value
-										soundtrack_count = [(scs[0], int(scs[1])) for scs in soundtrack_count_sorted if isinstance(soundtrack_count_sorted, tuple)]
-
-										print(Style.BRIGHT + Fore.CYAN + "debug soundtrack_count[low] \'%d soundtrack count\'" % len(soundtrack_count)) # is_color # %s/str
-
-								try:
-									soundtrack_count = {v.strip(): str(list(soundtrack_dict.values()).count(v.strip())) for k, v in
-												soundtrack_dict.items()}
-								except:
-									soundtrack_count = {}
-								else:
-									if soundtrack_count:
-
-										soundtrack_count_list = [(k, int(v)) for k, v in soundtrack_count.items()]
-										soundtrack_count_sorted = sorted(soundtrack_count_list, key=lambda soundtrack_count_list: soundtrack_count_list[1]) # sorted_by_value
-										stc = {scs[0]: scs[1] for scs in soundtrack_count_sorted} # sorted_json
-										soundtrack_count = stc if stc else {} # is_no_lambda
-
-										print(Style.BRIGHT + Fore.WHITE + "debug soundtrack_count[combine] \'%s\'" % str(soundtrack_count)) # is_color # %d/len
-
+									try:
+										soundtrack_count_new = {k: int(v) for k, v in soundtrack_count.items()}
+										s = sum(list(soundtrack_count_new.values()));
+										l = len(soundtrack_count_new);
+										a = s / l
+										class_dict = {k: round((v / s) * 100, 2) for k, v in soundtrack_count_new.items() if v - a > 0}  # 0..100%(popular_classify)
+									except BaseException as e:
+										class_dict = {}
+										print(Style.BRIGHT + Fore.RED + "debug soundtrack_count[error] \'%s %s\'" % (str(None), str(e)))
+										# write_log("debug soundtrack_count[error]", "%s %s" % (str(None), str(e)), is_error=True) # is_color
+									else:
 										try:
-											soundtrack_count_new = {k: int(v) for k, v in soundtrack_count.items()}
-											s = sum(list(soundtrack_count_new.values()));
-											l = len(soundtrack_count_new);
-											a = s / l
-											class_dict = {k: round((v / s) * 100, 2) for k, v in soundtrack_count_new.items() if v - a > 0}  # 0..100%(popular_classify)
-										except BaseException as e:
-											class_dict = {}
-											print(Style.BRIGHT + Fore.RED + "debug soundtrack_count[error] \'%s %s\'" % (str(None), str(e)))
-											# write_log("debug soundtrack_count[error]", "%s %s" % (str(None), str(e)), is_error=True) # is_color
-										else:
-											try:
-												sort_class = {s:v for s in sorted(class_dict, key=class_dict.get, reverse=False) for k, v in class_dict.items() if all((s,k,v, s == k))}
-											except:
-												sort_class = {}
+											sort_class = {s:v for s in sorted(class_dict, key=class_dict.get, reverse=False) for k, v in class_dict.items() if all((s,k,v, s == k))}
+										except:
+											sort_class = {}
 
-											if all((sort_class, len(sort_class) <= len(class_dict))): # is_sorted_dict # less_or_equal
-												class_dict = sort_class
+										if all((sort_class, len(sort_class) <= len(class_dict))): # is_sorted_dict # less_or_equal
+											class_dict = sort_class
 
-											class_status = str(class_dict) if class_dict else "" # is_no_lambda
-											if class_status:
-												print(Style.BRIGHT + Fore.CYAN + "debug soundtrack_count[popular] \'%s\'" % class_status) # is_color
-												# write_log("debug soundtrack_count[popular]", "%s" % class_status)
+										class_status = str(class_dict) if class_dict else "" # is_no_lambda
+										if class_status:
+											print(Style.BRIGHT + Fore.CYAN + "debug soundtrack_count[popular] \'%s\'" % class_status) # is_color
+											# write_log("debug soundtrack_count[popular]", "%s" % class_status)
 
-								with open(soundtrack_base, "w", encoding="utf-8") as sbf:
-									json.dump(soundtrack_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True) # is(decrypt/debug)
+							with open(soundtrack_base, "w", encoding="utf-8") as sbf:
+								json.dump(soundtrack_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True) # is(decrypt/debug)
 
-							# x[0].isalpha() -> x[0] == x[0].upper()
+						# x[0].isalpha() -> x[0] == x[0].upper()
 
-							with open(files_base["soundtrack"], "a", encoding="utf-8") as fbsf:
-								fbsf.writelines("%s\n" % t.strip() for t in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(tmp)))
+						with open(files_base["soundtrack"], "a", encoding="utf-8") as fbsf:
+							fbsf.writelines("%s\n" % t.strip() for t in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(tmp)))
 
-					if is_not_found: # desc(0), files(0) # create_null(any_time)
-						try:
-							if not os.path.exists("\\".join([fsf, "00s00e.txt"])):
-								open("\\".join([fsf, "00s00e.txt"]), "w", encoding="utf-8").close()
-						except:
-							pass # nothing_to_do_if_error # is_continue
-						else:
-							print(Style.BRIGHT + Fore.CYAN + "Описание и файлы не найдены в папке", Style.BRIGHT + Fore.WHITE + "%s" % fsf, end = "\n") # is_color's
-							# write_log("debug fsf[is_not_found][ok]", "%s" % fsf) # is_create
+				if is_not_found: # desc(0), files(0) # create_null(any_time)
+					try:
+						if not os.path.exists("\\".join([fsf, "00s00e.txt"])):
+							open("\\".join([fsf, "00s00e.txt"]), "w", encoding="utf-8").close()
+					except:
+						pass # nothing_to_do_if_error # is_continue
+					else:
+						print(Style.BRIGHT + Fore.CYAN + "Описание и файлы не найдены в папке", Style.BRIGHT + Fore.WHITE + "%s" % fsf, end = "\n") # is_color's
+						# write_log("debug fsf[is_not_found][ok]", "%s" % fsf) # is_create
 
-					if is_two_desc: # desc(2), files(0/1) # delete_null(any_time)
-						try:
-							if os.path.exists("\\".join([fsf, "00s00e.txt"])):
-								os.remove("\\".join([fsf, "00s00e.txt"]))
-						except:
-							pass # nothing_to_do_if_error # is_continue
-						else:
-							print(Style.BRIGHT + Fore.YELLOW + "Удаляю лишнее описание в папке", Style.BRIGHT + Fore.WHITE + "%s" % fsf, end = "\n") # is_color's
-							# write_log("debug fsf[is_two_desc_found][ok]", "%s" % fsf) # is_delete
-
-			# x[0].isalpha() -> x[0] == x[0].upper()
+				if is_two_desc: # desc(2), files(0/1) # delete_null(any_time)
+					try:
+						if os.path.exists("\\".join([fsf, "00s00e.txt"])):
+							os.remove("\\".join([fsf, "00s00e.txt"]))
+					except:
+						pass # nothing_to_do_if_error # is_continue
+					else:
+						print(Style.BRIGHT + Fore.YELLOW + "Удаляю лишнее описание в папке", Style.BRIGHT + Fore.WHITE + "%s" % fsf, end = "\n") # is_color's
+						# write_log("debug fsf[is_two_desc_found][ok]", "%s" % fsf) # is_delete
 
 			with open(mydir4, "w", encoding="utf-8") as mf: # resave # debug # found_by_period
 				mf.writelines("%s\n" % fs.strip() for fs in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(found_list))) # int/str # is_all(lang)
@@ -1243,16 +1245,27 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 	os.chdir(mydir)
 
-	cmd = os.system("%s >> %s" % (ccmd, mydir3)) # is_list_in_current_folder # 0 - ok, 1 - error
+	if os.path.exists(mydir3):
+		os.remove(mydir3) # clear_for_update
+
+	cmd = os.system(r"%s >> %s" % (ccmd, mydir3)) # is_list_in_current_folder # 0 - ok, 1 - error
 
 	if cmd == 0:
 		sleep(30) # if_ok_wait_30ms
 
 	try:
-		with open(mydir3, encoding="utf-8") as mdf:
+		with open(mydir3, "utf-8") as mdf: # utf-8
 			lang_list = mdf.readlines()
-	except:
-		lang_list = []
+	except BaseException as e:
+		try:
+			with open(mydir3, encoding="cp866") as mdf: # cp866
+				lang_list = mdf.readlines()
+		except:
+			lang_list = []
+
+		logging.error("debug lang_list[error]", "[%s] [%s]" % (str(e), str(datetime.now()))) # logging.warning("Пустой список @folder_from_path/lang_list")
+	else:
+		logging.info("debug lang_list[length]", "%s [%s]" % (str(len(lang_list)), str(datetime.now())))
 
 	# if len(lang_list) > 0: # skip_logic
 	# is_languages
@@ -2482,7 +2495,7 @@ async def days_by_list(lst: list = [], is_avg: bool = False): #8
 	today = datetime.today()  # datetime
 	try:
 		# lst = list(days_by_list_gen()) # new(yes_gen)
-		lst: list = list(set([l.strip() for l in filter(lambda x: all((os.path.exists(x), x)), tuple(lst))]))
+		lst: list = list(set([l.strip() for l in filter(lambda x: os.path.exists(x), tuple(lst)) if l]))
 	except:
 		lst: list = []
 	finally:
@@ -2903,11 +2916,11 @@ class Get_AR:
 		try:
 			assert width and height, "Ширина или высота пустая @width_to_ar/width/height" # is_assert_debug
 		except AssertionError: # as err: # if_null
-			logging.warning("Ширина или высота пустая @width_to_ar/%d/%d" % (width, height))
+			logging.warning("Ширина или высота пустая @width_to_ar/%d/%d [%s]" % (width, height, str(datetime.now())))
 			# raise err
 			return (0, 0, 0)
 		except BaseException as e: # if_error
-			logging.error("Ширина или высота пустая @width_to_ar/%d/%ds [%s]" % (width, height, str(e)))
+			logging.error("Ширина или высота пустая @width_to_ar/%d/%ds [%s] [%s]" % (width, height, str(e), str(datetime.now())))
 			return (0, 0, 0)
 
 		"""Specify the Width To Retain the Aspect Ratio"""
@@ -2967,11 +2980,11 @@ class Get_AR:
 		try:
 			assert width and height, "Высота пустая @height_to_ar/width/height" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Высота пустая @height_to_ar/%d/%d" % (width, height))
+			logging.warning("Высота пустая @height_to_ar/%d/%d [%s]" % (width, height, str(datetime.now())))
 			raise err
 			return (0, 0, 0)
 		except BaseException as e: # if_error
-			logging.error("Высота пустая @height_to_ar/%d/%d [%s]" % (width, height, str(e)))
+			logging.error("Высота пустая @height_to_ar/%d/%d [%s] [%s]" % (width, height, str(e), str(datetime.now())))
 			return (0, 0, 0)
 
 		"""Specify the Height To Retain the Aspect Ratio"""
@@ -3151,11 +3164,11 @@ class MyMeta:
 		try:
 			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_meta/filename" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Файл отсутствует @get_meta/%s" % self.filename)
+			logging.warning("Файл отсутствует @get_meta/%s [%s]" % (self.filename, str(datetime.now())))
 			raise err
 			return False
 		except BaseException as e: # if_error
-			logging.error("Файл отсутствует @get_meta/%s [%s]" % (self.filename, str(e)))
+			logging.error("Файл отсутствует @get_meta/%s [%s] [%s]" % (self.filename, str(e), str(datetime.now())))
 			return False
 
 		metacmd = path_for_queue + "ffprobe.exe -v quiet -print_format json -show_format -show_streams %s > %s" % (
@@ -3181,11 +3194,11 @@ class MyMeta:
 		try:
 			assert self.filename.split(".").lower() == "mkv", "Выбран другой формат @get_mkv_audio/filename" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Выбран другой формат @get_mkv_audio/%s" % self.filename)
+			logging.warning("Выбран другой формат @get_mkv_audio/%s [%s]" % (self.filename, str(datetime.now())))
 			raise err
 			return []
 		except BaseException as e: # if_error
-			logging.error("Выбран другой формат @get_mkv_audio/%s [%s]" % (self.filename, str(e)))
+			logging.error("Выбран другой формат @get_mkv_audio/%s [%s] [%s]" % (self.filename, str(e), str(datetime.now())))
 			return []
 
 		lst: list = []
@@ -3231,11 +3244,11 @@ class MyMeta:
 		try:
 			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_codecs/filename" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Файл отсутствует @get_codecs/%s" % self.filename)
+			logging.warning("Файл отсутствует @get_codecs/%s [%s]" % (self.filename, str(datetime.now())))
 			raise err
 			return lst
 		except BaseException as e: # if_error
-			logging.error("Файл отсутствует @get_codecs/%s [%s]" % (self.filename, str(e)))
+			logging.error("Файл отсутствует @get_codecs/%s [%s] [%s]" % (self.filename, str(e), str(datetime.now())))
 			return lst
 
 		# ffprobe -v error -show_entries stream=codec_name -of csv=p=0:s=x input.m4v
@@ -3290,11 +3303,11 @@ class MyMeta:
 		try:
 			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_width_height/filename" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Файл отсутствует @get_width_height/%s" % self.filename)
+			logging.warning("Файл отсутствует @get_width_height/%s [%s]" % (self.filename, str(datettime.now())))
 			raise err
 			return (0, 0, False)
 		except BaseException as e: # if_error
-			logging.error("Файл отсутствует @get_width_height/%s [%s]" % (self.filename, str(e)))
+			logging.error("Файл отсутствует @get_width_height/%s [%s] [%s]" % (self.filename, str(e), str(datetime.now())))
 			return (0, 0, False)
 
 		# is_owidth, is_change = 0, False
@@ -3450,11 +3463,11 @@ class MyMeta:
 		try:
 			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_length/filename" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Файл отсутствует @get_length/%s" % self.filename)
+			logging.warning("Файл отсутствует @get_length/%s [%s]" % (self.filename, str(datetime.now())))
 			raise err
 			return duration_null
 		except BaseException as e: # if_error
-			logging.error("Файл отсутствует @get_length/%s [%s]" % (self.filename, str(e)))
+			logging.error("Файл отсутствует @get_length/%s [%s] [%s]" % (self.filename, str(e), str(datetime.now())))
 			return duration_null
 
 		cmd_fd: list = [path_for_queue + "ffprobe.exe", "-v", "error", "-show_entries", "format=duration", "-of",
@@ -3515,11 +3528,11 @@ class MyMeta:
 		try:
 			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_profile_and_level/filename" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Файл отсутствует @get_profile_and_level/%s" % self.filename)
+			logging.warning("Файл отсутствует @get_profile_and_level/%s [%s]" % (self.filename, str(datetime.now())))
 			raise err
 			return ("", "")
 		except BaseException as e: # if_error
-			logging.error("Файл отсутствует @get_profile_and_level/%s [%s]" % (self.filename, str(e)))
+			logging.error("Файл отсутствует @get_profile_and_level/%s [%s] [%s]" % (self.filename, str(e), str(datetime.now())))
 			return ("", "")
 
 		cmd_pl: list = [path_for_queue + "ffprobe.exe", "-v", "error", "-show_entries", "stream=profile,level", "-of",
@@ -3561,11 +3574,11 @@ class MyMeta:
 		try:
 			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_fps/self.filename" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Файл отсутствует @get_fps/%s" % self.filename)
+			logging.warning("Файл отсутствует @get_fps/%s [%s]" % (self.filename, str(datetime.now())))
 			raise err
 			return 0
 		except BaseException as e: # if_error
-			logging.error("Файл отсутствует @get_fps/%s [%s]" % (self.filename, str(e)))
+			logging.error("Файл отсутствует @get_fps/%s [%s] [%s]" % (self.filename, str(e), str(datetime.now())))
 			return 0
 
 		fps_list: list = []
@@ -3749,10 +3762,10 @@ class MyMeta:
 		except AssertionError as err:
 			width, height, is_change = self.get_width_height(
 				filename=self.filename)  # pass_1_of_3 # no_calc("find_scale_and_status") # debug
-			logging.warning("Высота или ширина указаны не верно @calc_vbr/width/height/%s" % self.filename)
+			logging.warning("Высота или ширина указаны не верно @calc_vbr/width/height/%s [%s]" % (self.filename, str(datetime.now())))
 			raise err
 		except BaseException as e:
-			logging.error("Высота или ширина указаны не верно @calc_vbr/width/height/%s [%s]" % (self.filename, str(e)))
+			logging.error("Высота или ширина указаны не верно @calc_vbr/width/height/%s [%s] [%s]" % (self.filename, str(e), str(datetime.now())))
 
 		# temporary_hidden
 		"""
@@ -4015,11 +4028,11 @@ class MyMeta:
 		try:
 			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_gop/self.filename" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Файл отсутствует @get_gop/%s" % self.filename)
+			logging.warning("Файл отсутствует @get_gop/%s [%s]" % (self.filename, str(datetime.now())))
 			raise err
 			return 0
 		except BaseException as e: # if_error
-			logging.error("Файл отсутствует @get_gop/%s [%s]" % (self.filename, str(e)))
+			logging.error("Файл отсутствует @get_gop/%s [%s] [%s]" % (self.filename, str(e), str(datetime.now())))
 			return 0
 
 		try:
@@ -4057,11 +4070,11 @@ class MyMeta:
 		try:
 			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @calc_cbr/self.filename" # is_assert_debug
 		except AssertionError as err: # is_null
-			logging.warning("Файл отсутствует @calc_cbr/%s" % self.filename)
+			logging.warning("Файл отсутствует @calc_cbr/%s [%s]" % (self.filename, str(datetime.now())))
 			raise err
 			return 0
 		except BaseException as e: # if_error
-			logging.error("Файл отсутствует @calc_cbr/%s [%s]" % (self.filename, str(e)))
+			logging.error("Файл отсутствует @calc_cbr/%s [%s] [%s]" % (self.filename, str(e), str(datetime.now())))
 			return 0
 
 		if not abitrate:
@@ -4073,11 +4086,11 @@ class MyMeta:
 			assert fsize, "Не могу определить размер файла @calc_cbr/fsize" # is_assert_debug
 		except AssertionError as err: # if_null
 			fsize: int = 0
-			logging.warning("Не могу определить размер файла @calc_cbr/%s" % self.filename)
+			logging.warning("Не могу определить размер файла @calc_cbr/%s [%s]" % (self.filename, str(datetime.now())))
 			raise err
 		except BaseException as e: # if_error
 			fsize: int = 0
-			logging.error("Не могу определить размер файла @calc_cbr/%s [%s]" % (self.filename, str(e)))
+			logging.error("Не могу определить размер файла @calc_cbr/%s [%s] [%s]" % (self.filename, str(e), str(datetime.now())))
 		else:
 			fsize /= (1024 ** 2)
 
@@ -4087,11 +4100,11 @@ class MyMeta:
 			assert dur, "Не могу определить длину видео @calc_cbr/dur" # is_assert_debug
 		except AssertionError as err: # if_null
 			dur: int = 0
-			logging.warning("Не могу определить длину видео @calc_cbr/%s" % self.filename)
+			logging.warning("Не могу определить длину видео @calc_cbr/%s [%s]" % (self.filename, str(datetime.now())))
 			raise err
 		except BaseException as e: # if_error
 			dur: int = 0
-			logging.error("Не могу определить длину видео @calc_cbr/%s [%s]" % (self.filename, str(e)))
+			logging.error("Не могу определить длину видео @calc_cbr/%s [%s] [%s]" % (self.filename, str(e), str(datetime.now())))
 
 		if any((not fsize, not dur)):
 			return 0
@@ -4164,11 +4177,11 @@ class MyMeta:
 		try:
 			assert self.filename and os.path.exists(self.filename), "Файл отсуствует @lossy_audio/filename" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Файл отсуствует @lossy_audio/%s" % self.filename)
+			logging.warning("Файл отсуствует @lossy_audio/%s [%s]" % (self.filename, str(datetime.now())))
 			raise err
 			return 0
 		except BaseException as e: # if_error
-			logging.error("Файл отсуствует @lossy_audio/%s [%s]" % (self.filename, str(e)))
+			logging.error("Файл отсуствует @lossy_audio/%s [%s] [%s]" % (self.filename, str(e), str(datetime.now())))
 			return 0
 
 		# abitrate # channels
@@ -4187,11 +4200,11 @@ class MyMeta:
 			assert abr, "Немогу определить частоту аудио @lossy_audio/abr" # is_assert_debug
 		except AssertionError as err: # if_null
 			abr: int = 0
-			logging.warning("Немогу определить частоту аудио @lossy_audio/%s" % self.filename)
+			logging.warning("Немогу определить частоту аудио @lossy_audio/%s [%s]" % (self.filename, str(datetime.now())))
 			raise err
 		except BaseException as e: # if_error
 			abr: int = 0
-			logging.error("Немогу определить частоту аудио @lossy_audio/%s [%s]" % (self.filename, str(e)))
+			logging.error("Немогу определить частоту аудио @lossy_audio/%s [%s] [%s]" % (self.filename, str(e), str(datetime.now())))
 
 		return abr  # -b:a XXXk
 
@@ -4202,11 +4215,11 @@ class MyMeta:
 		try:
 			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_channels/self.filename" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Файл отсутствует @get_channels/%s" % self.filename)
+			logging.warning("Файл отсутствует @get_channels/%s [%s]" % (self.filename, str(datetime.now())))
 			raise err
 			return 0
 		except BaseException as e: # if_error
-			logging.error("Файл отсутствует @get_channels/%s [%s]" % (self.filename, str(e)))
+			logging.error("Файл отсутствует @get_channels/%s [%s] [%s]" % (self.filename, str(e), str(datetime.now())))
 			return 0
 
 		clcmd: list = [path_for_queue + "ffprobe.exe", "-v", "error", "-show_entries", "stream=channels", "-of",
@@ -4868,11 +4881,11 @@ class MyTime:
 		try:
 			assert delta.days >= 0 and delta.seconds >= 0, "Нет количества дней или секунд @seconds_to_hms/delta/*" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Нет количества дней или секунд @seconds_to_hms/delta/*")
+			logging.warning("Нет количества дней или секунд @seconds_to_hms/delta/* [%s]" % str(datetime.now()))
 			raise err
 			return (0, 0, 0, 0)
 		except BaseException as e: # if_error
-			logging.error("Нет количества дней или секунд @seconds_to_hms/delta/* [%s]" % str(e))
+			logging.error("Нет количества дней или секунд @seconds_to_hms/delta/* [%s] [%s]" % (str(e), str(datetime.now())))
 			return (0, 0, 0, 0)
 		else:
 			# print(delta.days, delta.seconds // 3600, (delta.seconds // 60) % 60, delta.seconds % 60)
@@ -5138,7 +5151,7 @@ async def folders_filter(lst=[], folder: str = "", is_Rus: bool = False, is_Ukr:
 				write_log("debug move[folder][2]", "Найдено %d папок с файлами [Eur]" % len(folder_with_files))
 
 	try:
-		folder_without_files: list = list(set([ff.strip() for ff in filter(lambda x: all((os.path.exists(x), x)), tuple(full_folder)) if
+		folder_without_files: list = list(set([ff.strip() for ff in filter(lambda x: os.path.exists(x), tuple(full_folder)) if
 									all((len(os.listdir(ff)) == 0, ff))]))  # no_files
 	except BaseException as e:
 		folder_without_files: list = []
@@ -5799,11 +5812,11 @@ async def process_delete(file1: str = ""): #14
 	try:
 		assert file1 and os.path.exists(file1), "Файл отсутствует @process_delete/file1" # is_assert_debug
 	except AssertionError as err: # if_null
-		logging.warning("Файл отсутствует @process_delete/%s" % file1)
+		logging.warning("Файл отсутствует @process_delete/%s [%s]" % (file1, str(datetime.now())))
 		raise err
 		return
 	except BaseException as e: # if_error
-		logging.error("Файл отсутствует @process_delete/%s [%s]" % (file1, str(e)))
+		logging.error("Файл отсутствует @process_delete/%s [%s] [%s]" % (file1, str(e), str(datetime.now())))
 		return
 
 	try:
@@ -5848,11 +5861,11 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 	try:
 		assert filename and os.path.exists(filename), "Файл отсутствует @seasonvar_parse/filename" # is_assert_debug
 	except AssertionError as err: # if_null
-		logging.warning("Файл отсутствует @seasonvar_parse/%s" % filename)
+		logging.warning("Файл отсутствует @seasonvar_parse/%s [%s]" % (filename, str(datetime.now())))
 		raise err
 		return None
 	except BaseException as e: # if_error
-		logging.error("Файл отсутствует @seasonvar_parse/%s [%s]" % (filename, str(e)))
+		logging.error("Файл отсутствует @seasonvar_parse/%s [%s] [%s]" % (filename, str(e), str(datetime.now())))
 		return None
 
 	# temp: list = []
@@ -5943,12 +5956,12 @@ async def seasonvar_parse(filename, is_log: bool = True) -> any: # convert_parse
 			assert seep_str, "" # is_assert_debug
 		except AssertionError as err: # if_null
 			seep_str: str = ""
-			logging.warning("Null templated filename [%s] [%s]" % (filename, str(err)))
+			logging.warning("Null templated filename [%s] [%s]" % (filename, str(datetime.now())))
 			raise err
 			# write_log("debug seep_str[notemp]!", "Null templated filename [%s] [%s]" % (filename, str(err)), is_error=True) # hidden
 		except BaseException as e: # if_error
 			seep_str: str = ""
-			logging.error("Error templated filename [%s] [%s]" % (filename, str(e)))
+			logging.error("Error templated filename [%s] [%s] [%s]" % (filename, str(e), str(datetime.now())))
 			write_log("debug seep_str[notemp]!", "Error templated filename [%s] [%s]" % (filename, str(e)), is_error=True) # is_hidden(debug)
 
 		# (filename_by_template, short_by_base)
@@ -7840,11 +7853,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			try:
 				assert fcmd, "Пустой словарь или нет задач @project_done/fcmd" # is_assert_debug
 			except AssertionError as err: # if_null
-				logging.warning("Пустой словарь или нет задач @project_done/fcmd")
+				logging.warning("Пустой словарь или нет задач @project_done/fcmd [%s]" % str(datetime.now()))
 				raise err
 				break
 			except BaseException as e: # if_error
-				logging.error("Пустой словарь или нет задач @project_done/fcmd [%s]" % str(e))
+				logging.error("Пустой словарь или нет задач @project_done/fcmd [%s] [%s]" % (str(e), str(datetime.now())))
 				break
 
 			try:
@@ -8138,11 +8151,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					try:
 						assert datelist, "Пустой список или нет файлов для справнения @project_done/datelist" # is_assert_debug
 					except AssertionError as err: # if_null
-						logging.warning("Пустой список или нет файлов для сравнения @project_done/datelist")
+						logging.warning("Пустой список или нет файлов для сравнения @project_done/datelist [%s]" % str(datetime.now()))
 						raise err
 						break
 					except BaseException as e: # if_error
-						logging.error("Пустой список или нет файлов для сравнения @project_done/datelist [%s]" % str(e))
+						logging.error("Пустой список или нет файлов для сравнения @project_done/datelist [%s] [%s]" % (str(e), str(datetime.now())))
 						break
 
 					if not os.path.exists(dl["file"][3]): # is_assert_debug
@@ -8203,11 +8216,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					try:
 						assert datelist, "Пустой список или нет файлов для сравнения @project_done/datelist" # is_assert_debug
 					except AssertionError as err: # if_null
-						logging.warning("Пустой список или нет файлов для сравнения @project_done/datelist")
+						logging.warning("Пустой список или нет файлов для сравнения @project_done/datelist [%s]" % str(datetime.now()))
 						raise err
 						break
 					except BaseException as e: # if_error
-						logging.error("Пустой список или нет файлов для сравнения @project_done/datelist [%s]" % str(e))
+						logging.error("Пустой список или нет файлов для сравнения @project_done/datelist [%s] [%s]" % (str(e), str(datetime.now())))
 						break
 
 					if not os.path.exists(dl["file"][3]): # is_assert_debug
@@ -8539,11 +8552,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		try:
 			assert length, "Ну указано сколько время ms надо конвертировать @hh_mm_ss/length" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Ну указано сколько время ms надо конвертировать @hh_mm_ss/length")
+			logging.warning("Ну указано сколько время ms надо конвертировать @hh_mm_ss/length [%s]" % str(datetime.now))
 			raise err
 			return (0, 0, 0, False)
 		except BaseException as e: # if_error
-			logging.error("Ну указано сколько время ms надо конвертировать @hh_mm_ss/length [%s]" % str(e))
+			logging.error("Ну указано сколько время ms надо конвертировать @hh_mm_ss/length [%s] [%s]" % (str(e), str(datetime.now())))
 			return (0, 0, 0, False)
 
 		try:
@@ -9026,11 +9039,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			try:
 				assert files2, "Пустой список или нет файлов files2" # is_assert_debug
 			except AssertionError as err: # if_null
-				logging.warning("Пустой список или нет файлов files2")
+				logging.warning("Пустой список или нет файлов files2 [%s]" % str(datetime.now()))
 				raise err
 				break
 			except BaseException as e: # if_error
-				logging.error("Пустой список или нет файлов files2 [%s]" % str(e))
+				logging.error("Пустой список или нет файлов files2 [%s] [%s]" % (str(e), str(datetime.now())))
 				break
 
 			try:
@@ -9234,11 +9247,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		try:
 			assert lst, "Пустой список @filter_from_list/lst" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Пустой список @filter_from_list/lst")
+			logging.warning("Пустой список @filter_from_list/lst [%s]" % str(datetime.now()))
 			raise err
 			return temp
 		except BaseException as e: # if_error
-			logging.error("Пустой список @filter_from_list/lst [%s]" % str(e))
+			logging.error("Пустой список @filter_from_list/lst [%s] [%s]" % (str(e), str(datetime.now())))
 			return temp
 
 		# load_meta_jobs(filter) #4
@@ -9648,7 +9661,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				avg_size: int = 0
 
 				try:
-					fsizes = list(set([os.path.getsize(l1) for l1 in list1 if os.path.exists(l1)]))
+					fsizes = list(set([os.path.getsize(l1) for l1 in filter(lambda x: os.path.exists(x), tuple(list1)) if ll]))
 				except:
 					fsizes = []
 				finally:
@@ -9673,11 +9686,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						try:
 							assert list1, "Пустой список list1" # is_assert_debug
 						except AssertionError as err: # if_null
-							logging.warning("Пустой список list1")
+							logging.warning("Пустой список list1 [%s]" % str(datetime.now()))
 							raise err
 							break
 						except BaseException as e: # if_error
-							logging.error("Пустой список list1 [%s]" % str(e))
+							logging.error("Пустой список list1 [%s] [%s]" % (str(e), str(datetime.now())))
 							break
 
 						try:
@@ -9697,9 +9710,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							print(Style.BRIGHT + Fore.WHITE + "%s" % "->".join([year_path, fname]))  # new
 							write_log("debug yearfolder", "->".join([year_path, fname]))
 
-						if all((l1, year_path)) and os.path.exists("".join([file_cinema,
-																		video_big_regex.findall(fname)[0].replace(
-																			"(", "").replace(")", "")])):
+						if all((l1, year_path)) and os.path.exists("".join([file_cinema, video_big_regex.findall(fname)[0].replace("(", "").replace(")", "")])):
 
 							try:
 								fsize: int = os.path.getsize(l1)
@@ -9775,11 +9786,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		try:
 			assert folder and os.path.exists(folder), "Папка отсутствует @true_project_rename/folder" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Папка отсутствует @true_project_rename/%s" % folder)
+			logging.warning("Папка отсутствует @true_project_rename/%s [%s]" % (folder, str(datetime.now())))
 			raise err
 			return
 		except BaseException as e: # if_error
-			logging.error("Папка отсутствует @true_project_rename/%s [%s]" % (folder, str(e)))
+			logging.error("Папка отсутствует @true_project_rename/%s [%s] [%s]" % (folder, str(e), str(datetime.now())))
 			return
 
 		write_log("debug start[true_project_rename]", "%s" % str(datetime.now()))
@@ -9941,11 +9952,11 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						try:
 							assert filter_dict2, "Пустой словарь filter_dict2" # is_assert_debug
 						except AssertionError as err: # if_null
-							logging.warning("Пустой словарь filter_dict2")
+							logging.warning("Пустой словарь filter_dict2 [%s]" % str(datetime.now()))
 							raise err
 							break
 						except BaseException as e: # if_error
-							logging.error("Пустой словарь filter_dict2 [%s]" % str(e))
+							logging.error("Пустой словарь filter_dict2 [%s] [%s]" % (str(e), str(datetime.now())))
 							break
 
 						# Надо заменить c:\downloads\new\Reginald_the_Vampire_01s07e.mp4 на c:\downloads\new\Reginald_The_Vampire_01s07e.mp4 # write_log
@@ -10780,7 +10791,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		MM = MyMeta() #4
 
-		length = list(set([MM.get_length(lf) for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]))
+		length = list(set([MM.get_length(lf) for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))
 
 		# async
 		try:
@@ -10802,71 +10813,62 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		date1 = datetime.now()
 
-		with unique_semaphore:
-			for lf in lfiles:
+		for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)):
 
-				try:
-					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
-				except AssertionError as err: # if_null
-					logging.warning("Пустой список или нет файлов lfiles")
-					raise err
-					break
-				except BaseException as e: # if_error
-					logging.error("Пустой список или нет файлов lfiles [%s]" % str(e))
-					break
+			try:
+				assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
+			except AssertionError as err: # if_null
+				logging.warning("Пустой список или нет файлов lfiles [%s]" % str(datetime.now()))
+				raise err
+				break
+			except BaseException as e: # if_error
+				logging.error("Пустой список или нет файлов lfiles [%s] [%s]" % (str(e), str(datetime.now())))
+				break
 
-				try:
-					assert lf and os.path.exists(lf), "Файл отсутствует lf" # is_assert_debug
-				except AssertionError: # as err: # if_null
-					logging.warning("Файл отсутствует %s" % lf)
-					# raise err
-					continue
-				except BaseException as e: # if_error
-					logging.error("Файл отсутствует %s [%s]" % (lf, str(e)))
-					continue
+			cnt += 1
 
-				cnt += 1
+			date2 = datetime.now()
 
-				date2 = datetime.now()
+			hour = divmod(int(abs(date1 - date2).total_seconds()), 60)  # 60(min) -> 3600(hours)
 
-				hour = divmod(int(abs(date1 - date2).total_seconds()), 60)  # 60(min) -> 3600(hours)
+			try:
+				_, hh, mm, _ = MT.seconds_to_hms(date1, date2) # days -> _ # ss -> _
+			except:
+				mm = abs(date1 - date2).seconds
+				hh = mm // 3600
+				mm //= 60
+				# mm %= 60 # sec
 
-				try:
-					_, hh, mm, _ = MT.seconds_to_hms(date1, date2) # days -> _ # ss -> _
-				except:
-					mm = abs(date1 - date2).seconds
-					hh = mm // 3600
-					mm //= 60
-					# mm %= 60 # sec
+			if hour[0]:
+				write_log("debug hour[count][1]", "%d" % (hour[0] // 60)) # is_index #1
+				hour = hour[0] // 60
 
-				if hour[0]:
-					write_log("debug hour[count][1]", "%d" % (hour[0] // 60)) # is_index #1
-					hour = hour[0] // 60
+			try:
+				assert isinstance(hour, int) and hour >= 4, "Меньше установленого лимита по времени hour[1]" # 1 # is_assert_debug # 4 -> 3
+			except AssertionError: # as err: # if_null
+				logging.warning("Меньше установленого лимита по времени hour[1]")
+				hour = 3 # limit_hour
+				# raise err
+			except BaseException as e: # if_error
+				logging.error("Меньше установленого лимита по времени hour[1] [%s]" % str(e))
+				hour = 3
 
-				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[1]" # 1 # is_assert_debug
-				except AssertionError: # as err: # if_null
-					logging.warning("Меньше установленого лимита по времени hour[1]")
-					hour = 2 # limit_hour
-					# raise err
-				except BaseException as e: # if_error
-					logging.error("Меньше установленого лимита по времени hour[1] [%s]" % str(e))
-					hour = 4
+			# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
+			if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # all((mm >= l_avg, l_avg >= 30)): # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
+				write_log("debug stop_job[lfiles]", "Stop: at %s [%d]" % (lf, cnt))
+				break
 
-				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
-				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # all((mm >= l_avg, l_avg >= 30)): # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
-					write_log("debug stop_job[lfiles]", "Stop: at %s [%d]" % (lf, cnt))
-					break
-
-				try:
-					fname = lf.split("\\")[-1].strip()
-				except:
-					fname = ""
+			try:
+				fname = lf.split("\\")[-1].strip()
+			except:
+				fname = ""
+			finally:
+				if not lf:
 					continue
 
-				if all((not fname in unique, fname)) and os.path.exists(lf):
-					unique.add(fname)  # short_file(first)_by_set
-					full_list.add(lf)  # full_filename(first)_by_set
+			if all((not fname in unique, fname)) and os.path.exists(lf):
+				unique.add(fname)  # short_file(first)_by_set
+				full_list.add(lf)  # full_filename(first)_by_set
 
 		del MT
 
@@ -11018,14 +11020,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[2]" # 2
+					assert isinstance(hour, int) and hour >= 4, "Меньше установленого лимита по времени hour[2]" # 2 # is_assert_debug # 4 -> 3
 				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[2]")
-					hour = 4 # limit_hour
+					hour = 3 # limit_hour
 					# raise err
 				except BaseException as e: # if_error
 					logging.error("Меньше установленого лимита по времени hour[2] [%s]" % str(e))
-					hour = 4
+					hour = 3
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >=h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -11066,7 +11068,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	# --- (move/update)_files ---
 
 	try:
-		temp = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]))
+		temp = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))
 	except:
 		temp = []
 	finally:
@@ -11476,14 +11478,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				hour = hour[0] // 60
 
 			try:
-				assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[3]" # 3 # is_assert_debug
+				assert isinstance(hour, int) and hour >= 4, "Меньше установленого лимита по времени hour[3]" # 3 # is_assert_debug # 4 -> 3
 			except AssertionError: # as err: # if_null
 				logging.warning("Меньше установленого лимита по времени hour[3]")
-				hour = 4 # limit_hour
+				hour = 3 # limit_hour
 				# raise err
 			except BaseException as e: # if_error
 				logging.error("Меньше установленого лимита по времени hour[3] [%s]" % str(e))
-				hour = 4
+				hour = 3
 
 			# time_is_limit_1hour_50min # all((h >= 0, m, hh >=h, mm >= m)) # all((hh > hour, mm >= m))
 			if all((hh > hour, hour)): # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -11572,7 +11574,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 	# --- update_files ---
 	try:
-		temp = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles))]))
+		temp = list(set([lf.strip() for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)) if lf]))
 	except:
 		temp = []
 	finally:
@@ -11603,12 +11605,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			flength_and_fname: list = []
 
 			try:
-				flength_and_fname: list = list(set([(MM.get_length(fd),fd) for fd in filter(lambda x: os.path.exists(x), tuple([*filecmdbase_dict]))]))
+				flength_and_fname: list = list(set([(MM.get_length(fd),fd) for fd in filter(lambda x: os.path.exists(x), tuple([*filecmdbase_dict])) if fd]))
 			except:
 				flength_and_fname = []
 
 			try:
-				flength: list = list(set([MM.get_length(fd) for fd in filter(lambda x: os.path.exists(x), tuple([*filecmdbase_dict]))]))
+				flength: list = list(set([MM.get_length(fd) for fd in filter(lambda x: os.path.exists(x), tuple([*filecmdbase_dict])) if fd]))
 			except:
 				flength: list = []
 			else:
@@ -11651,7 +11653,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								start = i * 60
 								length= splitLength * 60
 
-								script_line = f"ffmpeg -hide_banner -y -i {fln[1]} -ss {str(start)} -t {str(length)} clip{str(i)}.m4v"
+								script_line = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) 
+								script_line += f" -hide_banner -y -i {fln[1]} -ss {str(start)} -t {str(length)} clip{str(i)}.m4v"
 								# script_line = "ffmpeg -hide_banner -y -i %s -ss %s -t %s clip%s.m4v" % (fln[1], str(start), str(length), str(i))
 
 								# os.system("%s" % script_line) # run_script
@@ -11769,8 +11772,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			avg_size: int = 0
 
 			try:
-				fsizes: list = list(set([os.path.getsize(fd) for fd in [*filecmdbase_dict] if
-								os.path.exists(fd)]))
+				fsizes: list = list(set([os.path.getsize(fd) for fd in filter(lambda x: os.path.exists(x), tuple([*filecmdbase_dict])) if fd]))
 			except:
 				fsizes: list = []
 			finally:
@@ -11834,14 +11836,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[4]" # 4 # is_assert_debug
+					assert isinstance(hour, int) and hour >= 4, "Меньше установленого лимита по времени hour[4]" # 4 # is_assert_debug # 4 -> 3
 				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[4]")
-					hour = 4 # limit_hour
+					hour = 3 # limit_hour
 					# raise err
 				except BaseException as e: # if_error
 					logging.error("Меньше установленого лимита по времени hour[4] [%s]" % str(e))
-					hour = 4
+					hour = 3
 
 				# # time_is_limit_1hour_or_30min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)): # stop_if_more_30min # mm[0] // 60 >= limit_hour:  # stop_if_more_"2"hour
@@ -12199,14 +12201,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[5]" # 5 # is_assert_debug
+					assert isinstance(hour, int) and hour >= 4, "Меньше установленого лимита по времени hour[5]" # 5 # is_assert_debug # 4 -> 3
 				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[5]")
-					hour = 4 # limit_hour
+					hour = 3 # limit_hour
 					# raise err
 				except BaseException as e: # if_error
 					logging.error("Меньше установленого лимита по времени hour[5] [%s]" % str(e))
-					hour = 4
+					hour = 3
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)): # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -12395,14 +12397,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[6]" # 6 # is_assert_debug
+					assert isinstance(hour, int) and hour >= 4, "Меньше установленого лимита по времени hour[6]" # 6 # is_assert_debug # 4 -> 3
 				except AssertionError: # as err: # if_null
-					logging.warning("Меньше установленого лимита по времени hour[6]")
-					hour = 4 # limit_hour
+					logging.warning("Меньше установленого лимита по времени hour[6] [%s]" % str(datetime.now()))
+					hour = 3 # limit_hour
 					# raise err
 				except BaseException as e: # if_error
-					logging.warning("Меньше установленого лимита по времени hour[6] [%s]" % str(e))
-					hour = 4
+					logging.warning("Меньше установленого лимита по времени hour[6] [%s] [%s]" % (str(e), str(datetime.now())))
+					hour = 3
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -12540,14 +12542,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			hour = hour[0] // 60
 
 		try:
-			assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[7]" # 7 # is_assert_debug
+			assert isinstance(hour, int) and hour >= 4, "Меньше установленого лимита по времени hour[7]" # 7 # is_assert_debug # 4 -> 3
 		except AssertionError: # as err: # if_null
 			logging.warning("Меньше установленого лимита по времени hour[7]")
-			hour = 4 # limit_hour
+			hour = 3 # limit_hour
 			# raise err
 		except BaseException as e: # if_error
 			logging.error("Меньше установленого лимита по времени hour[7] [%s]" % str(e))
-			hour = 4
+			hour = 3
 
 		# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 		if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
@@ -14870,6 +14872,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				time_file: float = 0
 				data_file: float = 0
 
+
+				# file_zise = 1024 # размер файла в байтах # transfer_speed = 1000000 # скорость передачи данных в битах в секунду
+				# time = calculate_transfer_time(file_size, transfer_speed); print(f"Время передачи файла: {time} секунд")
+												
+				def calculate_transfer_time(file_size, transfer_speed):
+					transfer_time = (file_size * 8) / transfer_speed
+					return transfer_time
+
 				if os.path.exists(k):
 					try:
 						fsize = os.path.getsize(k)
@@ -14906,6 +14916,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 							write_log("debug speed_file[nolist]", "%s, скорость передачи: %s" % (k, speed_size)) # speed_size -> str(speed_list[-1])
 
 					# 'debug speed_file: d:\\multimedia\\video\\serials_conv\\Hudson_and_Rex\\Hudson_and_Rex_03s01e.mp4, скорость передачи: 32251694.750 30 Mb/s
+
+					try:
+						time_calc = calculate_transfer_time(fsize, speed_file)
+						sec_or_min = "%d минут" % int(time_calc // 60) if time_calc > 60 else "%d секунд" % int(time_calc)
+					except BaseException as e:
+						write_log("debug sec_or_min[error]", "%s [%s] [%s]" % (k.strip(), str(e), str(datetime.now())))
+					else:
+						write_log("debug sec_or_min", f"Время передачи файла: {sec_or_min}, имя файла: {k.strip()}, сейчас: {str(datetime.now())}") # print(f"Время передачи файла: {sec_or_min}") # секунд
 
 					time_list: list = []
 					time_list2: list = [] # is_debug_time
@@ -15015,14 +15033,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[8]" # 8 # is_assert_debug
+					assert isinstance(hour, int) and hour >= 4, "Меньше установленого лимита по времени hour[8]" # 8 # is_assert_debug # 4 -> 3
 				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[8]")
-					hour = 4 # limit_hour
+					hour = 3 # limit_hour
 					# raise err
 				except BaseException as e: # if_error
 					logging.error("Меньше установленого лимита по времени hour[8] [%s]" % str(e))
-					hour = 4
+					hour = 3
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # mm[0] // 60 >= 2:  # stop_if_more_2hour
@@ -15113,14 +15131,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					hour = hour[0] // 60
 
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[9]" # 9 # is_assert_debug
+					assert isinstance(hour, int) and hour >= 4, "Меньше установленого лимита по времени hour[9]" # 9 # is_assert_debug # 4 -> 3
 				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[9]")
-					hour = 4 # limit_hour
+					hour = 3 # limit_hour
 					# raise err
 				except BaseException as e: # if_error
 					logging.error("Меньше установленого лимита по времени hour[9] [%s]" % str(e))
-					hour = 4
+					hour = 3
 
 				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
 				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # stop_if_more_30min # prc >= 75 # stop_by_progress(1/3) ~ 75% (debug)
@@ -15522,14 +15540,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				# """
 				try:
-					assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[10]" # 10 # is_assert_debug
+					assert isinstance(hour, int) and hour >= 4, "Меньше установленого лимита по времени hour[10]" # 10 # is_assert_debug # 4 -> 3
 				except AssertionError: # as err: # if_null
 					logging.warning("Меньше установленого лимита по времени hour[10]")
-					hour = 4 # limit_hour
+					hour = 3 # limit_hour
 					# raise err
 				except BaseException as e: # if_error
 					logging.error("Меньше установленого лимита по времени hour[10] [%s]" % str(e))
-					hour = 4
+					hour = 3
 				# """
 
 				# all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
@@ -15695,14 +15713,14 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 						# """
 						try:
-							assert isinstance(hour, int) and hour >= 2, "Меньше установленого лимита по времени hour[11]" # 11 # is_assert_debug
+							assert isinstance(hour, int) and hour >= 4, "Меньше установленого лимита по времени hour[11]" # 11 # is_assert_debug # 4 -> 3
 						except AssertionError: # as err: # if_null
 							logging.warning("Меньше установленого лимита по времени hour[11]")
-							hour = 4 # limit_hour
+							hour = 3 # limit_hour
 							# raise err
 						except BaseException as e: # if_error
 							logging.error("Меньше установленого лимита по времени hour[11] [%s]" % str(e))
-							hour = 4
+							hour = 3
 						# """
 
 						# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
