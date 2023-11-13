@@ -771,7 +771,8 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 	# pass_1_of_3
 
-	rus_regex = re.compile("_Rus", re.M)
+	rus_regex = re.compile(r"_Rus", re.M)
+	sym_or_num = re.compile(r"^[a-z0-9]", re.I)
 
 	# full_paths # video_regex
 
@@ -823,7 +824,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 			desc_dict.update(desc_dict_filter)
 
-	logging.info("debug desc_dict[update][1]", "%d [%s]" % (len(desc_dict), str(datetime.now())))
+	logging.info("debug desc_dict[update][1] %d [%s]" % (len(desc_dict), str(datetime.now())))
 
 	# pass_2_of_3 # only_folder_names
 
@@ -832,44 +833,47 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 	lang_list: list = []
 	folder_scan: list = []
 
-	os.chdir(mydir)
+	if os.path.exists(mydir):
+		os.chdir(mydir)
 
-	if os.path.exists(mydir3):
-		os.remove(mydir3) # clear_for_update
+	try:
+		if os.path.exists(mydir3):
+			os.remove(mydir3) # clear_for_update
+	except BaseException as e:
+		logging.error("%s" % str(e))
 
-	cmd = os.system(r"%s >> %s" % (ccmd, mydir3)) # is_list_in_current_folder # 0 - ok, 1 - error
-
-	if cmd == 0:
-		sleep(30) # if_ok_wait_30ms
+	os.system("%s >> %s" % (ccmd, mydir3)) # is_list_in_current_folder # 0 - ok, 1 - error
 
 	try:
 		with open(mydir3) as mdf: # utf-8
 			lang_list = mdf.readlines()
-		assert lang_list, "Пустой список lang_list" # is_assert_debug
-	except AssertionError as err:
-		logging.warning("Пустой список lang_list [%s]" % str(datetime.now()))
-		raise err
 	except BaseException as e:
-		logging.error("debug lang_list[error]", "[%s] [%s]" % (str(e), str(datetime.now()))) # logging.warning("Пустой список @folder_from_path/lang_list")
-	else:
-		logging.info("debug lang_list[length]", "%s [%s]" % (str(len(lang_list)), str(datetime.now())))
+		logging.error("debug lang_list[error] [%s] [%s]" % (str(e), str(datetime.now()))) # logging.warning("Пустой список @folder_from_path/lang_list")
+	finally: # else
+		logging.info("debug lang_list[length] %s [%s]" % (str(len(lang_list)), str(datetime.now())))
 
-	# if len(lang_list) > 0: # skip_logic
-	# is_languages
-	if lang_list: # some_languages
-		folder_scan = [rus_regex.sub("", ll).strip() if rus_regex.sub("", ll) != ll else ll for ll in filter(lambda x: x, tuple(lang_list))] # debug
+		# is_languages
+		folder_scan = [rus_regex.sub("", ll).strip() for ll in filter(lambda x: sym_or_num.findall(x), tuple(lang_list)) if all((rus_regex.sub("", ll), ll))] # filter_rus
+		if any((not folder_scan, len(folder_scan) < len(lang_list))): # no_filter(other)
+			folder_scan = [ll.strip() for ll in filter(lambda x: sym_or_num.findall(x), tuple(lang_list)) if ll] 
+
 		folder_scan = folder_scan[::-1] # reverse(newer_to_oldest)
 		# folder_scan = folder_scan[0:1000] if len(folder_scan) > 1000 else folder_scan # limit_folders_for_scan
 
-	if folder_scan: # some_folders
-		with open(mydir2, "w", encoding="utf-8") as mf: # resave # debug # top_file_by_lang
-			mf.writelines("%s\n" % fs.strip() for fs in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(folder_scan))) # int/str # is_by_count(top)
+		if any((os.path.exists(mydir3), folder_scan)): # debug
+			# with open(mydir2, "w", encoding="utf-8") as mf: # resave # top_file_by_lang # debug
+				# mf.writelines("%s\n" % fs.strip() for fs in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(folder_scan))) # int/str # is_by_count(top)
 
-	logging.info("debug folder_scan[list][2]", "%d [%s]" % (len(folder_scan), str(datetime.now())))
+			move(mydir3, mydir2)
+
+	logging.info("debug folder_scan[list][2] %d [%s]" % (len(folder_scan), str(datetime.now())))
 
 	# pass_3_of_3
 
 	fsf_set = set()
+
+	if folder_scan_full: # count_folders
+		logging.info("Найденов папок %s [%s]" % (str(len(folder_scan_full)), str(datetime.now()))) # folder_counts / date_scan
 
 	for fsf in filter(lambda x: x, tuple(folder_scan_full)):
 
@@ -888,30 +892,24 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 			if not os.path.isfile(fsf):
 				list_files = os.listdir(fsf)
 
-			assert list_files, "Нет файлов в папке %s" % fsf # is_assert_debug
-		except AssertionError as err: # if_null
-			# list_files = [] # BaseException
-			logging.warning("Нет файлов в папке %s [%s]" % (fsf, str(datetime.now())))
-			raise err
-			# continue
+			# assert list_files, "Нет файлов в папке %s" % fsf # is_assert_debug
 		except BaseException as e: # if_error
 			logging.error("Нет файлов в папке %s [%s] [%s]" % (fsf, str(e), str(datetime.now())))
 			# continue
-		finally: # else
+		else:
 			is_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 1) # desc(1) / files(0/1)
 			is_not_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) == 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 0) # desc(0) / files(0)
 			is_two_desc = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 2) # desc(2) / files(0/1)
 
-			logging.info("Файлы в папке %s [%s]" % (str(len(folder_scan_full)), str(datetime.now())))
+			if list_files: # is_folder_not_null
+				logging.info("Файлы в папке %s %d [%s]" % (fsf, len(list_files), str(datetime.now()))) # folder_name / count_files / date_scan
 
 		# path_to_description
 		try:
 			full_list = list(set(["\\".join([fsf, ol]).strip() for ol in filter(lambda x: "txt" in x, tuple(list_files)) if ol]))
-			assert full_list, "Пустой список или нет описаний @folder_from_path/full_list" # is_assert_debug
-		except AssertionError as err: # if_null
-			logging.warning("Пустой список или нет описаний @folder_from_path/full_list [%s]" % str(datetime.now()))
-			raise err
+			# assert full_list, "Пустой список или нет описаний @folder_from_path/full_list" # is_assert_debug
 		except BaseException as e: # if_error
+			full_list = []
 			logging.error("Пустой список или нет описаний @folder_from_path/full_list [%s] [%s]" % (str(e), str(datetime.now())))
 		else:
 			full_list.sort(reverse=False)
@@ -1120,7 +1118,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 						dsize: int = 0
 
 					is_backup: bool = False
-					is_backup = (dt.hour <= 22, dsize // (1024 ** 2) > 0) # debug # midnght-10pm # limit_1mb(ok) # is_default
+					is_backup = (dt.hour <= 23, dsize // (1024 ** 2) > 0) # debug # midnght-10pm # limit_1mb(ok) # is_default
 
 					try:
 						desc_list = [ld.strip() for ld in os.listdir(fsf) if ld.lower().endswith(".txt")]
@@ -1281,20 +1279,14 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 						print(Style.BRIGHT + Fore.YELLOW + "Удаляю лишнее описание в папке", Style.BRIGHT + Fore.WHITE + "%s" % fsf, end = "\n") # is_color's
 						# write_log("debug fsf[is_two_desc_found][ok]", "%s" % fsf) # is_delete
 
-	# debug # indenterror?
-	with open(mydir4, "w", encoding="utf-8") as mf: # resave # debug # found_by_period
-		mf.writelines("%s\n" % fs.strip() for fs in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(found_list))) # int/str # is_all(lang)
+			# temp = sorted(found_list, reverse=False) # sort_by_string
+			temp = sorted(found_list, key=len, reverse=False) # sort_by_key
 
-	# temporary_hidden # debug
-	# """
-	# need_delete = False
+			found_list = temp
 
-	try:
-		if os.path.exists(mydir3) and folder_scan:
-			os.remove(mydir3) # if_need_delete(if_exists)
-	except BaseException as e:
-		logging.error("%s" % str(e))
-	# """
+			# debug # is_regenerate_every_time # any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric()
+			with open(mydir4, "w", encoding="utf-8") as mf: # resave # debug # found_by_period
+				mf.writelines("%s\n" % fs.strip() for fs in filter(lambda x: sym_or_num.findall(x), tuple(found_list))) # int/str # is_all(lang)
 
 	# if folder_scan:
 		# print(folder_scan)
@@ -1327,7 +1319,7 @@ async def ffp_generate():
 
 	await asyncio.gather(*ffp) # ok_if_runned / debug(is_no_return) # old
 
-# asyncio.run(ffp_generate()) # if_off_some_disk
+asyncio.run(ffp_generate()) # if_off_some_disk
 # '''
 
 # current_list(is_full) # is_ok
@@ -1372,7 +1364,7 @@ os.chdir(r"c:\\downloads\\mytemp") # is_change_drive_and_folder
 
 # top100(rus+eng)_save # pass_1_of_4 # pass # @curr_top.lst(default)
 with open(top_folder, "w", encoding="utf-8") as tff:
-	tff.writelines("%s\n" % al.strip() for al in tuple(all_list)) # is_top
+	tff.writelines("%s\n" % al.strip() for al in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(all_list))) # is_top
 
 # top_list = all_list
 
@@ -1388,42 +1380,38 @@ except:
 	with open(some_base, "w", encoding="utf-8") as sbf:
 		json.dump(somebase_dict, sbf, ensure_ascii=False, indent=4, sort_keys=True)
 
-if all((filter_top_list, len(somebase_dict) >= 0)):
+if filter_top_list:
 
 	# old # only_folders / no_backup # is_count_equal_template
 	filter_top_by_folders = list(set([ftl.strip() for ftl in filter_top_list for k, v in somebase_dict.items() if
 						ftl.strip() and k.split("\\")[-1].startswith(ftl)]))
 
-	# get_by_100(less_100)_if_more(filter_top_by_folders) # debug
+	filter_top_by_folders = filter_top_by_folders[0:100] if len(filter_top_by_folders) > 100 else filter_top_by_folders # only_100/less_100 # is_need_sort # top_100
+	# filter_top_by_folders.sort(reverse=False)
 
-	# filter_get100 = filter_top_by_folders[0:100] if len(filter_top_by_folders) > 100 else filter_top_by_folders # only_100/less_100
-	filter_get_middle = filter_top_by_folders[0:len(filter_top_by_folders)//2] if len(filter_top_by_folders) > 100 else filter_top_by_folders # middle(less/100)
-	if all((filter_get_middle, len(filter_get_middle) <= len(filter_top_by_folders))): # all((filter_get100, len(filter_get100) <= len(filter_top_by_folders))): # 100(1) -> middle(2)
-		filter_top_by_folders = sorted(filter_get_middle, reverse=False) # filter_get100(isSort)
+	# top100(rus+eng)_by_template # pass_2_of_3 # pass # @cur_top.lst
+	if filter_top_by_folders:
+		with open(top_folder, "w", encoding="utf-8") as tff:
+			tff.writelines("%s\n" % ftbf.strip() for ftbf in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(filter_top_by_folders))) # int/str # is_top
+
+	logging.info("debug filter_get_middle[count] %d [%s]" % (len(filter_get_middle), str(datetime.now())))
 
 	dt = datetime.now()
 
 	days = 366 if dt.year % 4 == 0 else 365 # by_year # is_no_lambda
 
-	# new # no_folders / only_backup # is_count_equal_template # default(30_days)
 	filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = days, is_dir=False, is_less=False, is_any=True)[0] != None])) # by_Year # type1
 	# filter_for_new_backup = list(set([k.strip() for k, v in somebase_dict.items() if ff_to_days(ff = k, period = 12*days, is_dir=False, is_less=True, is_any=False)[0] != None])) # 12_year_and_less # type2
 
-	# get_by_100(less_100)_if_more(filter_for_new_backup) # debug
+	filter_for_new_backup = filter_for_new_backup[0:100] if len(filter_for_new_backup) > 100 else filter_for_new_backup # only_100/less_100 # is_need_sort # top_100
+	# filter_for_new_backup.sort(reverse=False)
 
-	# filter_get100 = filter_for_new_backup[0:100] if len(filter_for_new_backup) > 100 else filter_for_new_backup # only_100/less_100
-	filter_get_middle = filter_for_new_backup[0:len(filter_for_new_backup) // 2] if len(filter_for_new_backup) > 100 else filter_for_new_backup # middle(less/100)
-	if all((filter_get_middle, len(filter_get_middle) <= len(filter_for_new_backup) )): # all((filter_get100, len(filter_get100) <= len(filter_for_new_backup))): # 100(1) -> middle(2)
-		filter_for_new_backup = sorted(filter_get_middle, reverse=False) # filter_get100(isSort)
+	# top100(rus+eng)_by_template # pass_3_of_3 # pass # @curr.lst
+	if filter_for_new_backup:
+		with open(top_folder2, "w", encoding="utf-8") as tff2:
+			tff2.writelines("%s\n" % ffnb.strip() for ffnb in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(filter_for_new_backup))) # int/str # is_top
 
-	# top100(rus+eng)_by_template # pass_2_of_4 # pass # @cur_top.lst
-	if filter_top_by_folders:
-		with open(top_folder, "w", encoding="utf-8") as tff:
-			tff.writelines("%s\n" % ftbf.strip() for ftbf in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(filter_top_by_folders))) # int/str # is_top
-
-	if any((filter_top_by_folders, filter_for_new_backup)): # os.path.exists(top_folder) # find_some_filter
-		# top100(rus+eng)_copy # pass_3_of_4 # pass # cur_top.lst -> curr.lst
-		copy(top_folder, top_folder2)
+	logging.info("debug filter_for_new_backup[count] %d [%s]" % (len(filter_for_new_backup), str(datetime.now())))
 
 	# config = {"ff": fsf, "period": 30, "is_dir": False, "is_less": True, "is_any": False} # **config # fsf(default) -> None(debug)
 	# ff_to_days(ff=fsf, period=30, is_dir=False, is_less=True, is_any=False)[0] != None # top_folder2 # curr.lst # date_modified_by_less_days
@@ -10500,7 +10488,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					write_log("debug shortfiles[filter]", "No_short_files at [%s]" % str(datetime.now()))
 
 			if not short_files: # stop_if_no_files # temp(debug)
-				logging.info("no short_files[10669]")
+				logging.info("no short_files[10506]")
 				exit()
 
 		filter_list: list(set(short_files)) if short_files else [] # is_no_lambda
@@ -10591,7 +10579,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			short_list = []
 
 		if not short_list: # stop_if_not_files # temp(debug)
-			logging.info("no short_list[10760]")
+			logging.info("no short_list[10597]")
 			exit()
 
 		tmp: list = []
@@ -10973,7 +10961,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			lfiles = lf.result()
 
 		if not lfiles: # stop_if_no_files # temp(debug)
-			logging.info("no lfiles[11144]")
+			logging.info("no lfiles[10979]")
 			exit()
 
 		if filter_list:
@@ -11085,7 +11073,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	# new_or_update_jobs # pass_2_of_2(if_ok_move_and_update)
 	lfiles_total: list = []
 
-	if any((os.listdir(copy_src), os.listdir(copy_src2))):
+	if any((len(os.listdir(copy_src)) > 0, len(os.listdir(copy_src2)) > 0)) and os.path.exists(copy_src) and os.path.exists(copy_src2): # debug
 
 		try:
 			lfiles2 = ["".join([copy_src, lf]).strip() for lf in os.listdir(copy_src) if
@@ -12339,7 +12327,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			lfiles = lf.result()
 
 		if not lfiles: # stop_if_no_files # temp(debug)
-			logging.info("no lfiles[12567]")
+			logging.info("no lfiles[12345]")
 			exit()
 
 		if filter_list:
@@ -13282,7 +13270,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								lf, vfile, svbr, svbr, svbr2, str(width), str(height), afile, sabr, project_file)
 			else:
 				write_log("debug is_add_meta[unknown]", "%s" % lf) # some_paramaters
-				logging.info("debug is_add_meta[unknown]")
+				logging.info("debug is_add_meta[unknown] %s" % lf)
 
 			# is_skip_meta(bad_for_android_with_poster) / bigcinema
 			if all((is_profile, is_level, year_regex.findall(lf.split("\\")[-1]))):
