@@ -95,7 +95,7 @@ async def hd_generate(from_w: int = 640, from_h: int = 360, to_max: int = 2500, 
 	scales: list = []
 
 	try:
-		scales = list(set(["x".join([str(w), str(h)]) for w in range(from_w, to_max, bit) for h in range(from_h, to_max, bit) if w/h == (16/9)]))
+		scales = list(set(["x".join([str(w), str(h)]) for w in range(from_w, to_max, bit) for h in range(from_h, to_max, bit) if w/h == (16/9) and all((w <= from_w, h <= from_h))]))
 
 		assert scales, "Ошибка hd маштабов @hd_generate/scales" # is_assert_debug
 	except AssertionError as err: # if_null
@@ -106,6 +106,9 @@ async def hd_generate(from_w: int = 640, from_h: int = 360, to_max: int = 2500, 
 		scales = []
 		logging.error("Ошибка hd маштабов @hd_generate/scales [%s]" % str(e))
 	else:
+		if not scales:
+			scales.append("x".join([str(from_w), str(from_h)]))
+
 		scales.sort(reverse=False)
 		logging.info(";".join(scales)) # print(scales) # logging_or_print_scales(;)
 
@@ -119,7 +122,7 @@ async def sd_generate(from_w: int = 640, from_h: int = 480, to_max: int = 2500, 
 	scales: list = []
 
 	try:
-		scales = list(set(["x".join([str(w), str(h)]) for w in range(from_w, to_max, bit) for h in range(from_h, to_max, bit) if w/h == (4/3)]))
+		scales = list(set(["x".join([str(w), str(h)]) for w in range(from_w, to_max, bit) for h in range(from_h, to_max, bit) if w/h == (4/3) and all((w <= from_w, h <= from_h))]))
 
 		assert scales, "Ошибка sd маштабов @sd_generate/scales" # is_assert_debug
 	except AssertionError as err: # if_null
@@ -130,6 +133,9 @@ async def sd_generate(from_w: int = 640, from_h: int = 480, to_max: int = 2500, 
 		scales = []
 		logging.error("Ошибка sd маштабов @sd_generate/scales [%s]" % str(e))
 	else:
+		if not scales:
+			scales.append("x".join([str(from_w), str(from_h)]))
+
 		scales.sort(reverse=False)
 		logging.info(",".join(scales)) # print(scales) # logging_or_print_scales(,)
 
@@ -347,9 +353,10 @@ lang_regex = re.compile(r"_[A-Z]{1}[a-z]{2}$", re.M)  # MatchCase # europe_langu
 video_regex = re.compile(
 	r"(.*)(?:(_[\d+]{2,4}s|\([\d+]{4}\)))(.*)(?:(.webm|.mpg|.mp2|.mpeg|.mp3|.mpv|.mp4|.m4p|.m4v|.mpe|.mpv|^.avi|.wmv|.mov|.qt|.flv|.f4v|.swf|^.dmf|^.dmfr|^.filepart|^.aria2|^.txt|^.crdownload|^.crswap))$",
 	re.M)  # (38)
+# IgnoreCase
 video_ext_regex = re.compile(
 	r"(.*)(?:(_[\d+]{2,4}s|\([\d+]{4}\)))(.*)(?:(.webm|.mpg|.mp2|.mpeg|.mp3|.mpv|.mp4|.m4p|.m4v|.mpe|.mpv|^.avi|.wmv|.mov|.qt|.flv|.f4v|.swf|^.dmf|^.dmfr|^.filepart|^.aria2|^.txt|^.crdownload|^.crswap))$",
-	re.M)  # (37)
+	re.I)  # (37)
 
 # --- Overload process ---
 
@@ -863,6 +870,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 		if any((os.path.exists(mydir3), folder_scan)): # debug
 			# with open(mydir2, "w", encoding="utf-8") as mf: # resave # top_file_by_lang # debug
 				# mf.writelines("%s\n" % fs.strip() for fs in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(folder_scan))) # int/str # is_by_count(top)
+				# mf.writelines("%s\n" % fs.strip() for fs in filter(lambda x: sym_or_num.findall(x), tuple(folder_scan))) # int/str # is_by_count(top)
 
 			move(mydir3, mydir2)
 
@@ -899,7 +907,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 		else:
 			is_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 1) # desc(1) / files(0/1)
 			is_not_found = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) == 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 0) # desc(0) / files(0)
-			is_two_desc = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) == 2) # desc(2) / files(0/1)
+			is_two_desc = (len(list(filter(lambda x: "mp4" in x, tuple(list_files)))) >= 0 and len(list(filter(lambda x: "txt" in x, tuple(list_files)))) >= 2) # desc(2) / files(0/1)
 
 			if list_files: # is_folder_not_null
 				logging.info("Файлы в папке %s %d [%s]" % (fsf, len(list_files), str(datetime.now()))) # folder_name / count_files / date_scan
@@ -1271,18 +1279,28 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 				if is_two_desc: # desc(2), files(0/1) # delete_null(any_time)
 					try:
-						if os.path.exists("\\".join([fsf, "00s00e.txt"])):
-							os.remove("\\".join([fsf, "00s00e.txt"]))
+						desc_list = [os.path.join(fsf, f) for f in filter(lambda x: x.lower().endswith(".txt"), os.listdir(fsf)) if os.path.exists(os.path.join(fsf, f))]
+					except BaseException as e:
+						desc_list = []
+						logging.error("Папка: %s, файл: %s, ошибка: %s" % (fsf, f, str(e)))
+					else:
+						desc_list.sort(reverse=False)
+						logging.error("Папка: %s, файл: %s" % (fsf, f))
+
+					try:
+						if os.path.exists(desc_list[0]) and len(desc_list) >= 2: # "\\".join([fsf, "00s00e.txt"])
+							os.remove(desc_list[0]) # "\\".join([fsf, "00s00e.txt"])
 					except:
 						pass # nothing_to_do_if_error # is_continue
 					else:
 						print(Style.BRIGHT + Fore.YELLOW + "Удаляю лишнее описание в папке", Style.BRIGHT + Fore.WHITE + "%s" % fsf, end = "\n") # is_color's
 						# write_log("debug fsf[is_two_desc_found][ok]", "%s" % fsf) # is_delete
 
+			# hide_if_not_need_sort
 			# temp = sorted(found_list, reverse=False) # sort_by_string
-			temp = sorted(found_list, key=len, reverse=False) # sort_by_key
+			# temp = sorted(found_list, key=len, reverse=False) # sort_by_key
 
-			found_list = temp
+			# found_list = temp
 
 			# debug # is_regenerate_every_time # any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric()
 			with open(mydir4, "w", encoding="utf-8") as mf: # resave # debug # found_by_period
@@ -2236,7 +2254,7 @@ async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 # dspace(+reserve) # midnight - 6am # 11pm # no_overload # 2
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22))) # dspace(is_need_hide) / less_7am_or_more_10pm
 # dspace(+reserve) # midnight - 6am # stop_after_18h # no_overload # 3
-is_status: tuple = (not dsize2, ctme.hour < mytime["sleeptime"][1], all((dayago > 18, is_hd_status))) # dspace(is_need_hide) / less_7am / run_more_18h
+is_status: tuple = (not dsize2, ctme.hour < mytime["sleeptime"][1], all((dayago > 18, is_hd_status))) # dspace(is_need_hide) / less_7am / run_more_18h(is_optimal)
 # dspace(+reserve) # midnight - 6am # 11pm # filter_run_time # no_overload # 4
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22, ctme.hour + dayago > 23))) # dspace(is_need_hide) / less_7am_or_more_10pm_or_optimal_run_hours
 # no_dspace # midnight - 6am # 11pm # no_overload # 5
@@ -2308,8 +2326,9 @@ async def my_args() -> list: #2
 			temp2 = list(set([f.strip() for f in filter(lambda x: abc_or_num_regex.findall(x), tuple(temp))])) # start(abc/123) # debug
 
 			temp3 = list(set([t2.strip() if len(t2) >= 2 else "".join([t2,"_"]) for t2 in temp2]))  # length >= 2 # debug
-			# tmp = sorted(temp3, reverse=False) # sort_by_abc
-			tmp = sorted(temp3, key=len, reverse=False) # sort_by_key
+
+			tmp = sorted(temp3, reverse=False) # sort_by_string
+			# tmp = sorted(temp3, key=len, reverse=False) # sort_by_key
 
 		print(Style.BRIGHT + Fore.CYAN + "Найдено %d аргументов [%s]" % (len(tmp), str(datetime.now())))  # is_color
 		write_log("debug sys[args]", "Найдено %d аргументов [%s]" % (len(tmp), str(datetime.now())))
@@ -3889,7 +3908,7 @@ class MyMeta:
 			width += 1  # 640
 
 		try:
-			sd_scales = asyncio.run(sd_generate())
+			sd_scales = asyncio.run(sd_generate(from_w=width, from_h=height)) # insert_width_and_height(sd) # debug
 		except:
 			sd_scales = []
 
@@ -3905,7 +3924,7 @@ class MyMeta:
 					write_log("debug sd_count[notfound]", "%s" % "x".join([str(owidth), str(oheight)]))
 
 		try:
-			hd_scales = asyncio.run(hd_generate())
+			hd_scales = asyncio.run(hd_generate(from_w=width, from_h=height)) # insert_width_and_height(hd) # debug
 		except:
 			hd_scales = []
 
@@ -10459,7 +10478,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				temp = list(set(short_files))
 
 				try:
-					short_files: list = sorted(temp, key=len, reverse=False)  # True(cba) # False(abc)
+					short_files: list = sorted(temp, reverse=False)  # sort_by_string
+					# short_files: list = sorted(temp, key=len, reverse=False)  # sort_by_key
 				except:
 					short_files: list = []
 
@@ -10585,8 +10605,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		tmp: list = []
 		tmp = list(set([sl.strip() for sl in filter(lambda x: len(x.strip()) > 1, tuple(short_list))])) # short_by_length(sl)
 
-		# short_list = sorted(short_list, reverse=False) # re_sort_before_by_string
-		short_list = sorted(tmp, key=len, reverse=False) # re_sort_before_by_length
+		short_list = sorted(short_list, reverse=False) # re_sort_before_by_string
+		# short_list = sorted(tmp, key=len, reverse=False) # re_sort_before_by_length
 
 		short_string = "|".join(short_list) if len(short_list) > 1 else short_list[0] # is_no_lambda
 
@@ -14912,13 +14932,16 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 					# 'debug speed_file: d:\\multimedia\\video\\serials_conv\\Hudson_and_Rex\\Hudson_and_Rex_03s01e.mp4, скорость передачи: 32251694.750 30 Mb/s
 
+					# debug_logging_and_logic # logging!
 					try:
 						time_calc = calculate_transfer_time(fsize, speed_file)
-						sec_or_min = "%d минут" % int(time_calc // 60) if time_calc > 60 else "%d секунд" % int(time_calc)
-					except BaseException as e:
-						write_log("debug sec_or_min[error]", "%s [%s] [%s]" % (k.strip(), str(e), str(datetime.now())))
+						min_or_hour = "%d часов" % int(time_calc // 60) if time_calc > 60 else "%d минут" % int(time_calc) # часов / минут
+					except BaseException: # as e:
+						write_log("debug min_or_hour[error]", "%s [%s]" % (k.strip(), str(datetime.now())))
+						logging.error("debug min_or_hour[error] %s [%s]" (k.strip(), str(datetime.now())))
 					else:
-						write_log("debug sec_or_min", f"Время передачи файла: {sec_or_min}, имя файла: {k.strip()}, сейчас: {str(datetime.now())}") # print(f"Время передачи файла: {sec_or_min}") # секунд
+						write_log("debug min_or_hour", f"Время передачи файла: {min_or_hour}, имя файла: {k}, сейчас: {str(datetime.now())}") # print(f"Время передачи файла: {sec_or_min}") # секунд
+						logging.info(f"debug min_or_hour Время передачи файла: {min_or_hour}, имя файла: {k}, сейчас: {str(datetime.now())}")
 
 					time_list: list = []
 					time_list2: list = [] # is_debug_time
