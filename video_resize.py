@@ -52,7 +52,13 @@ from colorama import (  # Cursor # Makes ANSI escape character sequences (for pr
 # go_in_project_folder
 os.chdir("c:\\downloads\\mytemp")
 
-script_path: str = os.path.dirname(os.path.realpath(__file__))
+# abspath_or_realpath
+basedir: str = os.path.dirname(os.path.abspath(__file__)).lower()  # folder_where_run_script
+script_path: str = os.path.dirname(os.path.realpath(__file__)).lower()  # is_system_older
+
+if not "mytemp" in basedir:
+	basedir: str = "c:\\downloads\\mytemp\\"
+
 
 # logging.basicConfig(level=logging.INFO)
 
@@ -97,15 +103,11 @@ async def hd_generate(from_w: int = 640, from_h: int = 360, to_max: int = 2500, 
 	try:
 		scales = list(set(["x".join([str(w), str(h)]) for w in range(from_w, to_max, bit) for h in range(from_h, to_max, bit) if w/h == (16/9) and all((w <= from_w, h <= from_h))]))
 
-		assert scales, "Ошибка hd маштабов @hd_generate/scales" # is_assert_debug
-	except AssertionError as err: # if_null
-		scales = []
-		logging.warning("Ошибка hd маштабов @hd_generate/scales")
-		raise err
+		# assert scales, "Ошибка hd маштабов @hd_generate/scales" # is_assert_debug
 	except BaseException as e: # if_error
-		scales = []
+		# scales = []
 		logging.error("Ошибка hd маштабов @hd_generate/scales [%s]" % str(e))
-	else:
+	finally:
 		if not scales:
 			scales.append("x".join([str(from_w), str(from_h)]))
 
@@ -124,15 +126,11 @@ async def sd_generate(from_w: int = 640, from_h: int = 480, to_max: int = 2500, 
 	try:
 		scales = list(set(["x".join([str(w), str(h)]) for w in range(from_w, to_max, bit) for h in range(from_h, to_max, bit) if w/h == (4/3) and all((w <= from_w, h <= from_h))]))
 
-		assert scales, "Ошибка sd маштабов @sd_generate/scales" # is_assert_debug
-	except AssertionError as err: # if_null
-		scales = []
-		logging.warning("Ошибка sd маштабов @sd_generate/scales")
-		raise err
+		# assert scales, "Ошибка sd маштабов @sd_generate/scales" # is_assert_debug
 	except BaseException as e: # is_error
-		scales = []
+		# scales = []
 		logging.error("Ошибка sd маштабов @sd_generate/scales [%s]" % str(e))
-	else:
+	finally:
 		if not scales:
 			scales.append("x".join([str(from_w), str(from_h)]))
 
@@ -862,7 +860,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 		# is_languages
 		folder_scan = [rus_regex.sub("", ll).strip() for ll in filter(lambda x: sym_or_num.findall(x), tuple(lang_list)) if all((rus_regex.sub("", ll), ll))] # filter_rus
 		if any((not folder_scan, len(folder_scan) < len(lang_list))): # no_filter(other)
-			folder_scan = [ll.strip() for ll in filter(lambda x: sym_or_num.findall(x), tuple(lang_list)) if ll] 
+			folder_scan = [ll.strip() for ll in filter(lambda x: sym_or_num.findall(x), tuple(lang_list)) if ll]
 
 		folder_scan = folder_scan[::-1] # reverse(newer_to_oldest)
 		# folder_scan = folder_scan[0:1000] if len(folder_scan) > 1000 else folder_scan # limit_folders_for_scan
@@ -1404,6 +1402,8 @@ if filter_top_list:
 	filter_top_by_folders = list(set([ftl.strip() for ftl in filter_top_list for k, v in somebase_dict.items() if
 						ftl.strip() and k.split("\\")[-1].startswith(ftl)]))
 
+	filter_get_middle = len(filter_top_by_folders) // 2 if len(filter_top_by_folders) // 2 > 0 else len(filter_top_by_folders)  # middle / full
+
 	filter_top_by_folders = filter_top_by_folders[0:100] if len(filter_top_by_folders) > 100 else filter_top_by_folders # only_100/less_100 # is_need_sort # top_100
 	# filter_top_by_folders.sort(reverse=False)
 
@@ -1412,7 +1412,7 @@ if filter_top_list:
 		with open(top_folder, "w", encoding="utf-8") as tff:
 			tff.writelines("%s\n" % ftbf.strip() for ftbf in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(filter_top_by_folders))) # int/str # is_top
 
-	logging.info("debug filter_get_middle[count] %d [%s]" % (len(filter_get_middle), str(datetime.now())))
+	logging.info("debug filter_get_middle[count] %d [%s]" % (filter_get_middle, str(datetime.now())))
 
 	dt = datetime.now()
 
@@ -2069,7 +2069,7 @@ def count_level_from_full(filename) -> int:
 		return 0
 
 	try:
-		level_count: len(filename.split("\\")) if filename else 0 # is_no_lambda
+		level_count = len(filename.split("\\")) if filename else 0 # is_no_lambda
 	except BaseException as e:
 		level_count: int = 0
 		write_log("debug level_count[filename][error]", "%s [%s]" % (filename, str(e)), is_error=True)
@@ -2526,7 +2526,7 @@ async def days_by_list(lst: list = [], is_avg: bool = False): #8
 				raise err
 				break
 			except BaseException as e: # if_error
-				logging.error("Пустой список @days_by_list/lst")
+				logging.error("Пустой список @days_by_list/lst [%s]" % str(e))
 				break
 
 			try:
@@ -2953,6 +2953,8 @@ class Get_AR:
 					if (owidth / nh) == (width / height):
 						yield (owidth, nh)
 
+			swe: list = []
+
 			try:
 				# scale_height_equal = [(owidth, nh) for nh in range(second-16, second,1) if (owidth/nh) == (width/height)] # old(no_gen)
 				scale_height_equal: list = list(sh_equal())  # new(yes_gen)
@@ -2960,24 +2962,22 @@ class Get_AR:
 				scale_height_equal: list = []
 			else:
 				if scale_height_equal:
-					with unique_semaphore:
-						for she in scale_height_equal:
+					for wc, hc in scale_height_equal:
 
-							try:
-								width_calc = she[0] - 1 if she[0] % 2 != 0 else she[0]  # -1
-							except:
-								width_calc = 0
-								break
-							else:
-								she[0] = width_calc
+						try:
+							width_calc = wc - 1 if wc % 2 != 0 else wc # -1
+						except:
+							swe[0], swe[1] = 0, hc  # if_error # width_calc -> swe[0]
+						else:
+							swe[0], swe[1] = width_calc, hc  # if_ok
 
-								logging.info("Оптимальный маштаб(высота) для маштабируемого файла %s %s" % (
-									"x".join([str(swe[0]), str(swe[1])]), fname))
+						logging.info("Оптимальный маштаб(высота) для маштабируемого файла %s %s" % (
+							"x".join([str(swe[0]), str(swe[1])]), fname))
 
-								print(Style.BRIGHT + Fore.YELLOW + "Оптимальный маштаб(высота) для маштабируемого файла",
-									Style.BRIGHT + Fore.WHITE + "%s" % "x".join([str(she[0]), str(she[1])]))  # is_color
+						print(Style.BRIGHT + Fore.YELLOW + "Оптимальный маштаб(высота) для маштабируемого файла",
+							Style.BRIGHT + Fore.WHITE + "%s" % "x".join([str(swe[0]), str(swe[1])]))  # is_color
 
-								write_log("debug scale_height_equal!", "%s" % ":".join([str(she[0]), str(she[1])]))
+						write_log("debug scale_height_equal!", "%s" % ":".join([str(swe[0]), str(swe[1])]))
 				else:
 					print(Style.BRIGHT + Fore.YELLOW + "Оптимальный маштаб(высота) для маштабируемого файла",
 						Style.BRIGHT + Fore.WHITE + "%s" % "x".join([str(owidth), str(second)]))  # is_color
@@ -3017,32 +3017,31 @@ class Get_AR:
 					if (nw / oheight) == (width / height):
 						yield (nw, oheight)
 
+			she: list = []
+
 			try:
 				# scale_width_equal = [(nw, oheight) for nw in range(second-16, second,1) if (nw/oheight) == (width/height)] # old(no_gen)
 				scale_width_equal: list = list(sw_equal())  # new(yes_gen)
 			except:
 				scale_width_equal: list = []
-
 			else:
 				if scale_width_equal:
-					with unique_semaphore:
-						for swe in scale_width_equal:
+					for wc, hc in scale_width_equal:
 
-							try:
-								height_calc = swe[1] - 1 if swe[1] % 2 != 0 else swe[1]  # -1 or +1
-							except:
-								height_calc = 0
-								break
-							else:
-								swe[1] = height_calc
+						try:
+							height_calc = hc - 1 if hc % 2 != 0 else hc  # -1 or +1
+						except:
+							she[0], she[1] = wc, 0  # if_error # height_calc -> she[1]
+						else:
+							she[0], she[1] = wc, height_calc  # if_ok
 
-								logging.info("Оптимальный маштаб(длина) для маштабируемого файла %s %s" % (
-									"x".join([str(swe[0]), str(swe[1])]), fname))
+						logging.info("Оптимальный маштаб(длина) для маштабируемого файла %s %s" % (
+							"x".join([str(she[0]), str(she[1])]), fname))
 
-								print(Style.BRIGHT + Fore.YELLOW + "Оптимальный маштаб(длина) для маштабируемого файла",
-									Style.BRIGHT + Fore.WHITE + "%s" % "x".join([str(swe[0]), str(swe[1])]))  # is_color
+						print(Style.BRIGHT + Fore.YELLOW + "Оптимальный маштаб(длина) для маштабируемого файла",
+							Style.BRIGHT + Fore.WHITE + "%s" % "x".join([str(she[0]), str(she[1])]))  # is_color
 
-								write_log("debug scale_width_equal!", "%s" % ":".join([str(swe[0]), str(swe[1])]))
+						write_log("debug scale_width_equal!", "%s" % ":".join([str(she[0]), str(she[1])]))
 				else:
 					print(Style.BRIGHT + Fore.YELLOW + "Оптимальный маштаб(длина) для маштабируемого файла",
 						Style.BRIGHT + Fore.WHITE + "%s" % "x".join([str(second), str(oheight)]))  # is_color
@@ -3118,7 +3117,7 @@ class Get_AR:
 			with open(dar_base, "w", encoding="utf-8") as djf:
 				json.dump(dar_dict, ensure_ascii=False, indent=4, sort_keys=True)
 
-		dar_dict = {float(sd) * floar(pd): [self.filename, float(sd), float(pd)] for sd in sar_dict.items() for pd in dar_dict.items()}
+		dar_dict = {float(sd) * float(pd): [self.filename, float(sd), float(pd)] for sd in sar_dict.items() for pd in dar_dict.items()}
 		dar_list = [*dar_dict]
 
 		with open(dar_base, "w", encoding="utf-8") as djf:
@@ -3139,8 +3138,8 @@ class Get_AR:
 				print("Scale for %dx%d is hd [%s] [%s]" % (width, height, self.filename, str(is_hd_sd)))
 
 		if filename:  # only_with_filename(ar)
-			print(f"The file %s is %sx%s with SAR = %s , PAR = %s , DAR = %s (G-spot)" % (filename, width, height, sar, par, dar))
-			write_log("debug spd[ar]", "%s [%s]" % (filename, ";".join(["sar=" % sar,"par=" % par, "dar=" % dar])))
+			print("The file %s is %sx%s with SAR = %s , PAR = %s , DAR = %s (G-spot)" % (filename, width, height, str(sar_list), str(par_list), str(dar_list)))
+			write_log("debug spd[ar]", "%s [%s]" % (filename, ";".join(["sar=" % str(sar_list),"par=" % str(par_list), "dar=" % str(dar_list)])))
 
 		try:
 			sar = str(sar_list) # SAR
@@ -3317,7 +3316,7 @@ class MyMeta:
 		try:
 			assert self.filename and os.path.exists(self.filename), "Файл отсутствует @get_width_height/filename" # is_assert_debug
 		except AssertionError as err: # if_null
-			logging.warning("Файл отсутствует @get_width_height/%s [%s]" % (self.filename, str(datettime.now())))
+			logging.warning("Файл отсутствует @get_width_height/%s [%s]" % (self.filename, str(datetime.now())))
 			raise err
 			return (0, 0, False)
 		except BaseException as e: # if_error
@@ -3908,36 +3907,44 @@ class MyMeta:
 			width += 1  # 640
 
 		try:
-			sd_scales = asyncio.run(sd_generate(from_w=width, from_h=height)) # insert_width_and_height(sd) # debug
-		except:
-			sd_scales = []
+			sd_scales = asyncio.run(sd_generate(from_w=width, from_h=height))  # insert_calc_width_and_height(sd) # debug
+
+			assert sd_scales, "sd_generate нет sd aspect ratio"
+		except AssertionError:
+			sd_scales = asyncio.run(sd_generate(from_w=owidth, from_h=oheight))  # insert_default_width_and_height
+		except BaseException:
+			sd_scales = []  # clear_sd_scales_if_error
 
 		if sd_scales:
 			try:
-				tmp = [ss.strip() for ss in sd_scales if "x".join([str(owidth), str(oheight)]) == ss]
+				tmp = [ss.strip() for ss in sd_scales if any(("x".join([str(owidth), str(oheight)]) == ss, "x".join([str(width), str(height)]) == ss))]
 			except:
 				tmp = []
-			else:
-				if tmp:
-					write_log("debug sd_count[found]", "%s" % str(tmp))
-				else:
-					write_log("debug sd_count[notfound]", "%s" % "x".join([str(owidth), str(oheight)]))
+
+			if tmp:
+				write_log("debug sd_count[found]", "%s %s" % (";".join(tmp), filename))  # str(tmp)
+		else:
+			write_log("debug sd_count[notfound]", "%s %s" % ("x".join([str(owidth), str(oheight)]), filename))
 
 		try:
-			hd_scales = asyncio.run(hd_generate(from_w=width, from_h=height)) # insert_width_and_height(hd) # debug
-		except:
-			hd_scales = []
+			hd_scales = asyncio.run(hd_generate(from_w=width, from_h=height))  # insert_calc_width_and_height(hd) # debug
+
+			assert hd_scales, "hd_generate нет hd aspect ratio"
+		except AssertionError:
+			hd_scales = asyncio.run(hd_generate(from_w=owidth, from_h=oheight))  # insert_default_width_and_height
+		except BaseException:
+			hd_scales = []  # clear_hd_scales_if_error
 
 		if hd_scales:
 			try:
-				tmp = [hs.strip() for hs in hd_scales if "x".join([str(owidth), str(oheight)]) == hs]
+				tmp = [hs.strip() for hs in hd_scales if any(("x".join([str(owidth), str(oheight)]) == hs, "x".join([str(width), str(height)]) == hs))]
 			except:
 				tmp = []
 			else:
 				if tmp:
-					write_log("debug hd_count[found]", "%s" % str(tmp))
-				else:
-					write_log("debug hd_count[notfound]", "%s" % "x".join([str(owidth), str(oheight)]))
+					write_log("debug hd_count[found]", "%s %s" % (";".join(tmp), filename))  # str(tmp)
+		else:
+			write_log("debug hd_count[notfound]", "%s %s" % ("x".join([str(owidth), str(oheight)]), filename))
 
 		if any((not width, not height)) and all((owidth, oheight)):
 			width, height = owidth, oheight  # restore(width/height)
@@ -4629,7 +4636,7 @@ class MyMeta:
 		except:
 			pheight: float = 0
 
-		if ((pheight % 2 != 0, pheight)):
+		if all((pheight % 2 != 0, pheight)):
 			pheight -= 1
 		if not isinstance(pheight, int):
 			pheight = int(pheight)
@@ -8850,7 +8857,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			list_total = tmp if tmp else [] # sorted/sort
 
 			for lt in tuple(list_total):
-				
+
 				try:
 					fname = lt.split("\\")[-1].strip()
 				except:
@@ -9675,7 +9682,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				avg_size: int = 0
 
 				try:
-					fsizes = list(set([os.path.getsize(l1) for l1 in filter(lambda x: os.path.exists(x), tuple(list1)) if ll]))
+					fsizes = list(set([os.path.getsize(l1) for l1 in filter(lambda x: os.path.exists(x), tuple(list1)) if l1]))
 				except:
 					fsizes = []
 				finally:
@@ -11668,7 +11675,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 								start = i * 60
 								length= splitLength * 60
 
-								script_line = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"]) 
+								script_line = "cmd /c " + "".join([path_for_queue, "ffmpeg.exe"])
 								script_line += f" -hide_banner -y -i {fln[1]} -ss {str(start)} -t {str(length)} clip{str(i)}.m4v"
 								# script_line = "ffmpeg -hide_banner -y -i %s -ss %s -t %s clip%s.m4v" % (fln[1], str(start), str(length), str(i))
 
@@ -12293,7 +12300,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		# shorts_in_list(upgrade)
 		try:
-			# filter_list = [crop_filename_regex.sub("", sm.split("\\")[-1]) for lf in filter(lambda x: os.path.exists(x), tuple(some_files))] # equal
+			# filter_list = [crop_filename_regex.sub("", lf.split("\\")[-1]) for lf in filter(lambda x: os.path.exists(x), tuple(some_files))] # equal
 			filter_list: list = list(set([
 				crop_filename_regex.sub("", lf.split("\\")[-1]).split("_")[0].strip() if lf.split("\\")[-1].count(
 					"_") > 0 else crop_filename_regex.sub("", lf.split("\\")[-1]).strip() for lf in
@@ -14116,6 +14123,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					assert k and os.path.exists(k), "Файл отсутствует" # is_assert_debug
 				except AssertionError as err: # if_null
 					logging.warning("Файл отсутствует %s" % k)
+					raise err
 					continue
 				except BaseException as e: # if_error
 					logging.error("Файл отсутствует %s [%s]" % (k, str(e)))
@@ -14534,7 +14542,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					except BaseException as e: # if_error
 						logging.error("Пустой словарь или нет задач filecmdbase_dict [%s]" % str(e))
 						break
-						
+
 					try:
 						assert k and os.path.exists(k), "Файл отсутствует" # is_assert_debug
 					except AssertionError as err: # if_null
@@ -14595,7 +14603,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				except BaseException as e: # if_error
 					logging.error("Пустой словарь или нет задач filecmdbase_dict [%s]" % str(e))
 					break
-					
+
 				try:
 					assert k and os.path.exists(k), "Файл отсутствует" # is_asssert_debug
 				except AssertionError as err: # if_null
@@ -14726,7 +14734,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					break
 				except BaseException: # if_error
 					break
-					
+
 				try:
 					assert "Файл отсутствует" # is_assert_debug
 				except AssertionError as err: # if_null
@@ -14806,7 +14814,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					raise err
 					continue
 				except BaseException as e: # if_error
-					logging.error("Файл отсутвтует %s" % k)
+					logging.error("Файл отсутвтует %s [%s]" % (k, str(e)))
 					continue
 
 				lastfile.append(v.split(" ")[-1]) # save_to_xml_for_backup(clear_last) # @last.xml
@@ -14890,7 +14898,7 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				# file_zise = 1024 # размер файла в байтах # transfer_speed = 1000000 # скорость передачи данных в битах в секунду
 				# time = calculate_transfer_time(file_size, transfer_speed); print(f"Время передачи файла: {time} секунд")
-												
+
 				def calculate_transfer_time(file_size, transfer_speed):
 					transfer_time = (file_size * 8) / transfer_speed
 					return transfer_time
