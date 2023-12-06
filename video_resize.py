@@ -63,13 +63,14 @@ if not "mytemp" in basedir:
 # logging.basicConfig(level=logging.INFO)
 
 # with_encoding # utf-8 -> cp1251
+# filename / lineno / name / levelname / message / asctime # save_logging_manuals
 logging.basicConfig(handlers=[logging.FileHandler("".join([script_path, "\\videoresize.log"]), "w", "cp1251")],
 					format=u'%(filename)s [ LINE:%(lineno)+5s ]# %(levelname)+8s [%(asctime)s]  %(message)s',
-					level=logging.INFO)  # filename / lineno / name / levelname / message / asctime # save_logging_manuals
+					level=logging.INFO)
 
 logging.info(f"debug start {str(datetime.now())}")
 
-mytime: dict = {"jobtime": [9, 18, 4], "dinnertime": [12, 13], "sleeptime": [0, 6], "anytime": [True]} # sleep_time_less_hour
+mytime: dict = {"jobtime": [9, 18, 4], "dinnertime": [12, 13], "sleeptime": [0, 7], "anytime": [True]} # sleep_time_less_hour
 
 
 @contextmanager
@@ -143,6 +144,35 @@ async def sd_generate(from_w: int = 640, from_h: int = 480, to_max: int = 2500, 
 # 1408x1056, 1472x1104, 1536x1152, 1600x1200, 1664x1248, 1728x1296, 1792x1344, 1856x1392, 1920x1440, 1984x1488
 # 2048x1536, 2112x1584, 2176x1632, 2240x1680, 2304x1728, 2368x1776, 2432x1824, 2496x1872
 
+
+# antoher_aspect_ratio(no_sd/no_hd) # 8/16
+async def ar_generate(from_w: int = 640, from_h: int = 360, to_max: int = 2500) -> list: # bit: int = 8
+	"""
+	1.0, 1.5555555555555556, 1.6, 1.66, 1.75, 1.85, 2.0,
+	2.2, 2.35, 2.39, 2.4, 2.55, 2.76, 2.3333333333333335
+	"""
+	list_ar: list = [1/1, 14/9, 16/10, 1.66/1, 1.75/1, 1.85/1, 2/1]
+	list_ar += [2.2/1, 2.35/1, 2.39/1, 2.4/1, 2.55/1, 2.76/1, 21/9]
+
+	scales: list = []
+
+	try:
+		scales = list(set(["x".join([str(w), str(h)]) for w in range(from_w, to_max) for h in range(from_h, to_max) if all((w/h in list_ar, list_ar)) and all((w <= from_w, h <= from_h))]))
+
+		# assert scales, "Ошибка дополнительных маштабов @ar_generate/scales" # is_assert_debug
+	except BaseException as e: # is_error
+		# scales = []
+		logging.error("Ошибка дополнительных маштабов @ar_generate/scales [%s]" % str(e))
+	finally:
+		if not scales:
+			scales.append("x".join([str(from_w), str(from_h)]))
+
+		scales.sort(reverse=False)
+		logging.info(",".join(scales)) # print(scales) # logging_or_print_scales(,)
+
+	return scales
+
+
 # ffmpeg -y -i input -c:v libx264 -vf scale=640:-1 -c:a aac -af dynaudnorm output # stay_profile_high # stay_metadata
 # use_by_default_manual(height % 2 == 0) # "720" >= 640
 
@@ -191,13 +221,13 @@ if any((dt.weekday() <= mytime["jobtime"][2], dt.weekday() > mytime["jobtime"][2
 	finally:
 		if is_error == False:
 			if hWnd:
-				if mytime["jobtime"][0] <= dt.hour <= mytime["jobtime"][1]:
+				if dt.hour >= mytime["jobtime"][0]:  # mytime["jobtime"][0] <= dt.hour <= mytime["jobtime"][1] # hide_in_job_time
 					user32.ShowWindow(hWnd, SW_HIDE) # new
 
 					# print(f"Приложение успешно свёрнуто в {str(dt)}")
 					with open(curdir + "\\minimized_vr.pid", "w", encoding="utf-8") as mpf:
 						mpf.write(f"Приложение успешно свёрнуто в {str(dt)}")
-				else:
+				else: # if_another_time
 					user32.ShowWindow(hWnd, SW_SHOW) # new
 
 					# print(f"Приложение успешно разсвёрнуто в {str(dt)}")
@@ -314,6 +344,7 @@ dar_base: str = "".join([path_for_queue, "dar.json"])  #d(isplay)aspect_ratio
 par_base: str = "".join([path_for_queue, "par.json"])  #p(ixel)aspect_ratio
 sar_base: str = "".join([path_for_queue, "sar.json"])  #s(cale)aspect_ratio
 std_base: str = "".join([path_for_queue, "std.json"])  #s(peed)/t(ime)/d(ata)
+days_base: str = "".join([path_for_queue, "days_ago.json"])  # ?
 
 # psoundtrack.json?
 
@@ -384,7 +415,7 @@ with open("c:\\downloads\\mytemp\\overload.csv", "a", newline="") as ocf:
 # dc = {"file1": 2, "file2": 4, "file3": 3} # {"file1": 2, "file3": 3, "file2": 4}
 
 
-# group_of_data # debug
+# group_of_data # super
 """
 async def group_by_age(people):
 	result = {}
@@ -592,6 +623,8 @@ async def fromdaytohny():
 	ny = datetime(dt.year + 1, 1, 1)
 	d = ny - dt
 
+	# last2str(maintxt='кол-во', endtxt='в файле', count=1, kw='минут')
+
 	try:
 		mm, ss = divmod(d.seconds, 60)
 		hh, mm = divmod(mm, 60)
@@ -599,6 +632,7 @@ async def fromdaytohny():
 		return ""
 	else:
 		return f"До нового года осталось {d.days} дней, {hh} час. {mm} мин. {ss} сек."
+		# return last2str(maintxt="До нового года осталось", endtxt=f"{hh} час. {mm} мин. {ss} сек.", count=d.days, kw="день")
 
 
 async def date_to_week() -> dict:
@@ -858,19 +892,30 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 		logging.info("debug lang_list[length] %s [%s]" % (str(len(lang_list)), str(datetime.now())))
 
 		# is_languages
-		folder_scan = [rus_regex.sub("", ll).strip() for ll in filter(lambda x: sym_or_num.findall(x), tuple(lang_list)) if all((rus_regex.sub("", ll), ll))] # filter_rus
-		if any((not folder_scan, len(folder_scan) < len(lang_list))): # no_filter(other)
-			folder_scan = [ll.strip() for ll in filter(lambda x: sym_or_num.findall(x), tuple(lang_list)) if ll]
 
 		folder_scan = folder_scan[::-1] # reverse(newer_to_oldest)
 		# folder_scan = folder_scan[0:1000] if len(folder_scan) > 1000 else folder_scan # limit_folders_for_scan
 
-		if any((os.path.exists(mydir3), folder_scan)): # debug
-			# with open(mydir2, "w", encoding="utf-8") as mf: # resave # top_file_by_lang # debug
-				# mf.writelines("%s\n" % fs.strip() for fs in filter(lambda x: any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric())), tuple(folder_scan))) # int/str # is_by_count(top)
-				# mf.writelines("%s\n" % fs.strip() for fs in filter(lambda x: sym_or_num.findall(x), tuple(folder_scan))) # int/str # is_by_count(top)
+		if all((folder_scan, lang_list)): # folder_list(reverse) / folder_list_by_lang
+			if is_rus:
+				folder_scan_rus = [rus_regex.sub("", ll).strip() for ll in filter(lambda x: sym_or_num.findall(x), tuple(lang_list)) if all((rus_regex.sub("", ll), len(rus_regex.sub("", ll)) <= len(ll)))] # filter_rus
+				if all((folder_scan_rus, len(folder_scan_rus) <= len(lang_list))):
+					folder_scan = folder_scan_rus
+			elif not is_rus:
+				folder_scan_eng = [ll.strip() for ll in filter(lambda x: sym_or_num.findall(x), tuple(lang_list)) if ll]
+				if all((folder_scan_eng, len(folder_scan_eng) <= len(lang_list))):
+					folder_scan = folder_scan_eng
 
-			move(mydir3, mydir2)
+			with open(mydir2, "w", encoding="utf-8") as mf: # resave # top_file_by_lang # debug
+				mf.writelines("%s\n" % fs.strip() for fs in filter(lambda x: sym_or_num.findall(x), tuple(folder_scan))) # int/str # is_by_count(top)
+
+			# move(mydir3, mydir2)
+
+	try:
+		if os.path.exists(mydir3):
+			os.remove(mydir3) # clear_after_update
+	except BaseException as e:
+		logging.error("%s" % str(e))
 
 	logging.info("debug folder_scan[list][2] %d [%s]" % (len(folder_scan), str(datetime.now())))
 
@@ -878,8 +923,38 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 	fsf_set = set()
 
+	len_and_codepage = set()
+
+	fold_and_date: list = []
+
+	# clear_before_load(every_run_update)
+	result_days: dict = {}
+
+	with open(days_base, "w", encoding="utf-8") as dbf:
+		json.dump(result_days, dbf, ensure_ascii=False, indent=4 ,sort_keys=False)
+
+	try:
+		with open(days_base, encoding="utf-8") as dbf:
+			result_days = json.load(dbf)
+	except:
+		with open(days_base, "w", encoding="utf-8") as dbf:
+			json.dump(result_days, dbf, ensure_ascii=False, indent=4 ,sort_keys=False)
+
+
+	'''
+	result = {}
+	for name, age in people:
+		if age in result:
+			result[age].append(name)
+		else:
+			result[age] = [name]
+	'''
+	group_error: bool = False
+
 	if folder_scan_full: # count_folders
 		logging.info("Найденов папок %s [%s]" % (str(len(folder_scan_full)), str(datetime.now()))) # folder_counts / date_scan
+
+	print("Загрузка папок и период загрузки или обработки. Ждите... %s" % str(datetime.now()).split(" ")[-1])  # is-color
 
 	for fsf in filter(lambda x: x, tuple(folder_scan_full)):
 
@@ -934,6 +1009,8 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 
 			dlist = []
 
+			codepage: str = ""
+
 			for fl in tuple(full_list): # description_files
 
 				try:
@@ -941,6 +1018,8 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 						dlist = flf.readlines()
 				except:
 					dlist = []
+				else:
+					codepage = "utf-8"
 
 				if not dlist:
 					try:
@@ -948,6 +1027,8 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 							dlist = flf.readlines()
 					except:
 						dlist = []
+					else:
+						codepage = "cp1251"
 
 				if not dlist:
 					try:
@@ -955,20 +1036,13 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 							dlist = flf.readlines()
 					except:
 						dlist = []
+					else:
+						codepage = "cp866"
 
-				if not dlist:
-					try:
-						with open(fl, encoding="iso8859_5") as flf: # codepage4
-							dlist = flf.readlines()
-					except:
-						dlist = []
+				# iso8859_5 # koi8_r
 
-				if not dlist:
-					try:
-						with open(fl, encoding="koi8_r") as flf: # codepage5
-							dlist = flf.readlines()
-					except:
-						dlist = []
+			# days_and_folder: list = []
+			# days_and_folder_dict: dict = {}
 
 			for dl in tuple(dlist): # only_first_line # debug
 
@@ -982,7 +1056,12 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 					if not dl: # if_empty_line(no_logging)
 						continue
 					else:
-						logging.info("Список описаний @folders_from_path/dlist [%s] [%s]" % (str(len(dlist)), str(datetime.now())))
+						len_and_codepage_str = ";".join([str(len(dlist)), codepage])
+
+						if not len_and_codepage_str in len_and_codepage:  # try_without_dublicates
+							len_and_codepage.add(len_and_codepage_str)
+
+							logging.info("Список описаний @folders_from_path/dlist/codepage/date [%s] \'%s\' [%s]" % (str(len(dlist)), codepage, str(datetime.now())))
 
 				parse_list = []
 
@@ -1010,8 +1089,6 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 			# config = {"ff": fsf, "period": days, "is_dir": False, "is_less": False, "is_any": True} # **config # fsf(default) -> None(debug)
 			# ff_to_days(ff=fsf, period=days, is_dir=False, is_less=False, is_any=True)
 
-			fold_and_date: list = []
-
 			dt = datetime.now()
 
 			days = 366 if dt.year % 4 == 0 else 365 # by_year # is_no_lambda
@@ -1030,19 +1107,41 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 					folder_or_file = "Папка: %s" % fsf if ftd[-1] else "Файл: %s" % ftd[0] # is_no_lambda # type2
 				finally:
 					try:
-						assert ftd[1] >= 0, ""
+						assert ftd[1] >= 0, "Нет данных о количества дней или имени папки"  # is_assert_debug
 					except AssertionError as err:
-						raise err
-						print(Style.BRIGHT + Fore.YELLOW + "%s [%s]" % (folder_or_file, str(datetime.now()))) # folder(file) / datetime
+						# print(Style.BRIGHT + Fore.YELLOW + "%s [%s]" % (folder_or_file, str(datetime.now()))) # folder(file) / datetime # skip_logging_if_need
 						logging.warning("%s [%s]" % (folder_or_file, str(datetime.now()))) # if_null(is_color)
+						raise err
 					except BaseException as e:
-						print(Style.BRIGHT + Fore.RED + "%s [%s] [%s]" % (folder_or_file, str(datetime.now()), str(e))) # folder(file) / datetime / error
+						# print(Style.BRIGHT + Fore.RED + "%s [%s] [%s]" % (folder_or_file, str(datetime.now()), str(e))) # folder(file) / datetime / error
 						logging.error("%s [%s] [%s]" % (folder_or_file, str(e), str(datetime.now()))) # if_error(is_color)
 					else:
 						fold_and_date.append((folder_or_file, days_ago, str(datetime.now())))
 						# print(Style.BRIGHT + Fore.WHITE + "%s %s [%s]" % (folder_or_file, str(days_ago), str(datetime.now()))) # folder(file) / dayago /datetime # is_color
 						logging.info("%s %s [%s]" % (folder_or_file, str(days_ago), str(datetime.now()))) # if_ok(is_color)
 
+						if "дней" in days_ago.lower():  # only_days(skip_month)
+							try:
+								if days_ago in [*result_days]:
+									result_days[days_ago].append(fsf.split("\\")[-1])
+								else:
+									result_days[days_ago] = [fsf.split("\\")[-1]]
+							except BaseException:
+								group_error = True
+
+			if result_days and not group_error:
+				# @classify_by_folders
+				result_temp = result_days
+
+				for k, v in result_days.items():
+					result_temp[k] = list(set(v))
+
+				# if clear_before_load not_use_result_temp(result_days)
+
+				with open(days_base, "w", encoding="utf-8") as dbf:
+					json.dump(result_temp, dbf, ensure_ascii=False, indent=4, sort_keys=False)  # save_unique # debug
+
+			'''
 			fold_and_date_sorted: list = []
 
 			fold_and_date_sorted = sorted(fold_and_date, key=lambda fold_and_date: fold_and_date[1])
@@ -1060,7 +1159,9 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 				else:
 					logging.info("@folders_from_path/fad_dict %s [%s]" % (";".join([str(k), str(v)]), str(datetime.now())))
 
-				print(Style.BRIGHT + Fore.WHITE + "%s %s" % (k, v)) # folder(file) / days_ago
+				if k in [*result_days]:  # hide_if_need(logging_only_days)
+					print(Style.BRIGHT + Fore.WHITE + "%s %s" % (k, v)) # folder(file) / days_ago
+			'''
 
 			# find_folders_by_month(by_time) # is_all_days
 			if all((len(ftd) > 1, ftd[0] != None, ftd[1] >= 0)): # period=30 -> period=days
@@ -1124,7 +1225,7 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 						dsize: int = 0
 
 					is_backup: bool = False
-					is_backup = (dt.hour <= 23, dsize // (1024 ** 2) > 0) # debug # midnght-10pm # limit_1mb(ok) # is_default
+					is_backup = (dt.hour >= 0, dsize // (1024 ** 2) > 0) # debug # all_day # limit_1mb(ok) # is_default
 
 					try:
 						desc_list = [ld.strip() for ld in os.listdir(fsf) if ld.lower().endswith(".txt")]
@@ -1152,10 +1253,10 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 						except BaseException as e:
 							tmp = []
 							logging.error("Пустой список файлов @folders_from_path/tmp/#notvseries/%s [%s]" % (str(datetime.now()), str(e))) # when_null_folder
-						finally:
-							if tmp:
-								print("%d downloaded projects" % len(tmp)) #print(";".join(tmp)) #; print() # need_another_comment
-								sleep(0.5)
+						# finally: # hide_download_project_list_with_count
+							# if tmp:
+								# print("%d downloaded projects" % len(tmp)) #print(";".join(tmp)) #; print() # need_another_comment
+								# sleep(0.5)
 
 						st_list: list = []
 
@@ -1278,12 +1379,18 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 				if is_two_desc: # desc(2), files(0/1) # delete_null(any_time)
 					try:
 						desc_list = [os.path.join(fsf, f) for f in filter(lambda x: x.lower().endswith(".txt"), os.listdir(fsf)) if os.path.exists(os.path.join(fsf, f))]
-					except BaseException as e:
+
+						assert desc_list, "В папке %s нет описания" % fsf
+					except AssertionError as err:  # if null
+						logging.warning("В папке %s нет описания" % fsf)
+						raise err
+					except BaseException as e:  # if_error
 						desc_list = []
-						logging.error("Папка: %s, файл: %s, ошибка: %s" % (fsf, f, str(e)))
+						logging.error("Папка: %s, ошибка: %s" % (fsf, str(e)))
 					else:
 						desc_list.sort(reverse=False)
-						logging.error("Папка: %s, файл: %s" % (fsf, f))
+						desc_status = desc_list[0] if desc_list else None # first_file / no_description
+						logging.info("Папка: %s, файл: %s" % (fsf, str(desc_status)))
 
 					try:
 						if os.path.exists(desc_list[0]) and len(desc_list) >= 2: # "\\".join([fsf, "00s00e.txt"])
@@ -1298,11 +1405,13 @@ async def folders_from_path(is_rus: bool = False, template: list = [], need_clea
 			# temp = sorted(found_list, reverse=False) # sort_by_string
 			# temp = sorted(found_list, key=len, reverse=False) # sort_by_key
 
-			# found_list = temp
+			found_list = sorted(found_list, key=len, reverse=True) # temp # reverse(False -> True)
 
 			# debug # is_regenerate_every_time # any((x[0] == x[0].isalpha(), x[0] == x[0].isnumeric()
 			with open(mydir4, "w", encoding="utf-8") as mf: # resave # debug # found_by_period
 				mf.writelines("%s\n" % fs.strip() for fs in filter(lambda x: sym_or_num.findall(x), tuple(found_list))) # int/str # is_all(lang)
+
+	print("Загрузка папок и период загрузки или обработки. Завершена... %s" % str(datetime.now()).split(" ")[-1])  # is-color
 
 	# if folder_scan:
 		# print(folder_scan)
@@ -1484,6 +1593,7 @@ if curProcesses:
 
 			if int(mem) > 80:  # "80"->85
 				print(eachProcess.name(), end="\n")
+				logging.warning("Overload: %s" % eachProcess.name())
 
 				if all((not eachProcess.name() in big_process, not eachProcess.name() in skip_process)):
 					big_process.append(eachProcess.name())
@@ -1639,7 +1749,7 @@ def log_error(f):
 			return f(*args, **kwargs)
 		except BaseException as e:
 			write_log("debug error", "%s" % str(e), is_error=True)
-			# logging.error("%s" % str(e))
+			logging.error("%s" % str(e))
 			# raise e
 
 	return inner
@@ -1991,13 +2101,16 @@ async def ipconfig_to_base():
 
 					is_update: bool = all((last_info, combine_info, last_info != combine_info))
 					is_new: bool = any((all((not last_info, combine_info)), all((not cmac.strip() in [*lanmacs], cmac))))
+					is_exist: bool = (last_info == combine_info)
 
 					if any((is_new, is_update)): # if_updated(vendor) / if_new(vendor)
 
 						if is_new:
-							print("информация по ip %s добавлена в базу" % cip.strip())
+							print(Style.BRIGHT + Fore.GREEN + "информация по ip %s добавлена в базу" % cip.strip())
 						if is_update:
-							print("информация по ip %s обновлена в базе" % cip.strip())
+							print(Style.BRIGHT + Fore.BLUE + "информация по ip %s обновлена в базе" % cip.strip())
+						if is_exist:
+							print(Style.BRIGHT + Fore.YELLOW + "информация по ip %s найдена в базе" % cip.strip())
 
 						lanmacs[cmac.strip()] = combine_info # host;"ip";mac_to_vendor # "ip";mac_to_vendor
 				else:
@@ -2113,24 +2226,32 @@ def slugify(s: str = "") -> str:
 	return s
 
 
-# kill_process_by_name(test) # percent?
+# kill_process_by_name(debug) # percent?
 # @log_error
-async def kill_proc_by_name(proc_name: str = ""):
+async def kill_proc_by_name(proc_name: str = "", kill: bool = True):  # if_not_kill_found
+	'''
+	os.system("taskkill /f /im %s" % proc_name)
+	'''
+
+	PROCNAME = proc_name
+
+	found: bool = False
+
 	try:
-		os.system("taskkill /f /im %s" % proc_name)
+		for proc in psutil.process_iter():
+
+			if proc.name == PROCNAME:
+				found = True
+
+				p = psutil.Process(proc.pid)
+
+				if not 'SYSTEM' in p.username and kill:
+					# write_log("debug kill", str(proc.name))
+					proc.kill()
 	except:
-		PROCNAME = proc_name
-
-		try:
-			for proc in psutil.process_iter():
-				if proc.name == PROCNAME:
-					p = psutil.Process(proc.pid)
-
-					if not 'SYSTEM' in p.username:
-						# write_log("debug kill", str(proc.name))
-						proc.kill()
-		except:
-			return
+		return False
+	else:
+		return found
 
 
 # kill_process_by_pid
@@ -2212,7 +2333,7 @@ async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 
 	global ctme
 
-	# mytime: dict = {"jobtime": [9, 18, 4], "dinnertime": [12, 13], "sleeptime": [0, 6], "anytime": [True]} # sleep_time_less_hour
+	# mytime: dict = {"jobtime": [9, 18, 4], "dinnertime": [12, 13], "sleeptime": [0, 7], "anytime": [True]} # sleep_time_less_hour
 
 	write_log("debug utctime", "Utc: %s" % str(utcnow)) # time_zone(gmt)
 
@@ -2221,7 +2342,7 @@ async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 
 	# if ctime.hour <= mytime["sleeptime"][1] and all((not list(filter(lambda x: "aria2" in x, tuple(os.listdir(copy_src)))), not list(filter(lambda x: "aria2" in x, tuple(os.listdir(copy_src2)))))):  # shutdown_before_7am_or_equal_and_no_download_files
 	# if ctme.hour < mytime["sleeptime"][1] and any((not os.listdir(copy_src), not os.listdir(copy_src2))):  # shutdown_before_7am_or_equal_and_some_no_download_files
-	if ctme.hour < mytime["sleeptime"][1]:  # utcnow <= ctme.hour < mytime["sleeptime"][1] # shutdown_before_6am_or_equal
+	if ctme.hour < mytime["sleeptime"][1]:  # utcnow <= ctme.hour < mytime["sleeptime"][1] # shutdown_before_7am
 		# run(["cmd", "/c", "shutdown", "/a"], shell=False)  # stop_timer(is_need_hide_no_cancel) # kill_proc_by_name("shutdown.exe") # stop_timer_by_app # 1
 		# run(["cmd", "/c", "shutdown", "/s", "/t", "3600", "/c", "Чтобы отменить выключение, выполните в командной строке shutdown /a"], shell=False)  # shutdown(1hour) (midnight - 7am) # start_after # if_no_updates #1.1
 		run(["cmd", "/c", "shutdown", "/s", "/t", "1800", "/c", "Чтобы отменить выключение, выполните в командной строке shutdown /a"], shell=False)  # shutdown(30min) (midnight - 7am) # start_after
@@ -2240,7 +2361,10 @@ async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 
 	elif ctme.hour >= mytime["sleeptime"][1]:  # ctme.hour % 3 == 0 # every_3_hours_by_divmod # stop_shutdown_by_time
 		run(["cmd", "/c", "shutdown", "/a"], shell=False)  # stop_timer_after_7am(more)
-		await kill_proc_by_name("shutdown.exe") # stop_timer_by_app # asyncio.run(
+
+		res = await kill_proc_by_name("shutdown.exe") # stop_timer_by_app # asyncio.run(
+		if res:
+			write_log("debug res[kill_proc_by_name]", "shutdown [%s]" % str(datetime.now()))
 
 	# if_equal_time(mytime["sleeptime"][1])_pass
 
@@ -2254,7 +2378,7 @@ async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 # dspace(+reserve) # midnight - 6am # 11pm # no_overload # 2
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22))) # dspace(is_need_hide) / less_7am_or_more_10pm
 # dspace(+reserve) # midnight - 6am # stop_after_18h # no_overload # 3
-is_status: tuple = (not dsize2, ctme.hour < mytime["sleeptime"][1], all((dayago > 18, is_hd_status))) # dspace(is_need_hide) / less_7am / run_more_18h(is_optimal)
+is_status: tuple = (not dsize2, ctme.hour < mytime["sleeptime"][1], dayago > 18) # dspace(is_need_hide) / less_7am / run_more_18h(is_optimal)
 # dspace(+reserve) # midnight - 6am # 11pm # filter_run_time # no_overload # 4
 # is_status: tuple = (not dsize2, any((ctme.hour < mytime["sleeptime"][1], ctme.hour > 22, ctme.hour + dayago > 23))) # dspace(is_need_hide) / less_7am_or_more_10pm_or_optimal_run_hours
 # no_dspace # midnight - 6am # 11pm # no_overload # 5
@@ -3906,6 +4030,7 @@ class MyMeta:
 		if all((width % 2 != 0, width)):
 			width += 1  # 640
 
+		# @sd
 		try:
 			sd_scales = asyncio.run(sd_generate(from_w=width, from_h=height))  # insert_calc_width_and_height(sd) # debug
 
@@ -3926,6 +4051,7 @@ class MyMeta:
 		else:
 			write_log("debug sd_count[notfound]", "%s %s" % ("x".join([str(owidth), str(oheight)]), filename))
 
+		# @hd
 		try:
 			hd_scales = asyncio.run(hd_generate(from_w=width, from_h=height))  # insert_calc_width_and_height(hd) # debug
 
@@ -3945,6 +4071,27 @@ class MyMeta:
 					write_log("debug hd_count[found]", "%s %s" % (";".join(tmp), filename))  # str(tmp)
 		else:
 			write_log("debug hd_count[notfound]", "%s %s" % ("x".join([str(owidth), str(oheight)]), filename))
+
+		# @ar
+		try:
+			ar_scales = asyncio.run(ar_generate(from_w=width, from_h=height))  # insert_calc_width_and_height(hd) # debug
+
+			assert ar_scales, "ar_generate нет aspect ratio"
+		except AssertionError:
+			ar_scales = asyncio.run(ar_generate(from_w=owidth, from_h=oheight))  # insert_default_width_and_height
+		except BaseException:
+			ar_scales = []  # clear_ar_scales_if_error
+
+		if ar_scales:
+			try:
+				tmp = [a_s.strip() for a_s in ar_scales if any(("x".join([str(owidth), str(oheight)]) == a_s, "x".join([str(width), str(height)]) == a_s))]
+			except:
+				tmp = []
+			else:
+				if tmp:
+					write_log("debug ar_count[found]", "%s %s" % (";".join(tmp), filename))  # str(tmp)
+		else:
+			write_log("debug ar_count[notfound]", "%s %s" % ("x".join([str(owidth), str(oheight)]), filename))
 
 		if any((not width, not height)) and all((owidth, oheight)):
 			width, height = owidth, oheight  # restore(width/height)
@@ -10020,8 +10167,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	lfiles: list = []
 
 	# recovery/project/args/"last_jobs"(is_optimized) # filter4
-	filter1: list = [] # recovery_base
-	filter2: list = [] # short_filenames
+	filter1: list = [] # recovery_base(full)
+	filter2: list = [] # short_filenames(full)
 	filter3: list = [] # args
 	filter4: list = [] # ready_projects
 	filter5: list = [] # ?desc
@@ -10085,8 +10232,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 					print(Style.BRIGHT + Fore.YELLOW + "Проход 1 из 4 [%s]" % ", ".join(filter1[0:len(filter1)]))
 					write_log("debug filter1[list]", ",".join(filter1[0:len(filter1)]))
 
-				write_log("debug files[filter1]",
-						  "Найдены файлы с шаблоном 1 [%d][%s]" % (len(filter1), str(datetime.now())))
+				# write_log("debug files[filter1]", "Найдены файлы с шаблоном 1 [%d][%s]" % (len(filter1), str(datetime.now())))
+				write_log("debug files[filter1]", "Найдены файлы с шаблоном 1 [%s][%s]" % ("|".join(filter1), str(datetime.now())))
 			else:
 				write_log("debug files[filter1][null]", "Не найдены файлы с шаблоном 1 [%s]" % str(datetime.now()))
 
@@ -10169,8 +10316,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				print(Style.BRIGHT + Fore.YELLOW + "Проход 2 из 4 [%s]" % ", ".join(filter2[0:len(filter2)]))
 				write_log("debug filter2[list]", ",".join(filter2[0:len(filter2)]))
 
-			write_log("debug files[filter2]",
-					  "Найдены файлы с шаблоном 2 [%d][%s]" % (len(filter2), str(datetime.now())))
+			# write_log("debug files[filter2]", "Найдены файлы с шаблоном 2 [%d][%s]" % (len(filter2), str(datetime.now())))
+			write_log("debug files[filter2]", "Найдены файлы с шаблоном 2 [%s][%s]" % ("|".join(filter2), str(datetime.now())))
 		else:
 			write_log("debug files[filter2][null]", "Не найдены файлы с шаблоном 2 [%s]" % str(datetime.now()))
 
@@ -10201,6 +10348,19 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 	except:
 		filter3 = []
 	else:
+		filter_set3 = set()
+
+		# get_all_unique_words
+		for maf in filter(lambda x: x, tuple(my_arg_filter)):
+			if maf.count("_") > 0:
+				for spl in crop_filename_regex.sub("", maf).split("_"):
+					if all((spl, not spl in filter_set3)):
+						filter_set3.add(spl)  # have_delims_but_not_sort
+			elif maf.count("_") == 0 and all((maf, not maf in filter_set3)):
+				filter_set3.add(maf)  # no_delims_but_not_sort
+
+		# get_unique_by_split # / get_first_unique
+		"""
 		# shorts_in_list(upgrade) # maf.split("_")[0:maf.count("_")] for maf in filter(lambda x: x, tuple(my_arg_filter))
 		try:
 			filter_new3 = list(set([crop_filename_regex.sub("", maf).split("_")[0].strip() if maf.count(
@@ -10210,6 +10370,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			filter_new3 = []
 		else:
 			filter3 = filter_new3
+		"""
+
+		filter3 = list(filter_set3)
 
 	if filter3:
 		filter_temp3: list = []
@@ -10233,8 +10396,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				print(Style.BRIGHT + Fore.YELLOW + "Проход 3 из 4 [%s]" % ", ".join(filter3[0:len(filter3)]))
 				write_log("debug filter3[list]", ",".join(filter3[0:len(filter3)]))
 
-			write_log("debug files[filter3]",
-					  "Найдены файлы с шаблоном 3 [%d][%s]" % (len(filter3), str(datetime.now())))
+			# write_log("debug files[filter3]", "Найдены файлы с шаблоном 3 [%d][%s]" % (len(filter3), str(datetime.now())))
+			write_log("debug files[filter3]", "Найдены файлы с шаблоном 3 [%s][%s]" % ("|".join(filter3), str(datetime.now())))
 		else:
 			write_log("debug files[filter3][null]", "Не найдены файлы с шаблоном 3 [%s]" % str(datetime.now()))
 
@@ -10292,8 +10455,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				print(Style.BRIGHT + Fore.YELLOW + "Проход 4 из 4 [%s]" % ", ".join(filter4[0:len(filter4)]))
 				write_log("debug filter4[list]", ",".join(filter4[0:len(filter4)]))
 
-			write_log("debug files[filter4]",
-					  "Найдены файлы с шаблоном 4 [%d][%s]" % (len(filter4), str(datetime.now())))
+			# write_log("debug files[filter4]", "Найдены файлы с шаблоном 4 [%d][%s]" % (len(filter4), str(datetime.now())))
+			write_log("debug files[filter4]", "Найдены файлы с шаблоном 4 [%s][%s]" % ("|".join(filter4), str(datetime.now())))
 		else:
 			write_log("debug files[filter4][null]", "Не найдены файлы с шаблоном 4 [%s]" % str(datetime.now()))
 
@@ -10828,69 +10991,72 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		MT = MyTime(seconds=2)
 
+		'''
 		try:
 			h, m = asyncio.run(load_timing_from_xml(ind=2)) # 2 # h, m = load_timing_from_xml(ind=2)
 		except:
 			h, m = 0, 0
+		'''
 
 		date1 = datetime.now()
 
-		for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)):
+		with unique_semaphore:
+			for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)):
 
-			try:
-				assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
-			except AssertionError as err: # if_null
-				logging.warning("Пустой список или нет файлов lfiles [%s]" % str(datetime.now()))
-				raise err
-				break
-			except BaseException as e: # if_error
-				logging.error("Пустой список или нет файлов lfiles [%s] [%s]" % (str(e), str(datetime.now())))
-				break
+				try:
+					assert lfiles, "Пустой список или нет файлов lfiles" # is_assert_debug
+				except AssertionError as err: # if_null
+					logging.warning("Пустой список или нет файлов lfiles [%s]" % str(datetime.now()))
+					raise err
+					break
+				except BaseException as e: # if_error
+					logging.error("Пустой список или нет файлов lfiles [%s] [%s]" % (str(e), str(datetime.now())))
+					break
 
-			cnt += 1
+				cnt += 1
 
-			date2 = datetime.now()
+				date2 = datetime.now()
 
-			hour = divmod(int(abs(date1 - date2).total_seconds()), 60)  # 60(min) -> 3600(hours)
+				hour = divmod(int(abs(date1 - date2).total_seconds()), 60)  # 60(min) -> 3600(hours)
 
-			try:
-				_, hh, mm, _ = MT.seconds_to_hms(date1, date2) # days -> _ # ss -> _
-			except:
-				mm = abs(date1 - date2).seconds
-				hh = mm // 3600
-				mm //= 60
-				# mm %= 60 # sec
+				try:
+					_, hh, mm, _ = MT.seconds_to_hms(date1, date2) # days -> _ # ss -> _
+				except:
+					mm = abs(date1 - date2).seconds
+					hh = mm // 3600
+					mm //= 60
+					# mm %= 60 # sec
 
-			if hour[0]:
-				write_log("debug hour[count][1]", "%d" % (hour[0] // 60)) # is_index #1
-				hour = hour[0] // 60
+				if hour[0]:
+					write_log("debug hour[count][1]", "%d" % (hour[0] // 60)) # is_index #1
+					hour = hour[0] // 60
 
-			try:
-				assert isinstance(hour, int) and hour >= 4, "Меньше установленого лимита по времени hour[1]" # 1 # is_assert_debug # 4 -> 3
-			except AssertionError: # as err: # if_null
-				logging.warning("Меньше установленого лимита по времени hour[1]")
-				hour = 3 # limit_hour
-				# raise err
-			except BaseException as e: # if_error
-				logging.error("Меньше установленого лимита по времени hour[1] [%s]" % str(e))
-				hour = 3
+				try:
+					assert isinstance(hour, int) and hour >= 4, "Меньше установленого лимита по времени hour[1]" # 1 # is_assert_debug # 4 -> 3
+				except AssertionError: # as err: # if_null
+					logging.warning("Меньше установленого лимита по времени hour[1]")
+					hour = 3 # limit_hour
+					# raise err
+				except BaseException as e: # if_error
+					logging.error("Меньше установленого лимита по времени hour[1] [%s]" % str(e))
+					hour = 3
 
-			# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
-			if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # all((mm >= l_avg, l_avg >= 30)): # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
-				write_log("debug stop_job[lfiles]", "Stop: at %s [%d]" % (lf, cnt))
-				break
+				# time_is_limit_1hour_50min # all((h >= 0, m, hh >= h, mm >= m)) # all((hh > hour, mm >= m))
+				if all((hh > hour, hour)) or date2.hour < mytime["sleeptime"][1]: # all((mm >= l_avg, l_avg >= 30)): # stop_if_more_30min # mm[0] // 60 >= 1:  # stop_if_more_hour
+					write_log("debug stop_job[lfiles]", "Stop: at %s [%d]" % (lf, cnt))
+					break
 
-			try:
-				fname = lf.split("\\")[-1].strip()
-			except:
-				fname = ""
-			finally:
-				if not lf:
-					continue
+				try:
+					fname = lf.split("\\")[-1].strip()
+				except:
+					fname = ""
+				finally:
+					if not lf:
+						continue
 
-			if all((not fname in unique, fname)) and os.path.exists(lf):
-				unique.add(fname)  # short_file(first)_by_set
-				full_list.add(lf)  # full_filename(first)_by_set
+				if all((not fname in unique, fname)) and os.path.exists(lf):
+					unique.add(fname)  # short_file(first)_by_set
+					full_list.add(lf)  # full_filename(first)_by_set
 
 		del MT
 
@@ -11013,10 +11179,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		MT = MyTime(seconds=2)
 
+		'''
 		try:
 			h, m = asyncio.run(load_timing_from_xml(ind=3)) # 3 # h, m = load_timing_from_xml(ind=3)
 		except:
 			h, m = 0, 0
+		'''
 
 		date1 = datetime.now()
 
@@ -11475,10 +11643,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 	MT = MyTime(seconds=2)
 
+	'''
 	try:
 		h, m = asyncio.run(load_timing_from_xml(ind=4)) # 4 # h, m = load_timing_from_xml(ind=4)
 	except:
 		h, m = 0, 0
+	'''
 
 	with unique_semaphore:
 		for lf in filter(lambda x: x, tuple(lfiles)):
@@ -11789,9 +11959,9 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 			limit_hour = 4 if year_filter else 2 # is_no_lambda
 
-			avg_sum: int = 0
-			avg_len: int = 0
-			avg_size: int = 0
+			# avg_sum: int = 0
+			# avg_len: int = 0
+			# avg_size: int = 0
 
 			try:
 				fsizes: list = list(set([os.path.getsize(fd) for fd in filter(lambda x: os.path.exists(x), tuple([*filecmdbase_dict])) if fd]))
@@ -11800,24 +11970,26 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			finally:
 				fsizes.sort(reverse=False)
 
-			try:
-				avg_size = asyncio.run(avg_lst(list(set(fsizes)))) # async(avg_size)
-				assert avg_size, "" # is_assert_debug
-			except AssertionError as err: # if_null
-				avg_size: int = 0
-				raise err # logging
-			except BaseException: # if_error
-				try:
-					avg_size = (lambda s, l: s / l)(sum(fsizes), len(fsizes)) # by_lambda
-				except:
-					avg_size = 0
+			# try:
+				# avg_size = asyncio.run(avg_lst(list(set(fsizes)))) # async(avg_size)
+				# assert avg_size, "" # is_assert_debug
+			# except AssertionError as err: # if_null
+				# avg_size: int = 0
+				# raise err # logging
+			# except BaseException: # if_error
+				# try:
+					# avg_size = (lambda s, l: s / l)(sum(fsizes), len(fsizes)) # by_lambda
+				# except:
+					# avg_size = 0
 
 			MT = MyTime(seconds=2)
 
+			'''
 			try:
 				h, m = asyncio.run(load_timing_from_xml(ind=5)) # 5 # h, m = load_timing_from_xml(ind=5)
 			except:
 				h, m = 0, 0
+			'''
 
 			date1 = datetime.now()
 
@@ -12196,10 +12368,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		MT = MyTime(seconds=2)
 
+		'''
 		try:
 			h, m = asyncio.run(load_timing_from_xml(ind=6)) # 6 # h, m = load_timing_from_xml(ind=6)
 		except:
 			h, m = 0, 0
+		'''
 
 		with unique_semaphore:
 			for lf in filter(lambda x: x, tuple(lfiles)):
@@ -12380,10 +12554,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 		MT = MyTime(seconds=2)
 
+		'''
 		try:
 			h, m = asyncio.run(load_timing_from_xml(ind=7)) # 7 # h, m = load_timing_from_xml(ind=7)
 		except:
 			h, m = 0
+		'''
 
 		date1 = datetime.now()
 
@@ -12520,10 +12696,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 	MT = MyTime(seconds=2)
 
+	'''
 	try:
 		h, m = asyncio.run(load_timing_from_xml(ind=8)) # 8 # h, m = load_timing_from_xml(ind=8)
 	except:
 		h, m = 0, 0
+	'''
 
 	date1 = datetime.now()
 
@@ -13565,6 +13743,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 		nob_dict = {k: v for k, v in nob_dict.items() if
 						os.path.exists(k)}  # without_length # skip_try_except
 
+		s_p_l_set = set() # int -> str
+
 		for k, v in filecmdbase_dict.items():
 
 			try:
@@ -13595,13 +13775,20 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				if level_count:
 					l_c += 1
 
-				nob_dict[k.strip()] = (
-					str(scale_count), str(profile_count), str(level_count))  # is_optimize(1 found, 0 not_found)
+				is_new: bool = False
 
-				print(Style.BRIGHT + Fore.CYAN + "%s\t(%s, %s, %s)" % (
-					k.strip(), str(s_c), str(p_c), str(l_c)))  # scale_count -> s_c ...
-				write_log("debug filecmdbase_dict[count]",
-						  "%s\t(%s, %s, %s)" % (k.strip(), str(s_c), str(p_c), str(l_c)))
+				if not ";".join([str(s_c), str(p_c), str(l_c)]) in s_p_l_set:  # unique_only
+					s_p_l_set.add(";".join([str(s_c), str(p_c), str(l_c)]))
+					is_new = True
+					nob_dict[k.strip()] = "x".join([str(scale_count), str(profile_count), str(level_count)])  # is_optimize(1 found, 0 not_found)
+				else:
+					continue  # skip_dublicate
+
+				if is_new:
+					print(Style.BRIGHT + Fore.CYAN + "%s\t(%s, %s, %s)" % (
+						k.strip(), str(s_c), str(p_c), str(l_c)))  # scale_count -> s_c ...
+					write_log("debug filecmdbase_dict[count]",
+						 	"%s\t(%s, %s, %s)" % (k.strip(), str(s_c), str(p_c), str(l_c)))
 
 		if any((s_c, p_c, l_c)):
 			cnt_index = {"scale": s_c, "profile": p_c, "level": l_c}
@@ -14519,10 +14706,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 
 				asyncio.run(save_timing_to_xml(hours = hh_time, minutes = mm_time)) # optimize_by_current_jobs(is_run)
 
+			# '''
 			try:
 				h, m = asyncio.run(load_timing_from_xml(ind=9)) # 9 # h, m = load_timing_from_xml(ind=9)
 			except:
 				h, m = 0, 0
+			# '''
 
 			fsizes : int = 0
 			fsizes2: int = 0
@@ -14714,15 +14903,12 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 			prc_pos_set = set()
 			prc_pos: int = 0
 
-			# debug_run_by_classify(and_by_filesizes) / fast_or_long # is_need_hidden(by_default)
+			# run_by_classify(and_by_filesizes) # is_need_hidden(by_default)
 			# '''
 
-			s, l, a = 0, 0, 0
-
+			# @classify
 			lst_classify: list = []
-
 			lst1 = lst2 = [] # classify(1 <=> 0)
-
 			fsizes_list: list = []
 
 			for k, v in filecmdbase_dict.items():
@@ -14757,41 +14943,52 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				else:
 					fsizes_list.append(fsize) # pass_1_of_2
 
-			if fsizes_list:
+			s = l = a = 0
+
+			try:
+				s, l = sum(fsizes_list), len(fsizes_list)
+				a = (lambda s, l: s / l)(s, l)
+
+				assert a, "Нет файлов для классификации"  # is_assert_debug
+			except AssertionError as err:
+				a = 0
+				logging.warning("Нет файлов для классификации [%s]" % str(datetime.now()))
+				raise err
+			except BaseException as e:
+				a = 0
+				logging.error("Нет файлов для классификации [%s] [%s]" % (str(e), str(datetime.now())))
+			else:
+				if a:
+					lst_classify = [(fl,1) if fl - a > 0 else (fl,0) for fl in fsizes_list] # is_no_lambda
+
+			if lst_classify:
+				lst1 = [lc[0] for lc in lst_classify if lc[1] == 1] # classify_1
+				lst2 = [lc[0] for lc in lst_classify if lc[1] == 0] # classify_0
+
+				if len(lst1) > len(lst2): # first_more_second
+					fsizes_list = lst1
+					logging.info("@lst_classify/fsizes_list/lst1/1 [%d]" % len(fsizes_list))
+				elif len(lst2) > len(lst1): # second_more_first
+					fsizes_list = lst2
+					logging.info("@lst_classify/fsizes_list/lst2/2 [%d]" % len(fsizes_list))
+				elif all((lst1, len(lst1) == len(lst2))): # if_eq_length_and_first_some_data
+					fsizes_list = lst1
+					logging.info("@lst_classify/fsizes_list/lst1/3 [%d]" % len(fsizes_list))
+				elif all((not lst1, lst2, lst1 != lst2)): # first_is_null_and_second_some_data
+					fsizes_list = lst2
+					logging.info("@lst_classify/fsizes_list/lst2/4 [%d]" % len(fsizes_list))
+				# else:
+					# pass
+
+				fsizes_list.sort(reverse=False) # default_sort(is_sorted)
+
 				try:
-					s, l = sum(fsizes_list), len(fsizes_list)
-					a = (lambda s, l: s / l)(s, l)
-				except AssertionError as err:
-					a = 0
-					raise err
-				else:
-					if a:
-						lst_classify = [(fl,1) if fl - a > 0 else (fl,0) for fl in fsizes_list] # is_no_lambda
+					filecmdbase_dict_filter = {k:v for k, v in filecmdbase_dict.items() if os.path.exists(k) and os.path.getsize(k) in fsizes_list}
+				except:
+					filecmdbase_dict_filter = {}
 
-				if lst_classify:
-					lst1 = [lc[0] for lc in lst_classify if lc[1] == 1] # classify_1
-					lst2 = [lc[0] for lc in lst_classify if lc[1] == 0] # classify_0
-
-					if len(lst1) > len(lst2): # first_more_second
-						fsizes_list = lst1
-					elif len(lst2) > len(lst1): # second_more_first
-						fsizes_list = lst2
-					elif all((lst1, len(lst1) == len(lst2))): # if_eq_length_and_first_some_data
-						fsizes_list = lst1
-					elif all((not lst1, lst2, lst1 != lst2)): # first_is_null_and_second_some_data
-						fsizes_list = lst2
-					# else:
-						# pass
-
-					fsizes_list.sort(reverse=False) # default_sort(is_sorted)
-
-					try:
-						filecmdbase_dict_filter = {k:v for k, v in filecmdbase_dict.items() if os.path.exists(k) and os.path.getsize(k) in fsizes_list}
-					except:
-						filecmdbase_dict_filter = {}
-
-					if all((filecmdbase_dict_filter, len(filecmdbase_dict_filter) <= len(filecmdbase_dict))):
-						filecmdbase_dict = filecmdbase_dict_filter
+				if all((filecmdbase_dict_filter, len(filecmdbase_dict_filter) <= len(filecmdbase_dict))):
+					filecmdbase_dict = filecmdbase_dict_filter
 			# '''
 
 			# new_script
@@ -14945,8 +15142,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						time_calc = calculate_transfer_time(fsize, speed_file)
 						min_or_hour = "%d часов" % int(time_calc // 60) if time_calc > 60 else "%d минут" % int(time_calc) # часов / минут
 					except BaseException: # as e:
-						write_log("debug min_or_hour[error]", "%s [%s]" % (k.strip(), str(datetime.now())))
-						logging.error("debug min_or_hour[error] %s [%s]" (k.strip(), str(datetime.now())))
+						write_log("debug min_or_hour[error]", "%s [%s]" % (str(k).strip(), str(datetime.now())))
+						logging.error("debug min_or_hour[error] %s [%s]" % (str(k).strip(), str(datetime.now())))
 					else:
 						write_log("debug min_or_hour", f"Время передачи файла: {min_or_hour}, имя файла: {k}, сейчас: {str(datetime.now())}") # print(f"Время передачи файла: {sec_or_min}") # секунд
 						logging.info(f"debug min_or_hour Время передачи файла: {min_or_hour}, имя файла: {k}, сейчас: {str(datetime.now())}")
