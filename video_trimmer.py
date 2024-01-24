@@ -12,6 +12,7 @@ import sys
 import logging
 import tkinter as tk
 import os
+import asyncio
 
 from threading import (  # Thread # Barrier # работа с потоками #mutli_async
 	 Semaphore )
@@ -57,6 +58,11 @@ job_count = 0
 #logging(start)
 log_base = "c:\\downloads\\mytemp\\trimmer.json" #unique_logging(test)
 log_print = "c:\\downloads\\mytemp\\trim.log"
+
+trimer_base: str = "".join([path_for_queue, "trimmer_job.json"])
+
+with open(trimer_base, "w", encoding="utf-8") as tbf:
+	json.dump({}, tbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 some_dict = {}
 
@@ -115,8 +121,9 @@ def write_log(desc="", txt=""): #event_log
 			if not lp in check_log:
 				check_log.add(lp)
 
-		if len(check_log) <= len(lprint) and check_log:
-			lprint = sorted(list(check_log), reverse=False) #without_abc(set->list)
+		if all((check_log, any((check_log != lprint, len(check_log) != len(lprint))))):
+			lprint = sorted(list(check_log), reverse=False) # with_abc(set->list)
+			# lprint = list(check_log) # without_abc(set->list)
 
 		with open(log_print, "w", encoding="utf-8") as lpf:
 			lpf.writelines("%s" % lp for lp in lprint) #\n
@@ -126,6 +133,7 @@ write_log("debug start", str(datetime.now()))
 ###debug/trimmer_stop/test_after_debug###
 #exit()
 #sys.exit()
+
 
 def most_frequent(list):
 	"""
@@ -146,6 +154,7 @@ def most_frequent(list):
 	"""
 	return max(set(list), key=list.count)
 
+
 #list (string / numbers)
 #search_moda([1,2, 2, 4, 4, 5, 7, 7]) #2, 4, 7
 def search_moda(lst):
@@ -156,6 +165,7 @@ def search_moda(lst):
 			moda.append(i)
 
 	return list(set(moda))
+
 
 def ready_file(filename):
 	root = tk.Tk()
@@ -185,6 +195,7 @@ def ready_file(filename):
 	root.after(3000, root.quit) #5000 = 5 seconds
 
 	root.mainloop()
+
 
 def seconds_to_time(seconds):
 
@@ -224,6 +235,7 @@ def seconds_to_time(seconds):
 		dhms = (days, hours, minutes, seconds)
 
 		return dhms #if_normal_then_data
+
 
 class width_height:
 
@@ -370,6 +382,7 @@ class width_height:
 	def __del__(self):
 		print("%s удалён" % str(self.__class__.__name__))
 
+
 class MyTime:
 
 	def __init__(self):
@@ -402,10 +415,12 @@ class MyTime:
 				if any((dd, hh, mm, ss)):
 					print(Style.BRIGHT + Fore.WHITE + "debug time", "Задержка сработала на : %d дн., %d ч., %d м., %d с." % (dd, hh, mm, ss), sep="\t", end="\n")
 
+
 # --- dos_shell ---
 #dir /r/b/s Short_AAsBBe*.ext > ext.list
 #(for /f "delims=" %a in @echo file '%a') > concat.lst
 #ffmpeg -f concat -safe 0 -y -i concat.lst -c copy Short_AAsBBe.ext
+
 
 #setup_parts(fcount=2681, ext=".mp4", is_Trim=Trim, is_Scale=False, is_Sount=False):
 """
@@ -418,7 +433,7 @@ c:\downloads\mytemp\ffmpeg -y -i C:\Downloads\Combine\Original\Backup\Bolshoy_sk
 c:\downloads\mytemp\ffmpeg -y -i C:\Downloads\Combine\Original\Backup\Bolshoy_skachyok_01s11e.mp4 -map_metadata -1 -threads 2 -c:v libx264 -vf "trim=2298:383" -c:a aac -af "dynaudnorm" C:\Downloads\Combine\Original\Backup\Bolshoy_skachyok_01s11e07p.mp4
 c:\downloads\mytemp\ffmpeg -y -i C:\Downloads\Combine\Original\Backup\Bolshoy_skachyok_01s11e.mp4 -map_metadata -1 -threads 2 -c:v libx264 -vf "trim=2681:383" -c:a aac -af "dynaudnorm" C:\Downloads\Combine\Original\Backup\Bolshoy_skachyok_01s11e08p.mp4
 """
-def setup_parts(fcount, filename, parts=10, ext=".mp4", is_Trim=True, is_Scale=False, is_Sound=False):
+def setup_parts(fcount: int = 0, filename: str = "", parts=10, ext=".mp4", is_Trim=True, is_Scale=False, is_Sound=False):
 
 	def one_to_double(cnt):
 
@@ -447,262 +462,129 @@ def setup_parts(fcount, filename, parts=10, ext=".mp4", is_Trim=True, is_Scale=F
 		#write_log("debug trimtime[error]", "Не смог прочитать время. [%s]" % fname)
 		#return cmd_str
 	"""
-		
+
 	if filename.split(".")[-1].lower() != "mp4":
 		return cmd_str #job_only_mp4_files
 
 	#if framecount % 2 != 0:
 		#framecount -= 1
 
-	tp = framecount // parts #framecount // 10(parts) #(debug/test) #parts=10 (default)
+	tp = framecount // parts # framecount // 10(parts) #parts=10 (default)
+	tp_seg = range(0, framecount, tp)
+	# dl = {str(chunk): str(chunk + tp) for i, chunk in enumerate(chunks)} # for_sequence(- 1)
+	dl = {str(chunk): str(tp) for item, chunk in enumerate(tp_seg)} # for_ffmpeg
 
 	try:
 		if tp:
 			write_log("debug timepart[calc]", "timepart is: %d" % tp) #606
-	except BaseException as e:
-		write_log("debug timepart[error]", str(e))
+	except BaseException as e1:
+		print("%s" % str(e1))
 
-	dl = [ds for ds in range(0, framecount-parts, tp) if all((ds % tp == 0, ds < framecount-parts))] #10(parts) #(debug/test) #parts=10 (default)
+	# print(filename, tp, tp_seg, dl, sep="\t", end="\n")
 
-	try:
-		if dl:
-			write_log("debug duration[generate]", "duration's [%d] [%s]" % (len(dl), fname)) #10
-	except BaseException as e:
-		write_log("debug duration[error]", str(e))
+	#is_Trim = False
 
-	dct = {}
-
-	try:	
-		if len(dl) >= 1:
-			dct = {dl[i]:tp for i in range(len(dl))} #debug_test(skip_last_destonation)
-	except BaseException as e:
-		write_log("debug destonation[error]", str(e))
-	else:
-		if dct:		
-			write_log("debug parttime", str(dct))
-		elif not dct:		
-			write_log("debug parttime", "Null")			
-
-	#is_Trim = False	
-
-	#if len(dct) == 0:
+	#if len(dl) == 0:
 		#is_Trim = False
-	#elif len(dct) >= 1:
+	#else:
 		#is_Trim = True
 
-	print("Debug for %s [value]" % fname)
+	# print("Debug for %s [value], partsize/segmentsize/parts: %s" % fname, "%s" % "x".join([str(tp), str(tp_seg), str(dl)])) # debug(logging)
 
-	#print()
-
-	#print("[p]=%s" % str(max(p,key=int)))
-	#print("ps=%s" % str(ps))
-	#print("[dl]=%s" % str(dl))
-	#print("{dct}=%s" % str(dct))
+	print()
 
 	#change_scale(logic)
 
-	try:	
+	try:
 		if is_Scale:
 			try:
 				wh = width_height(filename=filename)
 				width, height, resized = wh.get_width_height(filename=filename, is_calc=True)
 				del wh
-			except:
-				width = height = 0
-				resized = False
-				print("Scaled [err]")
-				write_log("debug scale[yes]", "Scaled [err] [%s]" % fname)
-			else:
-				whr = ";".join([str(width), str(height), str(resized), fname])
-				print(whr)
-				write_log("debug scale[yes]", whr)
-	
+				assert width and height, ""
+			except AssertionError: # if_null
+				wh = width_height(filename=filename)
+				width, height, resized = wh.get_width_height(filename=filename, is_calc=False)
+				del wh
+			except BaseException: # if_error
+				width, height, resized = 0, 0, False
+			finally:
+				if all((width, height)):
+					whr = ";".join([str(width), str(height), str(resized), fname])
+					print(whr)
+					write_log("debug scale[yes]", whr)
+
 		elif not is_Scale:
 			try:
 				wh = width_height(filename=filename)
 				width, height, resized = wh.get_width_height(filename=filename, is_calc=True)
 				del wh
-			except:
-				width = height = 0
-				resized = False
-				print("No scale [err]")
-				write_log("debug scale[no]", "No scale [err] [%s]" % fname)
-			else:
-				whr = ";".join([str(width), str(height), str(resized), fname])
-				print(whr)
-				write_log("debug scale[no]", whr)
-	except BaseException as e:
-		write_log("debug scale[error]", str(e))
+				assert width and height, ""
+			except AssertionError: # if_null
+				wh = width_height(filename=filename)
+				width, height, resized = wh.get_width_height(filename=filename, is_calc=False) # True -> False
+				del wh
+			except BaseException: # if_error
+				width, height, resized = 0, 0, False
+			finally:
+				if all((width, height)):
+					whr = ";".join([str(width), str(height), str(resized), fname])
+					print(whr)
+					write_log("debug scale[no]", whr)
+	except BaseException as e2:
+		write_log("debug scale[error]", "%s" % str(e2))
 
 	try:
 		if all((width, height)): #resized
 			whr = "x".join([str(width), str(height), str(resized), fname])
 			print(whr)
 			write_log("debug [scale/status/filename]", whr) #width/height/is_scale/fname
-	except BaseException as e:
-		write_log("debug error[width/height]", str(e))			
+	except BaseException as e3:
+		write_log("debug error[width/height]", "%s" % str(e3))
 
 	cnt = 0
 
 	cmd_str = []
-	
-	for d in dct:
+
+	try:
+		with open(trimer_base, encoding="utf-8") as tbf:
+			trimmer_dict = json.load(tbf)
+	except:
+		trimmer_dict: dict = {}
+
+		with open(trimer_base, "w", encoding="utf-8") as tbf:
+			json.dump(trimmer_dict, tbf, ensure_ascii=False, indent=4, sort_keys=True)
+
+	for k, v in dl.items():
 
 		cnt += 1
 
-		year_regex = re.compile(r"(\([\d+]{4}\))", re.M)
+		# year_regex = re.compile(r"(\([\d+]{4}\))", re.M)
+		# seas_regex = re.compile(r"(_[\d+]{2,4}s[\d+]{2}e)", re.M) #se_%~pa #sep_%~pa # ?([\d+]{2}p)
 
-		seas_regex = re.compile(r"(_[\d+]{2,4}s[\d+]{2}e|_[\d+]{2,4}[\d+]{2}s?([\d+]{2}p))", re.M) #se_%~pa #sep_%~pa
+		ofilename = "".join([filename.split("\\")[-1].split(".")[0] + "".join(["_", one_to_double(cnt),"p"]), ext]) #for_big_films
+		write_log("debug ofilename", "%s" % ";".join([ofilename, str(e)]))
 
-		try:
-			if any((year_regex.findall(filename.split("\\")[-1]), seas_regex.findall(filename.split("\\")[-1]))):
-				ofilename = filename.split("\\")[-1].split(".")[0] + "".join(["_", one_to_double(cnt),"p"])+ext #for_big_films
-		except:
-			ofilename = filename.split("\\")[-1]
-		
-		print(d, dct[d], sep="\t\t", end="\n")
-		
 		if all((width, height)):
 			#debug partparameters:('c:\\downloads\\mytemp\\', 0, 'd:\\multimedia\\video\\serials_europe\\Viraji_sudby_Rus\\Viraji_sudby_01s01e.mp4', 268, 640, 360, 'Viraji_sudby_01s01e_001p.mp4')
-			cmd_str.append("cmd /c ffmpeg -ss %d -y -i %s -to %d -threads 2 -c:v copy -threads 2 -c:a copy %s" % (d, filename, dct[d], ofilename))
-			write_log("debug partparameters", str((path_for_queue, d, filename, dct[d], width, height, ofilename )))
-		elif all((not width, not height)):
-			cmd_str.append("cmd /c ffmpeg -ss %d -y -i %s -to %d -threads 2 -c:v copy -threads 2 -c:a copy %s" % (d, filename, dct[d], ofilename))
-			write_log("debug partparameters", str((path_for_queue, d, filename, dct[d], ofilename )))
+			cmd_str.append("cmd /c ffmpeg -ss %d -y -i \'%s\' -to %d -threads 2 -c:v libx264 -vf \'scale=%d:%d\' -threads 2 -c:a copy %s \'%s\'" % (int(k), filename, int(v), width, height, ofilename, "".join([path_for_queue, filename.split("\\")[-1]])))
+			write_log("debug partparameters[scale]", str((int(k), filename, int(v), width, height, ofilename, "".join([path_for_queue, filename.split("\\")[-1]]))))
+		else: # if all((not width, not height)):
+			cmd_str.append("cmd /c ffmpeg -ss %d -y -i \'%s\' -to %d -threads 2 -c:v copy -threads 2 -c:a copy %s \'%s\'" % (int(k), filename, int(v), ofilename, "".join([path_for_queue, filename.split("\\")[-1]])))
+			write_log("debug partparameters", str((int(k), filename, int(v), ofilename, "".join([path_for_queue, filename.split("\\")[-1]]))))
 
-	if cmd_str:
-		for cs in cmd_str:
-			print(cs)
-			
+		# print(k, v, cmd_str[-1], sep="\t\t", end="\n")
 
-	'''
-	if all((dct, is_Trim)):
-		for d in dct:
-			cnt += 1
+		if not filename in [*trimmer_dict]:
+			trimmer_dict[filename] = [cmd_str[-1]]
+		else:
+			trimmer_dict[filename].append(cmd_str[-1])
 
-			year_regex = re.compile(r"(\([\d+]{4}\))", re.M)
-
-			seas_regex = re.compile(r"(_[\d+]{2,4}s[\d+]{2}e|_[\d+]{2,4}[\d+]{2}s?([\d+]{2}p))", re.M) #se_%~pa #sep_%~pa
-
-			if any((year_regex.findall(filename.split("\\")[-1]), seas_regex.findall(filename.split("\\")[-1]))):
-				ofilename = filename.split("\\")[-1].split(".")[0] + "".join(["_", one_to_double(cnt),"p"])+ext #for_big_films
-			else:
-				break
-
-			ofilename = "".join([path_to_done, ofilename]) #job_in_project_folder
-
-			if d == framecount: #test_from_here
-				break
-
-			if not ofilename:
-				continue
-
-			is_error = False
-
-			try:
-				if is_Sound and all((is_Scale, resized, width, height)): #is_Sound=True, is_Scale=True
-					cmd_str.append("%sffmpeg -ss %d -y -i %s -to %d -map_metadata -1 -threads 2 -c:v libx264 -vf \"scale=%d:%d\" -threads 2 -c:a aac -af \"dynaudnorm\" %s" % (path_for_queue, d, filename, dct[d], width, height, ofilename)) #change_scale(vf)
-				if is_Sound and all((is_Scale, not resized)): #is_Sound=True, is_Scale=True(resized)
-					cmd_str.append("%sffmpeg -ss %d -y -i %s -to %d -map_metadata -1 -threads 2 -c:v copy -threads 2 -c:a aac -af \"dynaudnorm\" %s" % (path_for_queue, d, filename, dct[d], ofilename)) #normal_scale(vf)
-				if is_Sound and not is_Scale: #is_Sound=True, is_Scale=False
-					cmd_str.append("%sffmpeg -ss %d -y -i %s -to %d -map_metadata -1 -threads 2 -c:v copy -threads 2 -c:a aac -af \"dynaudnorm\" %s" % (path_for_queue, d, filename, dct[d], ofilename)) #no_change_scale(vf)
-				if not is_Sound and all((is_Scale, resized, width, height)): #is_Sound=False, is_Scale=True
-					cmd_str.append("%sffmpeg -ss %d -y -i %s -to %d -map_metadata -1 -threads 2 -c:v libx264 -vf \"scale=%d:%d\" -threads 2 -c:a copy %s" % (path_for_queue, d, filename, dct[d], width, height, ofilename)) #change_scale(vf)
-				if not is_Sound and all((is_Scale, not resized)): #is_Sound=False, is_Scale=True(resized)
-					cmd_str.append("%sffmpeg -ss %d -y -i %s -to %d -map_metadata -1 -threads 2 -c:v copy -threads 2 -c:a copy %s" % (path_for_queue, d, filename, dct[d], ofilename)) #normal_scale(vf)
-				if not is_Sound and not is_Scale: #is_Sound=False, is_Scale=False
-					cmd_str.append("%sffmpeg -ss %d -y -i %s -to %d -map_metadata -1 -threads 2 -c:v copy -threads 2 -c:a copy %s" % (path_for_queue, d, filename, dct[d], ofilename)) #no_change_scale(vf)
-
-				if all((cmd_str, width, height)) and int(d) <= framecount:
-					write_log("debug partparameters", str((path_for_queue, d, filename, dct[d], width, height, ofilename)))
-				elif all((cmd_str, not width, not height)) and int(d) <= framecount:
-					write_log("debug partparameters", str((path_for_queue, d, filename, dct[d], ofilename)))
-			except BaseException as e:
-				write_log("debug ffmpeg[error]", str(e))
-
-				is_error = True
-
-			finally:
-				if is_error:
-					break
-
-		for cs in cmd_str:
-			print(cs)
-
-	elif any((not dct, not is_Trim)):
-		print("Skip one part")
-	'''
-	
-	'''
-	if is_Trim == True: #len(dl) >= 2
-		#generate_parts_to_command_line's(is_Trim=True)
-		for d in dct: #for v in range(len(dl)): #-1?
-			cnt += 1
-			#print(c[v], b, one_to_double(cnt))
-
-			year_regex = re.compile(r"(\([\d+]{4}\))", re.M)
-
-			seas_regex = re.compile(r"(_[\d+]{2,4}s[\d+]{2}e|_[\d+]{2,4}[\d+]{2}s?([\d+]{2}p))", re.M) #se_%~pa #sep_%~pa
-
-			if any((year_regex.findall(filename.split("\\")[-1]), seas_regex.findall(filename.split("\\")[-1]))):
-				ofilename = filename.split("\\")[-1].split(".")[0] + "".join(["_", one_to_double(cnt),"p"])+ext #for_big_films
-			else:
-				break
-
-			ofilename = "".join([path_to_done, ofilename]) #job_in_project_folder
-
-			if d == framecount: #test_from_here
-				break
-
-			if not ofilename:
-				continue
-
-			#dl[v] -> d #tp -> d[dct]
-
-			if is_Sound and all((is_Scale, resized, width, height)): #is_Sound=True, is_Scale=True
-				cmd_str.append("%sffmpeg -ss %d -y -i %s -to %d -map_metadata -1 -threads 2 -c:v libx264 -vf \"scale=%d:%d\" -threads 2 -c:a aac -af \"dynaudnorm\" %s" % (path_for_queue, d, filename, dct[d], width, height, ofilename)) #change_scale(vf)
-			if is_Sound and all((is_Scale, not resized)): #is_Sound=True, is_Scale=True(resized)
-				cmd_str.append("%sffmpeg -ss %d -y -i %s -to %d -map_metadata -1 -threads 2 -c:v copy -threads 2 -c:a aac -af \"dynaudnorm\" %s" % (path_for_queue, d, filename, dct[d], ofilename)) #normal_scale(vf)
-			if is_Sound and not is_Scale: #is_Sound=True, is_Scale=False
-				cmd_str.append("%sffmpeg -ss %d -y -i %s -to %d -map_metadata -1 -threads 2 -c:v copy -threads 2 -c:a aac -af \"dynaudnorm\" %s" % (path_for_queue, d, filename, dct[d], ofilename)) #no_change_scale(vf)
-			if not is_Sound and all((is_Scale, resized, width, height)): #is_Sound=False, is_Scale=True
-				cmd_str.append("%sffmpeg -ss %d -y -i %s -to %d -map_metadata -1 -threads 2 -c:v libx264 -vf \"scale=%d:%d\" -threads 2 -c:a copy %s" % (path_for_queue, d, filename, dct[d], width, height, ofilename)) #change_scale(vf)
-			if not is_Sound and all((is_Scale, not resized)): #is_Sound=False, is_Scale=True(resized)
-				cmd_str.append("%sffmpeg -ss %d -y -i %s -to %d -map_metadata -1 -threads 2 -c:v copy -threads 2 -c:a copy %s" % (path_for_queue, d, filename, dct[d], ofilename)) #normal_scale(vf)
-			if not is_Sound and not is_Scale: #is_Sound=False, is_Scale=False
-				cmd_str.append("%sffmpeg -ss %d -y -i %s -to %d -map_metadata -1 -threads 2 -c:v copy -threads 2 -c:a copy %s" % (path_for_queue, d, filename, dct[d], ofilename)) #no_change_scale(vf)
-
-			if all((cmd_str, width, height)) and int(d) < framecount:
-				write_log("debug partparameters", str((path_for_queue, d, filename, dct[d], width, height, ofilename)))
-			elif all((cmd_str, not width, not height)) and int(d) < framecount:
-				write_log("debug partparameters", str((path_for_queue, d, filename, dct[d], ofilename)))
-	elif is_Trim == False: #len(dl) == 1
-		cnt += 1
-
-		year_regex = re.compile(r"(\([\d+]{4}\))", re.M)
-
-		seas_regex = re.compile(r"(_[\d+]{2,4}s[\d+]{2}e|_[\d+]{2,4}s[\d+]{2}e?([\d+]{2}p))", re.M)
-
-		if any((year_regex.findall(filename.split("\\")[-1]), seas_regex.findall(filename.split("\\")[-1]))):
-			ofilename = filename.split("\\")[-1].split(".")[0] + "".join(["_", one_to_double(cnt),"p"])+ext #for_big_films
-
-		ofilename = "".join([path_to_done, ofilename]) #job_in_project_folder	
-
-		if is_Sound and all((is_Scale, resized, width, height)): #is_Sound=True, is_Scale=True
-			cmd_str.append("%sffmpeg -y -i %s -map_metadata -1 -threads 2 -c:v libx264 -vf \"scale=%d:%d\" -threads 2 -c:a aac -af \"dynaudnorm\" %s" % (path_for_queue, filename, width, height, ofilename))
-		if is_Sound and all((is_Scale, not resized)): #is_Sound=True, is_Scale=True(resized)
-			cmd_str.append("%sffmpeg -y -i %s -map_metadata -1 -threads 2 -c:v copy -threads 2 -c:a aac -af \"dynaudnorm\" %s" % (path_for_queue, filename, ofilename)) #normal_scale(vf)
-		if is_Sound and not is_Scale: #is_Sound=True, is_Scale=False
-			cmd_str.append("%sffmpeg -y -i %s -map_metadata -1 -threads 2 -c:v copy -threads 2 -c:a aac -af \"dynaudnorm\" %s" % (path_for_queue, filename, ofilename)) #no_change_scale(vf)
-		if not is_Sound and all((is_Scale, resized, width, height)): #is_Sound=False, is_Scale=True
-			cmd_str.append("%sffmpeg -y -i %s -map_metadata -1 -threads 2 -c:v libx264 -vf \"scale=%d:%d\" -threads 2 -c:a copy %s" % (path_for_queue, filename, width, height, ofilename)) #change_scale(vf)
-		if not is_Sound and all((is_Scale, not resized)): #is_Sound=False, is_Scale=True(resized)
-			cmd_str.append("%sffmpeg -y -i %s -map_metadata -1 -threads 2 -c:v copy -threads 2 -c:a copy %s" % (path_for_queue, filename, ofilename)) #normal_scale(vf)
-		if not is_Sound and not is_Scale: #is_Sound=False, is_Scale=False
-			cmd_str.append("%sffmpeg -y -i %s -map_metadata -1 -threads 2 -c:v copy -threads 2 -c:a copy %s" % (path_for_queue, filename, ofilename)) #no_change_scale(vf)
-	'''
+	with open(trimer_base, "w", encoding="utf-8") as tbf:
+		json.dump(trimmer_dict, tbf, ensure_ascii=False, indent=4, sort_keys=True)
 
 	return cmd_str #debug(null_data)
+
 
 def walk(dr, files_template=""):
 	"""Рекурсивный поиск файлов в пути"""
@@ -722,8 +604,9 @@ def walk(dr, files_template=""):
 			else:
 				yield from walk(path, ext_regex)
 
-	except BaseException as e:
-		return f'Error as {str(e)}'
+	except BaseException as e4:
+		return f'Error as {str(e4)}'
+
 
 #one_folder("c:\\downloads\\", re.compile(r"(?:(zip))$")) #one_folder #hide_regex(test_logic)
 #one_folder("c:\\downloads\\new\\", video_regex)
@@ -732,6 +615,7 @@ def one_folder(folder, files_template):
 	files = ["".join([folder, lf.strip()]) for lf in os.listdir(folder) if files_template.findall(lf.split("\\")[-1]) and os.path.isfile("".join([folder, lf.strip()])) and any((lf.split("\\")[-1].startswith(lf.split("\\")[-1].capitalize()), lf.split("\\")[-1].find(lf.split("\\")[-1]) == 0))]
 
 	return files #['c:\\downloads\\Current_BacthConverter.zip', ...] #capitalize #Abc... #find ~ findall(regex)
+
 
 #sub_folder("c:\\downloads\\combine\\", re.compile(r"(?:(zip))$")) #sub_folder #hide_regex(test_logic)
 def sub_folder(folder, files_template):
@@ -788,6 +672,7 @@ def sub_folder(folder, files_template):
 #multiple_jobs(need_look_like_"hello_world_01s01e"_template's)
 filter_list = []
 
+
 def my_args():
 
 	try:
@@ -800,12 +685,10 @@ def my_args():
 
 	return tmp
 
+
 filter_list = my_args()
-
 short_filter = ""
-
 is_regex_status = False
-
 short_filter = "|".join(filter_list)
 
 try:
@@ -894,23 +777,30 @@ ffiles = fullfilenames = set()
 
 #ffiles - unique_filenames
 #fullfilenames - find_all_files
-with unique_semaphore:
-	for lf in lfiles:
+# with unique_semaphore:
+for lf in lfiles:
 
-		if any((not lf, not lfiles)):
-			break
+	try:
+		assert lf and lfiles, ""
+	except AssertionError:
+		break
 
-		fname = lf.split("\\")[-1]
+	try:
+		assert os.path.exists(lf), ""
+	except AssertionError:
+		continue
 
-		if not fname in ffiles:
-			ffiles.add(fname)
-			fullfilenames.add(lf)
+	fname = lf.split("\\")[-1]
 
-		#elif fname in ffiles:
-			#fullfilenames.add(lf)
+	if not fname in ffiles:
+		ffiles.add(fname)
+		fullfilenames.add(lf)
+
+	#elif fname in ffiles:
+		#fullfilenames.add(lf)
 
 if len(ffiles) == len(fullfilenames) and ffiles:
-	print("Найдено одинковое количество файлов без повторений")	
+	print("Найдено одинковое количество файлов без повторений")
 if len(ffiles) != len(fullfilenames) and ffiles:
 	print("Найдены файлы с повторениями их разница %d" % abs(len(fullfilenames)-len(ffiles)))
 
@@ -919,12 +809,12 @@ if len(ffiles) != len(fullfilenames) and ffiles:
 
 		if not isinstance(lfiles, list):
 			lfiles = list(lfiles) #stay_unique_files
-	
+
 #'''
 
 # --- test ---
 #"""
-def parts_to_rejoin(filename):
+async def parts_to_rejoin(filename: str = ""):
 
 	if not filename:
 		return
@@ -937,18 +827,15 @@ def parts_to_rejoin(filename):
 	wh = width_height(filename=filename) #"C:\\Downloads\\Combine\\Original\\Backup\\Bolshoy_skachyok_01s11e.mp4"
 
 	try:
-		len_video = wh.get_length(filename=filename) #"C:\\Downloads\\Combine\\Original\\Backup\\Bolshoy_skachyok_01s11e.mp4"
-	except BaseException as e:
-		len_video = 0
-		print("Video length error!!! [%s]" % fname)
-		write_log("debug video[lengtherror]", "[%s] [%s]" % (str(e), fname))
+		len_video = wh.get_length(filename=wh.filename) #"C:\\Downloads\\Combine\\Original\\Backup\\Bolshoy_skachyok_01s11e.mp4"
+		assert len_video, ""
+	except AssertionError:
+		pass # return
 	finally: #else:
 		print("Video length ok! [%d] [%s]" % (len_video, fname))
 		write_log("debug video[length|file]", "[%d] [%s]" % (len_video, fname))
 
 	#width, height, resized = wh.get_width_height(filename=lf, is_calc=True) #"C:\\Downloads\\Combine\\Original\\Backup\\Bolshoy_skachyok_01s11e.mp4"
-
-	del wh
 
 	#is_Sound=True, is_Scale=True #1(sound_normalize, resize)
 	#is_Sound=True, is_Scale=False #2(sound_normalize, no_resize)
@@ -957,21 +844,47 @@ def parts_to_rejoin(filename):
 
 	#filter_list
 
-	'''
-	open(path_for_queue + "trimmer.cmd", "w", encoding="utf-8").close()
+	# '''
+	open("".join([path_for_queue, "trimmer.cmd"]), "w", encoding="utf-8").close()
+
+	cs_list: list = []
 
 	#ffmpeg_command_line
-	for cs in setup_parts(fcount=len_video, filename=filename, ext=".mp4", is_Sound=False, is_Scale=True): #get_filename_from_sys_argv[1] #is_Sound(False)~copy #is_Scale(True)~rescale
+	for cs in setup_parts(fcount=len_video, filename=wh.filename, ext=".mp4", is_Sound=False, is_Scale=True): #get_filename_from_sys_argv[1] #is_Sound(False)~copy #is_Scale(True)~rescale
 
-		with open(path_for_queue + "trimmer.cmd", "a", encoding="utf-8") as spf:
-			spf.writelines("%s\n" % str(cs))
-	'''				
+		if not cs in cs_list:
+			cs_list.append(cs)
 
+	del wh
+
+	with open("".join([path_for_queue, "trimmer.cmd"]), "a", encoding="utf-8") as spf:
+		spf.writelines("%s\n" % str(cs) for cs in cs_list)
+	# '''
+
+	async def run_job(cmd: str = ""):
+		os.system("%s" % cmd)
+
+	async def main(cmd: str = cs_list):
+
+		if not cmd:
+			return
+
+		tasks = []
+
+		for c in cmd:
+			task = asyncio.create_task(run_job(cmd=c))
+			tasks.append(task)
+
+		await asyncio.gather(*tasks)
+
+	asyncio.run(main())
+
+	'''
 	is_error = False
 
 	#run_command_line
 	for cs in setup_parts(fcount=len_video, filename=filename, ext=".mp4", is_Sound=False, is_Scale=True): #get_filename_from_sys_argv[1] #is_Sound(False)~copy #is_Scale(True)~rescale
-	
+
 		print(" ".join(cs))
 
 		#if cs:
@@ -988,92 +901,32 @@ def parts_to_rejoin(filename):
 
 	if all((not is_error, fname)):
 		ready_file(fname)
+	'''
 
-	"""
-	try:
-		project_list = os.listdir(path_for_done)
-	except:
-		project_list = []
+if __name__ == "__main__":
 
-	mp4_count = mp4_files = []
-
-	if ".mp4" in project_list:
-		mp4_count =[pl.strip() for pl in project_list if ".mp4" in pl]
-		mp4_files =["".join([path_for_done, pl]).strip() for mc in mp4_count if os.path.exists("".join([path_for_done, pl]))]
-
-		if len(mp4_count) == len(mp4_files):
-			print("Все файлы нашлись")
-		elif len(mp4_count) != len(mp4_files):
-			print("Не все файлы нашлись или ошибка")
-
-		print("Найдено %d готовых файлов" % len(mp4_count))
-
-		if mp4_count:
-			with unique_semaphore:
-				for mc in mp4_count:
-					print(mc) #console
-
-	if not mp4_count:
-		print("Нет готовых файлов в папке")
-	"""
-
-	"""
-	if mp4_files:
-
-		temp = mp4_files
-
-		try:
-			if os.path.exists(mp4_files[-1]) and len(mp4_files) > 1:
-				os.remove(mp4_files[-1]) #delete_last_file(test/debug)_from_directory
-				temp.remove(mp4_files[-1]) #mp4_files.pop() #delete_last_file(test/debug)_from_list
-		except:
-			pass
-		else:
-			if len(temp) != len(mp4_files) and temp:
-				mp4_files = sorted(temp, reverse=False)
-
-		with unique_semaphore:
-			for mf in mp4_files:
-
-				if any((not mf, not mp4_files)):
-					break
-
-				try:
-					fname = mf.split("\\")[-1]
-				except:
-					fname = ""
-	
-				#print(mf) #logging
-				if fname:
-					ready_file(fname) #dialog
-	"""
-
-#"""
-
-if lfiles:
-	with unique_semaphore:
-		for lf in lfiles:
-
-			if any((not lf, not lfiles)):
-				break
-
-			if not os.path.exists(lf):
-				continue
+	if lfiles:
+		# with unique_semaphore:
+		for lf in filter(lambda x: os.path.exists(x), tuple(lfiles)):
 
 			try:
-				parts_to_rejoin(filename=lf) #test_for_find_files(debug) #without_move
-			except BaseException as e:
-				print("Ошибка при обработке. [%s]" % str(e))
-				continue
-elif not lfiles:
-	print("No files. Programm exited")
+				assert lf and lfiles, ""
+			except AssertionError:
+				break
 
-if job_count:
+			try:
+				asyncio.run(parts_to_rejoin(filename=lf)) # filename= # test_for_find_files(debug) # without_move
+			except BaseException as e5:
+				print("Ошибка при обработке. [%s]" % str(e5))
+	elif not lfiles:
+		print("No files. Programm exited")
 
-	MT = MyTime()
-	MT.sleep_with_count(4) #240s ~ 4min
-	del MT
+	if job_count:
 
-write_log("debug end", str(datetime.now()))
+		MT = MyTime()
+		MT.sleep_with_count(4) #240s ~ 4min
+		del MT
 
-# --- trimmer.cmd(only_trim) / path_by_regex_find -> c:\downloads\new (d:\mutlimedia\video\...) (trimed/result_by_fspace);
+	write_log("debug end", str(datetime.now()))
+
+	# --- trimmer.cmd(only_trim) / path_by_regex_find -> c:\downloads\new (d:\mutlimedia\video\...) (trimed/result_by_fspace);
