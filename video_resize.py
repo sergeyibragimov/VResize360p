@@ -6869,26 +6869,26 @@ class MyMeta:
 			"""
 			# snapshot_at_end
 			if duration_null:
-					try:
-							parts = 10
+							try:
+											parts = 10
 
-							intervals = duration_null // parts
-							intervals = int(intervals)
-							interval_list = [(i * intervals, (i + 1) * intervals) for i in range(
-									parts)]  # [(0, 537), (537, 1074), (1074, 1611), (1611, 2148), (2148, 2685), (2685, 3222), (3222, 3759)]
+											intervals = duration_null // parts
+											intervals = int(intervals)
+											interval_list = [(i * intervals, (i + 1) * intervals) for i in range(
+															parts)]  # [(0, 537), (537, 1074), (1074, 1611), (1611, 2148), (2148, 2685), (2685, 3222), (3222, 3759)]
 
-							ffmpeg_path = path_for_queue + "ffmpeg.exe"
-							script_path = path_for_queue
+											ffmpeg_path = path_for_queue + "ffmpeg.exe"
+											script_path = path_for_queue
 
-					except:
-							return duration_null # exit_without_changes
-					else:
-							for il in interval_list:
-									try:
-											cmd_snapshot = "%s -hide_banner -y -i %s -ss %d -vf 'scale=width:-1' -vframes 1 %s\image0%d.jpg" % (ffmpeg_path, self.filename, il, script_path)
-											os.system(cmd_snapshot)  # is_generate_slideshow_for_current_file
-									except:
-											continue # break
+							except:
+											return duration_null # exit_without_changes
+							else:
+											for il in interval_list:
+															try:
+																			cmd_snapshot = "%s -hide_banner -y -i %s -ss %d -vf 'scale=width:-1' -vframes 1 %s\image0%d.jpg" % (ffmpeg_path, self.filename, il, script_path)
+																			os.system(cmd_snapshot)  # is_generate_slideshow_for_current_file
+															except:
+																			continue # break
 
 			"""
 			return duration_null
@@ -8284,16 +8284,16 @@ class MyMeta:
 
 				"""
 				try:
-						# swidth, pwidth, sheight, pheight = 640, 640, 360, 480 # debug/test
+								# swidth, pwidth, sheight, pheight = 640, 640, 360, 480 # debug/test
 
-						# '''
-						pheight = swidth * (3/4) # pheight = 640 * (3/4) = 480 # +/- 1
+								# '''
+								pheight = swidth * (3/4) # pheight = 640 * (3/4) = 480 # +/- 1
 
-						pady = (pheight - sheight) // 2 # pady = (480 - 360) // 2 = 60 # +/- 1
-						# '''
+								pady = (pheight - sheight) // 2 # pady = (480 - 360) // 2 = 60 # +/- 1
+								# '''
 				except:
-						pheight = pady = 0
-						sth_cmd = ""
+								pheight = pady = 0
+								sth_cmd = ""
 				else:
 				"""
 				if sheight % 2 != 0:  # need_up(scale.height) # 16:9 -> 4:3 # debug
@@ -8586,16 +8586,16 @@ class MyMeta:
 
 				"""
 				try:
-						# swidth, pwidth, sheight, pheight = 640, 640, 480, 360 # debug/test
+								# swidth, pwidth, sheight, pheight = 640, 640, 480, 360 # debug/test
 
-						# '''
-						pheight = swidth / (16/9) # pheight = 640 / (16/9) = 360 # +/- 1
+								# '''
+								pheight = swidth / (16/9) # pheight = 640 / (16/9) = 360 # +/- 1
 
-						padx = (sheight - pheight) // 2 # padx = (480 - 360) // 2 = 60 # +/- 1
-						# '''
+								padx = (sheight - pheight) // 2 # padx = (480 - 360) // 2 = 60 # +/- 1
+								# '''
 				except:
-						pheight = padx = 0
-						hts_cmd = ""
+								pheight = padx = 0
+								hts_cmd = ""
 				else:
 				"""
 				if sheight % 2 != 0:  # need_up(scale.height) # 4:3 -> 16:9 # debug
@@ -21859,13 +21859,13 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				# hide_ready_from_logging
 				"""
 				try:
-						# write_log("debug somebase_dict[2]", "%s [%s] [%s]" % (full_to_short(lf.strip()), "ready", str(datetime.now()))) # filename / is_status / datetime
-						write_log("debug somebase_dict[2]", "%s [%s] [%s]" % (lf.strip(), "ready", str(datetime.now()))) # filename / is_status / datetime
+								# write_log("debug somebase_dict[2]", "%s [%s] [%s]" % (full_to_short(lf.strip()), "ready", str(datetime.now()))) # filename / is_status / datetime
+								write_log("debug somebase_dict[2]", "%s [%s] [%s]" % (lf.strip(), "ready", str(datetime.now()))) # filename / is_status / datetime
 				except BaseException as e:
-						write_log("debug somebase_dict[2][error]", "%s [%s] [%s]" % (lf.strip(), str(e), str(datetime.now()))) # filename / error / datetime
+								write_log("debug somebase_dict[2][error]", "%s [%s] [%s]" % (lf.strip(), str(e), str(datetime.now()))) # filename / error / datetime
 				else:
-						# somebase_dict[lf.strip()] = "!".join([str(width), str(height), vcodec, str(vbr), acodec, str(abr), profile, level, scales])
-						# {filename: [width!height!vcodec!vbr!acodec!abr!profile!level!scales]}
+								# somebase_dict[lf.strip()] = "!".join([str(width), str(height), vcodec, str(vbr), acodec, str(abr), profile, level, scales])
+								# {filename: [width!height!vcodec!vbr!acodec!abr!profile!level!scales]}
 				"""
 
 				somebase_dict = {

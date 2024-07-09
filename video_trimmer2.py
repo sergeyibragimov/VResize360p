@@ -34,7 +34,7 @@ import sys
 # debug_moules
 # exit()
 
-# mklink /h videotrimmer.py video_trimmer2.py                                                                             █1║
+# mklink /h videotrimmer.py video_trimmer2.py
 
 # abspath_or_realpath
 basedir = os.path.dirname(os.path.abspath(__file__)).lower()  # folder_where_run_script
@@ -143,7 +143,12 @@ class Timer(object):
 		if sec < 60:
 			return "{} seconds".format(sec)
 		else:
-			return "{} minutes".format(int(sec / 60))
+			if int(sec / 60) < 60:
+				return "{} minutes".format(int(sec / 60))
+			elif int(sec / 60) >= 60:
+				return "{} hours, {} minutes".format(
+					int(sec / 60) // 60, int(sec / 60) % 60
+				)  # debug_time
 
 
 # t = Timer(12987) # max_count_tasks # There are 12987 units in this task
@@ -1176,8 +1181,10 @@ def save_slide(slide, framecount, filename, width, height):
 		sc = screenshot_cut(slide, framecount - 2)
 		assert sc, ""
 	except AssertionError:
+		logging.warning("@sc can't run screenshot_cut is some null")
 		return
-	except BaseException:
+	except BaseException as e:
+		logging.error("@sc can't run screenshot_cut error: %s" % str(e))
 		return
 
 	try:
@@ -1238,7 +1245,7 @@ def save_slide(slide, framecount, filename, width, height):
 					p = run(screenshot_video, shell=True)
 					assert bool(p == 0), ""
 				except AssertionError:
-					logging.warning("@screenshot_video")
+					logging.warning("@screenshot_video error run")
 				except BaseException as e:
 					screenshot_video_err = (fname, str(e))
 					logging.error(
@@ -1361,33 +1368,44 @@ def calc_parts(
 		time_by_cpu = int(time_by_cpu)
 
 	parts = tp = 0
-	tp_float: float = 0
-	tp_diff: float = 0
+	tp_diff: float = 0  # tp_float: float = 0
 
-	def some_parts(filename, tbc: int = 2, fc: int = 0):  # fc ~ 2899 # debug
-		parts, max_index = 0, 0
+	def some_parts(
+		filename, tbc: int = 2, fc: int = 0, def_parts: int = 10
+	):  # fc ~ 2899 # debug
+		parts = 0
+
+		sm = ln = ag = 0
 
 		try:
-			for i in range(1, tbc):  # time_by_cpu -> tbc
-				if (fc // 60**i) > 0:  # minutes(i==1)
-					parts = fc // 60**i
+			for i in range(1, def_parts + 1):
+				sm += fc // (60 * i)  # fc % i
+				ln += 1
+		except:
+			sm = ln = 0
 
-					if i > max_index:
-						max_index = i
+		c_parts = (lambda framecount, tcpu: framecount // (60 * tcpu))(fc, tbc)
 
-				if i > 1:  # hours(i>=2)
-					parts = fc // (60 * tbc)
-					break
-		except BaseException as e:
-			parts, some_parts_err = 0, (filename, str(e))
-			logging.error("@parts current: %s, error: %s" % some_parts_err)
-		else:
-			parts_str = (fc, max_index, parts, (fc / parts), filename)
+		try:
+			assert all((sm, ln)), ""
+		except AssertionError:  # if_null
+			logging.warning("@ag/@parts sum or len some null, current: %s" % filename)
+			ag, parts = 0, c_parts  # fc // (60 * tbc)
+		except BaseException as e:  # DevideByZero # if_error
+			ag_parts_err = (str(e), filename)
+			logging.error("@ag/@parts error: %s, current: %s" % ag_parts_err)
+			ag, parts = 0, c_parts  # fc // (60 * tbc)
+		else:  # calc_parts_by_avg
+			ag = (lambda s, l: s // l)(
+				sm, ln
+			)  # ag = (lambda s,l: s//l); parts = ag(sm, ln)
+			parts = ag
+			
 
-			# print("fc: %d, max_index: %d, parts: %d, tp: %f, current: %s" % parts_str)
-			logging.info(
-				"fc: %d, max_index: %d, parts: %d, tp: %f, current: %s" % parts_str
-			)
+		parts_str = (fc, parts, (fc / parts), filename)
+
+		# print("fc: %d, parts: %d, tp: %f, current: %s" % parts_str)
+		logging.info("fc: %d, parts: %d, tp: %f, current: %s" % parts_str)
 
 		return parts
 
@@ -1399,28 +1417,6 @@ def calc_parts(
 	except BaseException:  # if_error
 		parts = 0
 		return []
-
-	try:
-		tp = framecount // parts  # part_size(short/logic/int)
-	except:  # DevideByZero # if_error
-		tp = 0
-		return []
-	else:
-		try:
-			tp_float = framecount / parts  # part_size(full/logic/float)
-		except:  # DevideByZero # if_error
-			tp_float = 0
-			return 0
-		else:
-			try:
-				tp_diff = round((tp_float / tp) * 100, 2)
-			except:  # if_error
-				tp_diff = 0
-			else:
-				logging.info(
-					"@tp/@tp_float/@tp_diff %s"
-					% ";".join([str(tp), str(tp_float), str(tp_diff)])
-				)
 
 	# %03d.mkv # filename = "c:\\downloads\\mytemp\\test.tst"; path_to_done = "c:\\downloads\\list\\"
 	try:
@@ -1456,24 +1452,24 @@ def calc_parts(
 
 	framecount = def_fc  # tp * parts # 2860
 
-	# filter_framecount
-
-	# to_fr_pa = {"tp": framecount // parts, "framecount": tp * parts, "parts": framecount // tp}
+	# filter_framecount(int) # debug
+	"""
 	try:
 		to_fr_pa = {
 			"@part_size": framecount // parts,
 			"@length": tp * parts,
 			"@part_count": framecount // tp,
 		}  # is_int / is_int / is_int
-		assert to_fr_pa, ""
+		assert all((framecount, parts, tp)), "" # to_fr_pa
 	except AssertionError:  # if_null
 		logging.warning("@to_fr_pa can't get some parameters for %s" % filename)
-	except BaseException as e:  # DevideByZero # if_error
+	except BaseException as e:  # DevideByZero(integer division or modulo by zero) # if_error
 		to_fr_pa_err = (filename, str(e))
 		logging.error("@to_fr_pa some error in %s [%s]" % to_fr_pa_err)
 	else:  # if_ok
 		to_fr_pa_str = (str(to_fr_pa), filename)
 		logging.info("@tp_fr_pa %s, current: %s" % to_fr_pa_str)
+	"""
 
 	try:
 		tp_seg = range(0, def_fc, tp)
@@ -2808,6 +2804,22 @@ if __name__ == "__main__":  # skip_main(debug)
 
 	seasyear_count = {}
 
+	# @sorted_by_filter
+	# """
+	file_and_filter = ()
+	faf = faf_sorted_tuple = []
+
+	for f in os.listdir(path_to_done):
+		try:
+			assert seasyear.findall(f), ""
+		except AssertionError:
+			continue
+		else:
+			file_and_filter = (f, seasyear.findall(f)[0])
+			faf.append(file_and_filter)
+			faf_sorted_tuple = sorted(faf, key=lambda faf: faf[1])
+	# """
+
 	# need_read_subfolder_from_current_folder
 	try:
 		*fileparam, _ = os.walk(os.getcwd())  # folder/[subfolder]/[files]
@@ -2839,6 +2851,8 @@ if __name__ == "__main__":  # skip_main(debug)
 
 	# type(fileparam) # list(full_path=%s,?=list,short_file=list)
 	# ('D:\\Multimedia\\Video\\Serials_Europe\\Zolotaya_kletka_Rus', [], ['01s01e.txt'])
+
+	filter_files = []
 
 	for a, b, c in fileparam:  # (folder)str / (subfolder)list / (files)list
 		try:
@@ -2878,10 +2892,29 @@ if __name__ == "__main__":  # skip_main(debug)
 						try:
 							assert bool(f in some_files), ""
 						except AssertionError:
-							some_files.add(f)
-							if video_regex.findall(f.split("\\")[-1]):
+							some_files.add(f)  # any_file
+							if video_regex.findall(
+								f.split("\\")[-1]
+							):  # files_by_format
 								files.append(f)
 								logging.info("@files %s" % f)
+
+	# @add_equal_files
+	# """
+	if all((files, faf_sorted_tuple)):  # files / files_with_filter
+		for a, b in faf_sorted_tuple:
+			try:
+				assert bool(a in files), ""
+			except AssertionError:
+				continue
+			else:
+				filter_files.append(a)
+
+		if all((filter_files, files)):
+			logging.info(
+				"@filter_files/@files filter %s" % str(len(filter_files) == len(files))
+			)  # equal(True) / diff(False)
+	# """
 
 	# """
 	try:

@@ -1,4 +1,4 @@
-﻿month_to_seasdays  # -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 
 # Полуавтоматическое форматрирование файлов с метаданными(scale/profile/level)
 # Целый файл без разрезов(скрыть если не нужно)
@@ -133,7 +133,12 @@ class Timer(object):
 		if sec < 60:
 			return "{} seconds".format(sec)
 		else:
-			return "{} minutes".format(int(sec / 60))
+			if int(sec / 60) < 60:
+				return "{} minutes".format(int(sec / 60))
+			elif int(sec / 60) >= 60:
+				return "{} hours, {} minutes".format(
+					int(sec / 60) // 60, int(sec / 60) % 60
+				)  # debug_time
 
 
 # t = Timer(12987) # max_count_tasks # There are 12987 units in this task
@@ -1424,6 +1429,22 @@ if __name__ == "__main__":  # skip_main(debug)
 
 	seasyear_count = {}
 
+	# @sorted_by_filter
+	# """
+	file_and_filter = ()
+	faf = faf_sorted_tuple = []
+
+	for f in os.listdir(path_to_done):
+		try:
+			assert seasyear.findall(f), ""
+		except AssertionError:
+			continue
+		else:
+			file_and_filter = (f, seasyear.findall(f)[0])
+			faf.append(file_and_filter)
+			faf_sorted_tuple = sorted(faf, key=lambda faf: faf[1])
+	# """
+
 	# need_read_subfolder_from_current_folder
 	try:
 		*fileparam, _ = os.walk(os.getcwd())  # folder/[subfolder]/[files]
@@ -1455,6 +1476,8 @@ if __name__ == "__main__":  # skip_main(debug)
 
 	# type(fileparam) # list(full_path=%s,?=list,short_file=list)
 	# ('D:\\Multimedia\\Video\\Serials_Europe\\Zolotaya_kletka_Rus', [], ['01s01e.txt'])
+
+	filter_files = []
 
 	for a, b, c in fileparam:  # (folder)str / (subfolder)list / (files)list
 		try:
@@ -1494,10 +1517,29 @@ if __name__ == "__main__":  # skip_main(debug)
 						try:
 							assert bool(f in some_files), ""
 						except AssertionError:
-							some_files.add(f)
-							if video_regex.findall(f.split("\\")[-1]):
+							some_files.add(f)  # any_file
+							if video_regex.findall(
+								f.split("\\")[-1]
+							):  # files_by_format
 								files.append(f)
 								logging.info("@files %s" % f)
+
+	# @add_equal_files
+	# """
+	if all((files, faf_sorted_tuple)):  # files / files_with_filter
+		for a, b in faf_sorted_tuple:
+			try:
+				assert bool(a in files), ""
+			except AssertionError:
+				continue
+			else:
+				filter_files.append(a)
+
+		if all((filter_files, files)):
+			logging.info(
+				"@filter_files/@files filter %s" % str(len(filter_files) == len(files))
+			)  # equal(True) / diff(False)
+	# """
 
 	# """
 	try:
@@ -1781,7 +1823,7 @@ if __name__ == "__main__":  # skip_main(debug)
 
 		te_set = set()
 
-		for k, _ in fcd.items():  # {filename: cmd}
+		for k, v in fcd.items():  # {filename: cmd}
 			try:
 				assert os.path.exists(k), ""
 			except AssertionError:

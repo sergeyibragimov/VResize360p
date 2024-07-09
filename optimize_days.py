@@ -133,7 +133,12 @@ class Timer(object):
 		if sec < 60:
 			return "{} seconds".format(sec)
 		else:
-			return "{} minutes".format(int(sec / 60))
+			if int(sec / 60) < 60:
+				return "{} minutes".format(int(sec / 60))
+			elif int(sec / 60) >= 60:
+				return "{} hours, {} minutes".format(
+					int(sec / 60) // 60, int(sec / 60) % 60
+				)  # debug_time
 
 
 # @ oop
@@ -437,13 +442,13 @@ open(log_file, "w", encoding="utf-8").close()
 
 
 async def calc_number_of_day(
-	is_default: bool = True,
-	day: int = 0,
-	month: int = 0,
-	year: int = 0,
-	sleep_if: str = "",
-	find_c3: int = 0,
-	find_c4: int = 0,
+		is_default: bool = True,
+		day: int = 0,
+		month: int = 0,
+		year: int = 0,
+		sleep_if: str = "",
+		find_c3: int = 0,
+		find_c4: int = 0,
 ) -> tuple:  # 4
 
 	# calc_number_of_day
@@ -511,9 +516,9 @@ async def calc_number_of_day(
 		calc4 = True
 
 	if (
-		all((c3, find_c3 == c3))
-		and all((c4, find_c4 == c4))
-		and any((calc1, calc2, calc3, calc4))
+			all((c3, find_c3 == c3))
+			and all((c4, find_c4 == c4))
+			and any((calc1, calc2, calc3, calc4))
 	):
 		print(c1, c2, c3, c4, dt_str, "from def")
 
@@ -524,7 +529,7 @@ async def month_to_seasdays(month: int = 0, year: int = 0) -> tuple:  # 5
 
 	try:
 		assert (
-			1 <= month <= 12
+				1 <= month <= 12
 		), f"Неверный индекс месяца @month_to_seasdays/{month}"  # is_assert_debug
 	except AssertionError as err:  # if_null
 		logging.warning(f"Неверный индекс месяца @month_to_seasdays/{month}")
@@ -763,16 +768,16 @@ def unixtime_to_date(unixtime: float = 0.0) -> str:  # os.path.getmtime(file) # 
 			).timestamp()
 			# utd = datetime.fromtimestamp(dtu).strftime('%Y-%m-%d %H:%M:%S') # current_datetime # no_ms # type1
 			utd = datetime.fromtimestamp(dtu).strftime("%Y-%m-%d %H:%M:%S.%f")[
-				:-3
-			]  # current_datetime # ms # type2
+				  :-3
+				  ]  # current_datetime # ms # type2
 			# (dt, micro) = datetime.fromtimestamp(dtu).strftime('%Y-%m-%d %H:%M:%S.%f').split('.') # split_datetime_and_ms # type3
 			# utd = "%s.%03d" % (dt, int(micro) / 1000)
 
 	else:
 		# utd = datetime.fromtimestamp(unixtime).strftime('%Y-%m-%d %H:%M:%S") # no_ms # type1
 		utd = datetime.fromtimestamp(unixtime).strftime("%Y-%m-%d %H:%M:%S.%f")[
-			:-3
-		]  # ms # type2
+			  :-3
+			  ]  # ms # type2
 		# (dt, micro) = datetime.fromtimestamp(unixtime).strftime('%Y-%m-%d %H:%M:%S.%f').split('.') # split_datetime_and_ms # type3
 		# utd = "%s.%03d" % (dt, int(micro) / 1000)
 
@@ -784,7 +789,7 @@ def ms_to_time(ms: int = 0, mn: int = 60) -> int:
 		h, m, s = ms // 3600, ms % 3600 // 60, ms % 3600 % 60
 		h_m_s_str = (ms, str(h), str(m), str(s))
 		assert all((h, m, s)), (
-			"Первоначально %d, время %s:%s:%s" % h_m_s_str
+				"Первоначально %d, время %s:%s:%s" % h_m_s_str
 		)  # is_assert_debug
 	except AssertionError:  # as err:  # if_null
 		logging.warning("Первоначально %d, время %s:%s:%s" % h_m_s_str)
@@ -868,6 +873,22 @@ if __name__ == "__main__":
 
 	seasyear_count = {}
 
+	# @sorted_by_filter
+	# """
+	file_and_filter = ()
+	faf = faf_sorted_tuple = []
+
+	for f in os.listdir(path_to_done):
+		try:
+			assert seasyear.findall(f), ""
+		except AssertionError:
+			continue
+		else:
+			file_and_filter = (f, seasyear.findall(f)[0])
+			faf.append(file_and_filter)
+			faf_sorted_tuple = sorted(faf, key=lambda faf: faf[1])
+	# """
+
 	# need_read_subfolder_from_current_folder
 	try:
 		*fileparam, _ = os.walk(os.getcwd())  # folder/[subfolder]/[files]
@@ -899,6 +920,8 @@ if __name__ == "__main__":
 
 	# type(fileparam) # list(full_path=%s,?=list,short_file=list)
 	# ('D:\\Multimedia\\Video\\Serials_Europe\\Zolotaya_kletka_Rus', [], ['01s01e.txt'])
+
+	filter_files = []
 
 	for a, b, c in fileparam:  # (folder)str / (subfolder)list / (files)list
 		try:
@@ -938,8 +961,10 @@ if __name__ == "__main__":
 						try:
 							assert bool(f in some_files), ""
 						except AssertionError:
-							some_files.add(f)
-							if video_regex.findall(f.split("\\")[-1]):
+							some_files.add(f)  # any_file
+							if video_regex.findall(
+									f.split("\\")[-1]
+							):  # files_by_format
 								files.append(f)
 								logging.info("@files %s" % f)
 
@@ -953,6 +978,23 @@ if __name__ == "__main__":
 									if seas_or_year:
 										seasyear_count[seas_or_year.strip()] = seasyear_count.get(seas_or_year.strip(), 0) + 1 # seas_or_year_count
 								"""
+
+	# @add_equal_files
+	# """
+	if all((files, faf_sorted_tuple)):  # files / files_with_filter
+		for a, b in faf_sorted_tuple:
+			try:
+				assert bool(a in files), ""
+			except AssertionError:
+				continue
+			else:
+				filter_files.append(a)
+
+		if all((filter_files, files)):
+			logging.info(
+				"@filter_files/@files filter %s" % str(len(filter_files) == len(files))
+			)  # equal(True) / diff(False)
+	# """
 
 	# """
 	try:
@@ -1010,7 +1052,7 @@ if __name__ == "__main__":
 
 	# """
 	for fsf in filter(
-		lambda x: os.path.isdir(x), tuple(some_subfolders)
+			lambda x: os.path.isdir(x), tuple(some_subfolders)
 	):  # read_folders # some_folders -> folders
 		period_list_filter = []
 
