@@ -218,6 +218,14 @@ avg_elapsed_time = sum(elapsed_list) // len(elapsed_list)
 print(f"%.3f second's" % avg_elapsed_time); sleep(avg_elapsed_time)
 """
 
+# teranar value
+"""
+status = True
+
+some_value = ("1.0", "2.0")[not status] # 1.0
+some_value = ("1.0", "2.0")[status] # 2.0
+"""
+
 # pip install --user bpython (interactive_color_terminal) # launch?
 
 # python -m trace --trace video_trimmer2.py
