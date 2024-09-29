@@ -9,18 +9,23 @@
 # from os import getcwd # cpu_count  # текущая папка # cpu_count
 # import gevent.monkey # pip install --user gevent # is_async(debug)
 # import psutil
-from datetime import datetime, timedelta  # дата и время
+# import tomllib # look like json - parsing TOML (Python 3.11)
+from datetime import (
+	datetime,
+	timedelta,
+)  # дата и время
 from psutil import cpu_count  # viirtual_memory # pip install --user psutil
 from shutil import (
 	disk_usage,
 	move,
 )  # copy # файлы # usage(total=16388190208, used=16144154624, free=244035584)
-from subprocess import (
-	run,
-)  # TimeoutExpired, check_output, Popen, call, PIPE, STDOUT # Работа с процессами # console shell=["True", "False"]
+from subprocess import run  # TimeoutExpired, check_output, Popen, call, PIPE, STDOUT # Работа с процессами # console shell=["True", "False"]
 from threading import Semaphore  # Thread, Barrier # работа с потоками # mutli_async
-from time import time, sleep
-import asyncio  # TaskGroup(3.11+)
+from time import (
+	time,
+	sleep,
+)
+import asyncio  # TaskGroup(Python 3.11+)
 import json  # JSON (словарь)
 import logging  # журналирование и отладка
 import os  # система
@@ -33,7 +38,187 @@ import pyttsx3
 
 # Makes ANSI escape character sequences (for producing colored terminal text and cursor positioning) work under MS Windows.
 # Back, Cursor # Fore.color, Back.color # BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE # pip install --user colorama
-from colorama import Fore, Style, init
+from colorama import (
+	Fore,
+	Style,
+	init,
+)
+
+# from multiprocessing import Process # Process(target=compute_heavy).start() # join # Многопроцессорность: Применимо к вычислительно сложным задачам, позволяет всем менять ограничения GIL, используя несколько CPU 
+# from threading import Thread # Thread(target=disk_io_bound).start() # join # Многопоточность: Она оптимальна для задач, связанных с ожиданием I/O и возможностью параллельного выполнения, обусловленной освобождением GIL во время операций I/O. 
+# import asyncio # asyncio.run(async_io_operation()) # Asyncio: Лучший инструмент для асинхронных I/O-операций с эффективным переключением между задачами и снижением возможных проблем, связанных с многопоточностью.
+
+# python version requerments?
+"""
+# import tzdata # pip install --user -U tzdata
+import zoneinfo # pip install --user -U zoneinfo 
+from datetime import datetime
+
+# print(len(zoneinfo.available_timezones())) # >= 594
+
+timezone1 = zoneinfo.ZoneInfo("US/Pacific")
+print(datetime.now(tz=timezone1))
+"""
+
+# match case, python 3.10
+
+"""
+def switch():  # res(int)
+	res = 999
+
+	match res:
+		case 0 | 1 | 999:  # some_value_from_case
+			return "ok"
+		case _:
+			return "unknown"
+
+switch()  # ok <-> unknown
+
+point = [2, 5]  # [0, 3]
+
+def switch_list():  # point(list)
+	match point:
+		case 0, 3:
+			return ("No move")
+		case x, 3:
+			return (f"moved on x-axis - {x} points")
+		case 0, y:
+			return (f"moved on y-axis - {y} points")
+		case x, y:
+			return (f"moved along moth axes - {x}:{y} points")
+
+cmd = "quit"
+cmd2 = "menu start"
+cmd3 = "param go west"
+
+def switch_list2(cmd):
+	match cmd.split():
+		case ["quit"]:
+			print("we quited")
+		case ["menu", status]:
+			print(f"my status {status}")
+		case ["param", *two]:
+			print(f"params: {two}")
+		case _:
+			print("Unknown command")
+
+switch_list2(cmd)  # ?
+switch_list2(cmd2)  # ?
+switch_list2(cmd3)  # ?
+
+class Rectangle:
+	def __init__(self, width, height):
+		self.width = width
+		self.height = height
+
+class Circle:
+	def __init__(self, radius):
+		self.radius = radius
+
+def switch_class(shape):  # ?
+	match shape:
+		case Rectangle(width=w, height=h):
+			return w * h
+		case Circle(radius=r):
+			return 3.14 * r * r
+		case _:
+			return "Unknwon shape"
+
+result = swith_class(Circle(10))  # ?
+
+print(result)
+
+data = None
+data1 = ["bot"]
+data2 = ["user"]
+data3 = ["user", "Bob", 18]
+
+def switch_logic(data):
+	match data:
+		case [_, _, age] if age >= 18:
+			print("access granted")
+		case _:
+			print("access denied")
+
+# switch_logic(data1) # switch_logic(data2) # ? # bad
+switch_logic(data3) # ? # ok
+
+def switch_dict(dictionary):
+    # match case
+    match dictionary:
+        # pattern 1
+        case {"name": n, "age": a}:
+            print(f"Name:{n}, Age:{a}")
+        # pattern 2
+        case {"name": n, "salary": s}:
+            print(f"Name:{n}, Salary:{s}")
+        # default pattern
+        case _ :
+            print("Data does not exist")
+
+switch_dict({"name": "Jay", "age": 24})  # ?
+switch_dict({"name": "Ed", "salary": 25000})  # ?
+switch_dict({"name": "Al", "age": 27})  # ?
+switch_dict({})  # ?
+"""
+
+# try_except(note), python 3.11
+
+"""
+try:
+	raise ExceptionGroup("Description exception group", [ValueError("Some bad"), TypeError("Terrable"), ])
+exccept* ValueError as eg:  # TypeError, IndexError # Exception(all)
+	for exc in eg.exceptions:
+		print(f"{exc}")
+
+try:
+	var = val
+except Exception as e:
+	from datetime import datetime
+	# add_error_note(for_debug)
+	e.add_note(f"Script down at {datetime.now()}")
+	print(e.__notes__) # raise
+"""
+
+# TaskGroup, python 3.11
+
+"""
+import asyncio
+
+async def sleep(seconds: int) -> None:
+	await asyncio.sleep(seconds)
+	print(f"sleeped {second}s")
+
+async def old_main():
+	tasks = []
+	for seconds in (3, 1, 2):
+		tasks.append(asyncio.create_task(sleep(seconds)))
+	await asyncio.gather(*tasks)
+
+async def main():
+	async with asyncio.TaskGroup() as tg:
+		for seconds in (3, 1, 2):
+			tg.create_task(sleep(seconds))
+
+asyncio.run(main())
+"""
+
+# optimal_run_timer
+"""
+from time import time
+
+elapsed_list = []
+for i in range(10):
+	timer = time()
+	# func() # list / dict / str / sum / ...?
+	elapsed = time() - timer
+	elapsed_list.append(elapsed)
+
+avg_elapsed_time = sum(elapsed_list) // len(elapsed_list)
+print(f"%.3f second's" % avg_elapsed_time); sleep(avg_elapsed_time)
+"""
+
+# pip install --user bpython (interactive_color_terminal) # launch?
 
 # python -m trace --trace video_trimmer2.py
 
@@ -48,6 +233,8 @@ __author__ = "Sergey Ibragimov"
 # exit()
 
 # mklink /h videotrimmer.py video_trimmer2.py
+
+# qos ~ 1 * 1024 = 1mb, speed ~ (5/8) * 1024 = 1280 kb/s
 
 """
 numbers = [1,2,3]
@@ -95,8 +282,10 @@ current_folder = "".join([
 ])
 
 dletter = "".join(
-	[basedir.split("\\")[0], "\\"]
-)  # "".join(script_path[0:5]) if script_path else "".join(os.getcwd()[0:5])
+	[
+		basedir.split("\\")[0],
+		"\\"
+	])  # "".join(script_path[0:5]) if script_path else "".join(os.getcwd()[0:5])
 
 # logging(start)
 log_base = "%s\\trimmer_job.json" % script_path  # main_debug(json)
@@ -105,7 +294,11 @@ log_file = "%s\\trim.log" % script_path  # main_debug(logging)
 # --- path's ---
 path_for_queue = r"d:\\downloads\\mytemp\\"
 path_to_done = "%sdownloads\\list\\" % dletter  # "c:\\downloads\\" # ready_folder
-path_for_folder1 = "".join([os.getcwd(), "\\"])
+path_for_folder1 = "".join(
+	[
+		os.getcwd(),
+		"\\"
+	])
 
 cmd_list = "%s\\video_trimmer2.cmd" % script_path  # command_line_for_trim
 sequence_list = "%s\\sequence_list.cmd" % script_path  # mp4
@@ -127,6 +320,7 @@ period_json = "%s\\period.json" % script_path
 current_json = "%s\\current.json" % script_path
 current_base = "%s\\current.lst" % script_path
 displayar_base = "%s\\dar.json" % script_path
+segments_base = "%s\\segments.json" % script_path
 
 # '''
 try:
@@ -138,7 +332,9 @@ except BaseException: # AssertionError:
 		level=logging.INFO,
 	)  # no_file # pass
 else: # finally -> else
-	if dsize // (1024**2) > 0:  # any_Mb # debug
+	if (
+		dsize // (1024**2) > 0
+	):  # any_Mb # debug
 		logging.basicConfig(
 			handlers=[logging.FileHandler(log_file, "w", "cp1251")],
 			format="%(filename)s [ LINE:%(lineno)+5s ]# %(levelname)+8s [%(asctime)s]  %(message)s",
@@ -214,11 +410,18 @@ cmd_whitespace = re.compile(
 	r"[\s]{2,}"
 )  # text = "hello  world" # space_regex.sub(" ", text)
 
-
 year_regex = re.compile(r"\([\d+]{4}\)", re.M)
 seasyear = re.compile(
 	r"(?:(_[\d+]{2,4}s|\([\d+]{4}\)))", re.M
 )  # MatchCase # season_and_year(findall) # +additional(_[\d+]{2}p)
+
+# a = "test|test2|test30|test40|test999"
+# a_regex = re.compile(r"test[\d+]{2,}?", re.M) # a_regex.findall(a) # ['test30', 'test40', 'test99']
+# a_regex = re.compile(r"test[\d+]{1,}", re.M) # a_regex.findall(a) # ['test2', 'test30', 'test40', 'test999']
+# a_regex = re.compile(r"test[\d+]??", re.M) # a_regex.findall(a) # ['test', 'test', 'test', 'test', 'test']
+# a_regex = re.compile(r"test[\d]?", re.M) # a_regex.findall(a) # ['test', 'test2', 'test3', 'test4', 'test9']
+# a_regex = re.compile(r"test[\d]", re.M) # a_regex.findall(a) # ['test2', 'test3', 'test4', 'test9']
+# a_regex = re.compile(r"test[\d+]{1,}", re.M) # list(set(a_regex.split(a))) # ['test|', '', '|']
 
 start = time()
 
@@ -228,9 +431,11 @@ some_dict = {}
 mytime: dict = {
 	"jobtime": [9, 18, 5],
 	"dinnertime": [12, 14],
+	"dnd": [22, 8],
 	"sleeptime": [0, 8],
 	"anytime": [True],
-}  # sleep_time_less_hour # debug
+	"weekindex": 4,
+}  # sleep_time_less_hour # debug # weekindex (0 - 4, monday-friday)
 
 
 class Timer(object):
@@ -242,7 +447,9 @@ class Timer(object):
 		now = datetime.now()
 		left = (self.total - done) * (now - self.start) / done
 		sec = int(left.total_seconds())
-		logging.info("@now/@left/@sec %s" % ";".join(map(str, [now, left, sec])))
+		logging.info("@now/@left/@sec %s" % ";".join(
+			map(str, [now, left, sec]))
+		)
 		if sec < 60:
 			return "{} seconds".format(sec)
 		else:
@@ -365,7 +572,7 @@ async def calc_number_of_day(
 	sleep_if: str = "",
 	find_c3: int = 0,
 	find_c4: int = 0,
-) -> tuple:  # 4 # docstring
+) -> tuple:  # 4 # docstring # hide # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
 	"""@calc_number_of_day"""
 	if is_default:
 		dt_calc = datetime.now()  # day / month / year
@@ -374,7 +581,13 @@ async def calc_number_of_day(
 	elif not is_default:
 		dt_str = ".".join([str(day), str(month), str(year)])
 
-	if all((sleep_if, dt_str == sleep_if, not is_default)):
+	if all(
+		(
+			sleep_if,
+			dt_str == sleep_if,
+			not is_default
+		)
+	):
 		sleep(2)
 
 	c1, c2, c3, c4 = 0, 0, 0, 0
@@ -604,13 +817,19 @@ else:
 
 # clear_base_and_lists()
 
-logging.info("%s" % ";".join([basedir, script_path]))
+logging.info("%s" % ";".join(
+	[
+		basedir,
+		script_path
+	])
+)
 
 try:
-	files_types = [
+	files_types: list[int] = [
 		0 if os.path.isfile(os.path.join(os.getcwd(), f)) else 1
 		for f in os.listdir(os.getcwd())
-	]
+	]  # python 3.9(-hide/debug)
+
 	assert files_types, ""
 except AssertionError:
 	logging.warning("@files_types no files or no folders")
@@ -629,8 +848,33 @@ dspace_another_drive = 0.0
 
 # dletter_and_dspace = {}
 
+# add_and_save_to_json(is_linux)
+"""
+import gio
+
+for mount in volume_monitor.get_mounts():
+    print(mount.get_name(), mount.get_icon())
+"""
+
+# is_for_portable_devices
+"""
+import win32api
+import win32file
+drives = win32api.GetLogicalDriveStrings()
+drives =  drives.split('\000')[:-1]
+
+for drive in drives:
+	if win32file.GetDriveType(drive)==win32file.DRIVE_REMOVABLE:
+		label,fs,serial,c,d = win32api.GetVolumeInformation(drive)
+		print(label)
+"""
+
 for dl in range(ord("c"), ord("z") + 1):
-	du = "".join([str(chr(dl)), ":\\"])
+	du = "".join(
+		[
+			str(chr(dl)),
+			":\\"
+		])
 
 	try:
 		optimal_total = int(disk_usage("%s" % du).total) // (1024 ** 3) # 10% free for faster (hdd/ssd)
@@ -648,7 +892,9 @@ for dl in range(ord("c"), ord("z") + 1):
 		logging.info(f"@optimal_total/@optimal_free/@optimal_used optimal space on {du}, free: {optimal_free}, used: {optimal_used}")  # "optimal space on du='c:\\\\', free: optimal_free=9, used: optimal_used=46"
 
 	# logging.info("@du %s" % ";".join(map(str, ("%s" % du, int(disk_usage(r"%s" % du).used))))
-	print(";".join(map(str, ("%s" % du, int(disk_usage("%s" % du).used)))))
+	print(";".join(
+		map(str, ("%s" % du, int(disk_usage("%s" % du).used))))
+	)
 
 	dspace_list.append(int(disk_usage(r"%s" % du).used))
 
@@ -691,7 +937,9 @@ try:
 except:
 	some_dict = {}
 else:
-	some_dict = {k: v for k, v in some_dict.items() if os.path.exists(k) and v}
+	some_dict = {
+		k: v for k, v in some_dict.items() if os.path.exists(k) and v
+	}
 
 # @trimmer_base; create(clear)
 """
@@ -726,8 +974,11 @@ class Additional:
 
 		try:
 			short_filename = "".join(
-				[self.filename[0], ":\\...\\", self.filename.split("\\")[-1]]
-			).strip()  # is_ok
+				[
+					self.filename[0],
+					":\\...\\",
+					self.filename.split("\\")[-1]
+				]).strip()  # is_ok
 		except:
 			short_filename = self.filename.strip()  # if_error_stay_old_filename
 
@@ -835,8 +1086,12 @@ class width_height:
 			return None
 
 		# ffprobe -v error -show_entries stream=width,height -of csv=p=0:s=x input.m4v
-		cmd_wh = [
-			"".join([path_for_queue, "ffprobe.exe"]),
+		cmd_wh: list[str] = [
+			"".join(
+				[
+					path_for_queue,
+					"ffprobe.exe"
+				]),
 			"-v",
 			"error",
 			"-show_entries",
@@ -844,8 +1099,12 @@ class width_height:
 			"-of",
 			"csv=p=0:s=x",
 			self.filename,
-		]  # output_format
-		wi = "".join([current_folder, "wh.nfo"])  # path_for_queue
+		]  # output_format # python 3.9(-hide/debug)
+		wi = "".join(
+			[
+				current_folder,
+				"wh.nfo"
+			])  # path_for_queue
 
 		os.system("cmd /c %s > %s" % (" ".join(cmd_wh), wi))
 
@@ -897,7 +1156,13 @@ class width_height:
 						% self.filename
 					)
 				else:
-					if all((width > maxwidth, height, width >= height)):
+					if all(
+						(
+							width > maxwidth,
+							height,
+							width >= height
+						)
+					):
 						print(
 							Style.BRIGHT
 							+ Fore.YELLOW
@@ -974,7 +1239,13 @@ class width_height:
 						"@nw/@ac value is calced [%s]" % "x".join(map(str, [nw, ac]))
 					)
 
-					if all((ac, h, ac != h)):
+					if all(
+						(
+							ac,
+							h,
+							ac != h
+						)
+					):
 						is_clc = True
 
 				try:
@@ -987,7 +1258,13 @@ class width_height:
 			return (nw, ac)
 
 		if all(
-			(is_calc == True, width > maxwidth, height, width >= height, ar_find)
+			(
+				is_calc == True,
+				width > maxwidth,
+				height,
+				width >= height,
+				ar_find
+			)
 		):  # True;True;h;w >= h("any" -> 1:1);calc_ar(False-error ar, True-normal ar)
 
 			# additional(calc)
@@ -1021,7 +1298,12 @@ class width_height:
 					"@ar_calc_status error: %s, current: %s" % ar_calc_status_err
 				)
 			else:
-				logging.info("@ar_calc/file %s" % ";".join([ar_calc_status, filename]))
+				logging.info("@ar_calc/file %s" % ";".join(
+					[
+						ar_calc_status,
+						filename
+					])
+				)
 
 			changed = bool(
 				is_owidth > maxwidth
@@ -1033,7 +1315,13 @@ class width_height:
 				else "x".join(map(str, [width, height])) + " no resized"
 			)
 
-			if all((width, height, wh_status)):
+			if all(
+				(
+					width,
+					height,
+					wh_status
+				)
+			):
 				logging.info(
 					"@width/@height %s, filename: %s" % (wh_status, self.filename)
 				)
@@ -1046,7 +1334,7 @@ class width_height:
 	def get_profile_and_level(self, filename) -> tuple:
 		self.filename = filename
 
-		cmd_pl = [
+		cmd_pl: list[str] = [
 			"".join([path_for_queue, "ffprobe.exe"]),
 			"-v",
 			"error",
@@ -1055,7 +1343,7 @@ class width_height:
 			"-of",
 			"default=noprint_wrappers=1",
 			self.filename,
-		]  # output_format
+		]  # output_format # python 3.9(-hide/debug)
 		plf = "".join([current_folder, "profile_and_level.nfo"])  # path_for_queue
 
 		try:
@@ -1106,7 +1394,9 @@ class width_height:
 				)  # [main,30]
 
 	def get_length(self, filename) -> int:
-		cmd_fd = [
+		self.filename = filename
+
+		cmd_fd: list[str] = [
 			"".join([path_for_queue, "ffprobe.exe"]),
 			"-v",
 			"error",
@@ -1115,7 +1405,7 @@ class width_height:
 			"-of",
 			"compact=p=0:nk=1",
 			self.filename,
-		]  # output_format
+		]  # output_format # python 3.9(-hide/debug)
 		fdi = "".join([current_folder, "duration.nfo"])  # path_for_queue
 
 		duration_list = []
@@ -1152,7 +1442,10 @@ class width_height:
 		fc: int = 0  # ; ln: int = 0
 
 		try:
-			h, m, s = fcnt // 3600, fcnt % 3600 // 60, fcnt % 3600 % 60
+			h, m, s = (
+				fcnt // 3600, fcnt % 3600 // 60, fcnt % 3600 % 60
+			)
+
 			assert all((h, m, s)), "Первоначально %d, время %s:%s:%s, current: %s" % (
 				fcnt,
 				str(h),
@@ -1211,7 +1504,7 @@ class width_height:
 		self.filename = filename
 
 		# ffprobe -v error -show_entries stream=codec_name -of csv=p=0:s=x input.m4v
-		cmd = [
+		cmd: list[str] = [
 			"".join([path_for_queue, "ffprobe.exe"]),
 			"-v",
 			"error",
@@ -1220,7 +1513,7 @@ class width_height:
 			"-of",
 			"csv=p=0:s=x",
 			self.filename,
-		]  # output_format
+		]  # output_format # python 3.9(-hide/debug)
 		ci = "".join([current_folder, "codecs.nfo"])  # path_for_queue
 
 		try:
@@ -1275,7 +1568,7 @@ class width_height:
 
 
 # '''
-def screenshot_cut(slide, framecount):  # docstring
+def screenshot_cut(slide, framecount, /):  # docstring # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
 	"""@slide_from_job; 20 / 8340=0,00239808153477218225419664268585"""
 
 	try:
@@ -1290,7 +1583,7 @@ def screenshot_cut(slide, framecount):  # docstring
 
 
 # """
-def save_slide(slide, framecount, filename, width, height):
+def save_slide(slide, framecount, filename, width, height, /):  # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
 
 	if not slide:
 		slide = 20
@@ -1347,7 +1640,7 @@ def save_slide(slide, framecount, filename, width, height):
 				% ";".join(map(str, [width, height, sc, split_stream]))
 			)
 		else:
-			screenshot_video = [
+			screenshot_video: list[str] = [
 				init_ffmpeg,
 				init_file,
 				"-vf",
@@ -1357,7 +1650,7 @@ def save_slide(slide, framecount, filename, width, height):
 				"-f",
 				"image2",
 				"".join(['"', split_stream, '"']),
-			]
+			]  # python 3.9(-hide/debug)
 
 		try:
 			assert screenshot_video, ""
@@ -1392,7 +1685,7 @@ def save_slide(slide, framecount, filename, width, height):
 # """
 
 
-def one_to_double(cnt, mx: int = 3) -> str:  # debug_by_length
+def one_to_double(cnt, mx: int = 3) -> str:  # debug_by_length  # hide # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
 	"""a = "0"*3 -> '000'"""
 
 	# cnt_len = len(str(cnt))
@@ -1407,6 +1700,7 @@ def one_to_double(cnt, mx: int = 3) -> str:  # debug_by_length
 		return str(cnt)  # four
 
 
+# save_last: list[bool] = [] # python 3.9
 def calc_parts(
 	filename: str = "",
 	framecount: int = 0,
@@ -1441,7 +1735,9 @@ def calc_parts(
 	else:
 		old = ext = "".join([".", "mp4"])  # default_ext
 
-	logging.info("@old/@ext %s" % ";".join(map(str, [old, ext])))
+	logging.info("@old/@ext %s" % ";".join(
+		map(str, [old, ext]))
+	)
 
 	some_dict = {}
 
@@ -1460,7 +1756,9 @@ def calc_parts(
 	except:
 		some_dict = {}
 	else:
-		some_dict = {k: v for k, v in some_dict.items() if os.path.exists(k) and v}
+		some_dict: dict[str, list] = {
+			k: v for k, v in some_dict.items() if os.path.exists(k) and v
+		}  # python 3.9(-hide/debug)
 
 	try:
 		with open(filename_length_json, encoding="utf-8") as flj:
@@ -1475,7 +1773,10 @@ def calc_parts(
 	wh = width_height(filename)
 
 	try:
-		fl = {k: v for k, v in fl.items() if os.path.exists(k)}
+		fl = {
+			k: v for k, v in fl.items() if os.path.exists(k)
+		}  # python 3.9(hide/debug!)
+
 		assert fl, ""
 	except AssertionError:  # if_no_exists_files
 		logging.warning("@fl no exist files")
@@ -1543,40 +1844,75 @@ def calc_parts(
 
 	parts = tp = ag = 0
 	tp_diff: float = 0  # tp_float: float = 0
+	tp_list: list = []	
 
-	parts_list = [def_fc // 60, def_fc % 60]  # (2899 // 60, 2899 % 60) = (48, 19)
+	# need_framecount_convert_to_parts
 
-	try:
-		parts = def_fc // 60 if not parts_list[1] else def_fc % 60  # type1
-		assert parts, ""
-	except AssertionError:
-		try:
-			parts = parts_list[0] - parts_list[1]  # diff_time(hhmm-ms) # type2
-			assert parts, ""
-		except AssertionError:
-			try:
-				parts = sum(parts_list) // len(parts_list)  # ag	# type3
-				assert parts, ""
-			except AssertionError:
-				parts = def_fc // (60 * int(time_by_cpu))  # type4
-				logging.info("@parts[4] length: %d, current: %s" % (parts, filename))
-			else:
-				logging.info("@parts[3] length: %d, current: %s" % (parts, filename))
-		else:
-			logging.info("@parts[2] length: %d, current: %s" % (parts, filename))
-	else:
-		logging.info("@parts[1] length: %d, current: %s" % (parts, filename))
+	# -- default(last) --
+	# """
+	parts_list = (
+		[def_fc // 3600, def_fc % 3600] if def_fc > 3600 else [def_fc // 60, def_fc % 60]
+	)  # python 3.8 # 2100 -> [35, 0] ~ 35 + 0 ~ 35 # 3700 -> [1, 100] ~ (1 + 100) / 2 ~ 50
 
-	logging.info(
-		"@parts_list/@psumlen/@filename %s"
-		% str(
-			(
-				";".join(map(str, [parts_list[0], "...", parts_list[-1]])),
-				";".join(map(str, [parts, sum(parts_list), len(parts_list)])),
-				filename,
-			)
-		)
+	parts = (
+		sum(parts_list) if sum(parts_list) <= 60 else (sum(parts_list) // len(parts_list))
+	)  # python 3.8 # 2100 -> 35 ? # 3700 -> 50
+
+	logging.info("@part_list/@framecount/@parts/@tp/sparts_list/@filename %s" % ";".join(
+		map(str, (parts_list, def_fc, parts, (def_fc // parts), sum(parts_list), filename)))
 	)
+	# """
+
+	# debug(calc/+switch_statement)	
+	"""
+	for i in range(1, 4):
+		try:
+			parts_result = {
+				"1": lambda x: (max(x) % min(x)) if (max(x) % min(x)) > 0 else (max(x) // min(x)), 
+				"2": lambda x: abs(x[0] - x[1]),
+				"3": lambda x: sum(x) // len(x), 
+			}.get(str(i), 0)(parts_list)
+
+			assert parts_result, ""
+		except AssertionError:
+			parts = def_fc // (60 * time_by_cpu)  # parts_by_seconds(+cpu/div) # no_change
+			# parts = def_fc % (60 * time_by_cpu)  # parts_by_seconds(+cpu/mod) # no_change
+			tp_list.append((parts, i, (def_fc // parts)))
+			logging.warning("@parts/error%d/parts" % (i, parts))
+		except BaseException:
+			continue  # skip_if_error
+		else:
+			# parts -> parts_result
+			tp_list.append((parts_result, i, (def_fc // parts_result)))
+			logging.info("@parts/type%d/parts %d" % (i, parts_result))
+	"""
+
+	"""
+	max_parts = min_parts = 0
+
+	for part, index, t in tp_list:  # part, index, tp
+		try:
+			if part > max_parts:
+				max_parts = part
+			if part < max_parts:  # elif -> if
+				min_parts = part
+		except BaseException as e:
+			logging.error("@part/@index/@t/@min_parts/@max_parts/@error %s!" % ";".join(
+				map(str, (part, index, t, min_parts, max_parts, str(e))))
+			)
+		else:
+			logging.info("@part/@index/@t/@min_parts/@max_parts %s" % ";".join(
+				map(str, (part, index, t, min_parts, max_parts)))
+			)
+
+	parts = min_parts if not max_parts else max_parts  # filter(max/min)
+	"""
+
+	"""
+	logging.info(
+		"@parts_list/@tp_list/@filename %s" % str((";".join(map(str, (len(parts_list), tp_list, filename)))))
+	) # parts_list -> len(parts_list) # tp_list(+calc)
+	"""
 
 	split_stream = split_stream2 = split_stream3 = split_stream4 = ""
 
@@ -1598,18 +1934,57 @@ def calc_parts(
 	except:
 		return []
 
+	# @save({filename: [framecount/parts/tp]})_in_json
+
+	segments_dict = {}
+
+	try:
+		with open(segments_base, encoding="utf-8") as sbf:
+			segments_dict = json.load(sbf)
+	except:
+		with open(segments_base, "w", encoding="utf-8") as sbf:
+			json.dump(segments_dict, sbf, ensure_ascii=False, indent=4, sort_keys=False)
+
+
+	try:
+		segments_dict[filename.strip()] = [{"framecount": framecount, "parts": parts, "tp": tp}]
+	except:
+		segments_dict[filename.strip()] = [{"framecount": 0, "parts": 0, "tp": 0}]
+
+	try:
+		assert segments_dict, ""
+	except AssertionError:
+		logging.warning("@segments_dict no data for save")
+	else:
+		segments_dict = {k:v for k, v in segments_dict.items() if os.path.exists(k) and all((v[0]["framecount"], v[0]["parts"], v[0]["tp"]))}  # fitler(only_exists_files/param_not_null)
+
+		with open(segments_base, "w", encoding="utf-8") as sbf:
+			json.dump(segments_dict, sbf, ensure_ascii=False, indent=4, sort_keys=False)
+
 	try:
 		tp_seg = range(0, def_fc, tp)  # generate_slices
 	except:
 		return []
 
+	tt_list = []
+
 	try:
-		two_times = (tp / 60, tp % 60)  # slice_size(mm, ss)
+		# two_times = (tp // 60, tp % 60)  # slice_size(hh-mm, ss) # default
+		for i in range(1, 3):
+			try:
+				two_times = {"1": lambda x: x // 60, "2": lambda x: x % 60}.get(str(i), 0)(tp)
+			except BaseException: # if_error(skip_null)
+				continue
+			else:
+				tt_list.append(two_times)
 	except BaseException as e:
 		two_times = (tp, str(e))
 		logging.error("@tp part_size: %d, error: %s" % two_times)
 	else:
-		two_times_str = (tp, str(two_times))
+		# two_times = tuple(tt_list)  # debug(logging)
+		# two_times_str = (tp, str(two_times)) # default
+		two_times_str = (tp, str(tt_list) if tt_list else "")  # two_times -> tt_list(hh-mm/ms) ~ (tp~70, tt_list~'[1, 10]')
+
 		logging.info("@tp part_size: %d, part_per_time: %s" % two_times_str)
 
 	filter_framecount = 0
@@ -1644,7 +2019,7 @@ def calc_parts(
 
 	filter_framecount = (lambda h, m, s: (h * 3600) + (m * 60) + s)(
 		maybe_hour, maybe_min, maybe_sec
-	)  # 8, 36, 2 # 88737
+	)  # 8, 36, 2 # 88737(calc=30962)
 
 	try:
 		tp_diff = round(
@@ -1657,7 +2032,12 @@ def calc_parts(
 		tp_diff, tp_diff_str = 0, (filename, str(e))
 		logging.error("@tp_diff current: %s, error: %s" % tp_diff_str)
 	else:
-		logging.info("@tp_diff %s" % str(tp_diff))
+		tp_diff_status = (
+			"equal" if tp_diff == 100 else "diff"
+		)
+		logging.info("@tp_diff %s" % ";".join(
+			map(str, [tp_diff, tp_diff_status, filename]))
+		)
 
 	try:
 		framecount_diff = round(
@@ -1670,7 +2050,12 @@ def calc_parts(
 		framecount_diff, framecount_diff_err = 0, (filename, str(e))
 		logging.error("@framecount_diff current: %s, error: %s" % framecount_diff_err)
 	else:
-		logging.info("@framecount_diff %s" % str(framecount_diff))
+		framecount_diff_status = (
+			"equal" if framecount_diff == 100 else "diff"
+		)
+		logging.info("@framecount_diff %s" % ";".join(
+			map(str, [framecount_diff, framecount_diff_status, filename]))
+		)
 
 	try:
 		parts_diff = round(
@@ -1683,7 +2068,12 @@ def calc_parts(
 		parts_diff, parts_diff_err = 0, (filename, str(e))
 		logging.error("@parts_diff current: %s, error: %s" % parts_diff_err)
 	else:
-		logging.info("@parts_diff %s" % str(parts_diff))
+		parts_diff_status = (
+			"equal" if framecount_diff == parts_diff else "diff"
+		)
+		logging.info("@parts_diff %s" % ";".join(
+			map(str, [parts_diff, parts_diff_status, filename]))
+		)
 
 	# tp_seg = range(0, def_fc, tp)
 
@@ -1791,12 +2181,19 @@ def calc_parts(
 		pr, le = wh.get_profile_and_level(filename)  # [main,30]
 		assert all((pr, le)), ""
 	except AssertionError:
-		if any((not pr, not le)):
+		if any(
+			(
+				not pr,
+				not le
+			)
+		):
 			logging.warning("profile: %s, level: %s [%s]" % (pr, le, filename))
 		else:
 			logging.warning("no profile, no level [%s]" % filename)
 	else:
-		logging.info("@pr/@le %s" % ";".join(map(str, [pr, le])))  # "main";"30"
+		logging.info("@pr/@le %s" % ";".join(
+			map(str, [pr, le]))
+		)  # "main";"30"
 
 	try:
 		codecs = wh.get_codecs(filename)  # ['h264', 'aac']
@@ -1805,7 +2202,9 @@ def calc_parts(
 		logging.warning("no codecs [%s]" % filename)
 		return []
 	else:
-		logging.info("@codecs %s" % ";".join(map(str, tuple(codecs))))  # "h264";"aac"
+		logging.info("@codecs %s" % ";".join(
+			map(str, tuple(codecs)))
+		)  # "h264";"aac"
 
 	nw = nh = 0
 
@@ -1814,7 +2213,12 @@ def calc_parts(
 		assert all((w, h)), ""
 	except AssertionError:
 		nw, nh = 0, 0
-		if any((not w, not h)):
+		if any(
+			(
+				not w,
+				not h
+			)
+		):
 			logging.warning("width: %d, height: %d [%s]" % (w, h, filename))
 		else:
 			logging.warning("no width, no height [%s]" % filename)
@@ -1826,7 +2230,9 @@ def calc_parts(
 		)
 	else:
 		nw, nh = w, h
-		logging.info("@w/@h/@ic %s" % ";".join(map(str, [w, h, ic])))
+		logging.info("@w/@h/@ic %s" % ";".join(
+			map(str, [w, h, ic]))
+		)
 
 	some_display_ar = {}
 
@@ -1852,7 +2258,9 @@ def calc_parts(
 
 		logging.info(f"@display_ar add or update (width={w} / height={h}), current: {filename}")
 
-		some_display_ar.update(display_ar) # update_every_job(+last_filename)
+		some_display_ar |= display_ar  # python 3.9
+		# some_display_ar.update(display_ar)  # update_every_job(+last_filename) 
+		# some_display_ar_new = {**some_display_ar, **display_ar} # a.update(b) # a |= b # python 3.9
 
 		try:
 			assert some_display_ar, ""
@@ -1871,7 +2279,9 @@ def calc_parts(
 	try:
 		assert any((w, h)), ""  # all -> any
 	except AssertionError:
-		logging.warning("w/h %s, current: %s" % ("x".join(map(str, [w, h])), filename))
+		logging.warning("w/h %s, current: %s" % ("x".join(
+			map(str, [w, h])), filename)
+		)
 	except BaseException as e:
 		sar, sar_err = 0, (str(e), filename)
 		logging.error("@sar error: %s, current: %s" % sar_err)
@@ -1948,9 +2358,13 @@ def calc_parts(
 
 	# clear_meta_and_codec(copy)
 	try:
-		if pr_le_sc.count(True) != 3:  # some_optimized
+		if (
+			pr_le_sc.count(True) != 3
+		):  # some_optimized
 			init_nometa_vfile = "-map_metadata -1 -preset medium -threads 2 -c:v libx264"  # video_stabilize
-		elif pr_le_sc.count(True) == 3:  # all_optimized
+		elif (
+			pr_le_sc.count(True) == 3
+		):  # all_optimized
 			init_nometa_vfile = (
 				"-map_metadata -1 -preset medium -threads 2 -c:v copy"  # video_copy
 			)
@@ -1960,7 +2374,9 @@ def calc_parts(
 			"-map_metadata -1 -preset medium -threads 2 -c:v libx264"  # video_stabilize
 		)
 	else:
-		logging.info("@pr_le_sc %s" % ";".join(map(str, [pr_le_sc])))
+		logging.info("@pr_le_sc %s" % ";".join(
+			map(str, [pr_le_sc]))
+		)
 
 	pr_le_sc_str = ""
 
@@ -1997,11 +2413,15 @@ def calc_parts(
 	init_afile = ""
 
 	try:
-		if pr_le_sc.count(True) != 3:  # some_optimized
+		if (
+			pr_le_sc.count(True) != 3
+		):  # some_optimized
 			init_afile = (
 				'-threads 2 -c:a %s -af "dynaudnorm"' % "aac"
 			)  # sound_stabilize # ffmpeg release?
-		elif pr_le_sc.count(True) == 3:  # all_optimized
+		elif (
+			pr_le_sc.count(True) == 3
+		):  # all_optimized
 			init_afile = "-threads 2 -c:a copy"  # sound_copy
 		assert init_afile, ""
 	except AssertionError:
@@ -2028,142 +2448,6 @@ def calc_parts(
 	# @segment(fast_run) / @segment_time! / @segment_list / @segment_format # muxer segment
 
 	# @"обычная" разрезка по segment_time(1)
-
-	"""
-	The segment muxer supports the following options:
-
-	increment_tc 1|0
-	if set to 1, increment timecode between each segment If this is selected, the input need to have a timecode in the first video stream. Default value is 0.
-
-	reference_stream specifier
-	Set the reference stream, as specified by the string specifier. If specifier is set to auto, the reference is chosen automatically. Otherwise it must be a stream specifier (see the “Stream specifiers” chapter in the ffmpeg manual) which specifies the reference stream. The default value is auto.
-
-	%segment_format% format
-	Override the inner container format, by default it is guessed by the filename extension.
-
-	segment_format_options options_list
-	Set output format options using a :-separated list of key=value parameters. Values containing the : special character must be escaped.
-
-	%segment_list% name
-	Generate also a listfile named name. If not specified no listfile is generated.
-
-	segment_list_flags flags
-	Set flags affecting the segment list generation.
-
-	It currently supports the following flags:
-
-	‘cache’
-	Allow caching (only affects M3U8 list files).
-
-	‘live’
-	Allow live-friendly file generation.
-
-	segment_list_size size
-	Update the list file so that it contains at most size segments. If 0 the list file will contain all the segments. Default value is 0.
-
-	segment_list_entry_prefix prefix
-	Prepend prefix to each entry. Useful to generate absolute paths. By default no prefix is applied.
-
-	segment_list_type type
-	Select the listing format.
-
-	The following values are recognized:
-
-	‘flat’
-	Generate a flat list for the created segments, one segment per line.
-
-	‘csv, ext’
-	Generate a list for the created segments, one segment per line, each line matching the format (comma-separated values):
-
-	segment_filename,segment_start_time,segment_end_time
-	segment_filename is the name of the output file generated by the muxer according to the provided pattern. CSV escaping (according to RFC4180) is applied if required.
-
-	segment_start_time and segment_end_time specify the segment start and end time expressed in seconds.
-
-	A list file with the suffix ".csv" or ".ext" will auto-select this format.
-
-	‘ext’ is deprecated in favor or ‘csv’.
-
-	‘ffconcat’
-	Generate an ffconcat file for the created segments. The resulting file can be read using the FFmpeg concat demuxer.
-
-	A list file with the suffix ".ffcat" or ".ffconcat" will auto-select this format.
-
-	‘m3u8’
-	Generate an extended M3U8 file, version 3, compliant with http://tools.ietf.org/id/draft-pantos-http-live-streaming.
-
-	A list file with the suffix ".m3u8" will auto-select this format.
-
-	If not specified the type is guessed from the list file name suffix.
-
-	%segment_time% time
-	Set segment duration to time, the value must be a duration specification. Default value is "2". See also the segment_times option.
-
-	Note that splitting may not be accurate, unless you force the reference stream key-frames at the given time. See the introductory notice and the examples below.
-
-	min_seg_duration time
-	Set minimum segment duration to time, the value must be a duration specification. This prevents the muxer ending segments at a duration below this value. Only effective with segment_time. Default value is "0".
-
-	segment_atclocktime 1|0
-	If set to "1" split at regular clock time intervals starting from 00:00 o’clock. The time value specified in segment_time is used for setting the length of the splitting interval.
-
-	For example with segment_time set to "900" this makes it possible to create files at 12:00 o’clock, 12:15, 12:30, etc.
-
-	Default value is "0".
-
-	segment_clocktime_offset duration
-	Delay the segment splitting times with the specified duration when using segment_atclocktime.
-
-	For example with segment_time set to "900" and segment_clocktime_offset set to "300" this makes it possible to create files at 12:05, 12:20, 12:35, etc.
-
-	Default value is "0".
-
-	segment_clocktime_wrap_duration duration
-	Force the segmenter to only start a new segment if a packet reaches the muxer within the specified duration after the segmenting clock time. This way you can make the segmenter more resilient to backward local time jumps, such as leap seconds or transition to standard time from daylight savings time.
-
-	Default is the maximum possible duration which means starting a new segment regardless of the elapsed time since the last clock time.
-
-	segment_time_delta delta
-	Specify the accuracy time when selecting the start time for a segment, expressed as a duration specification. Default value is "0".
-
-	When delta is specified a key-frame will start a new segment if its PTS satisfies the relation:
-
-	PTS >= start_time - time_delta
-	This option is useful when splitting video content, which is always split at GOP boundaries, in case a key frame is found just before the specified split time.
-
-	In particular may be used in combination with the ffmpeg option force_key_frames. The key frame times specified by force_key_frames may not be set accurately because of rounding issues, with the consequence that a key frame time may result set just before the specified time. For constant frame rate videos a value of 1/(2*frame_rate) should address the worst case mismatch between the specified time and the time set by force_key_frames.
-
-	segment_times times
-	Specify a list of split points. times contains a list of comma separated duration specifications, in increasing order. See also the segment_time option.
-
-	segment_frames frames
-	Specify a list of split video frame numbers. frames contains a list of comma separated integer numbers, in increasing order.
-
-	This option specifies to start a new segment whenever a reference stream key frame is found and the sequential number (starting from 0) of the frame is greater or equal to the next value in the list.
-
-	segment_wrap limit
-	Wrap around segment index once it reaches limit.
-
-	segment_start_number number
-	Set the sequence number of the first segment. Defaults to 0.
-
-	strftime 1|0
-	Use the strftime function to define the name of the new segments to write. If this is selected, the output segment name must contain a strftime function template. Default value is 0.
-
-	break_non_keyframes 1|0
-	If enabled, allow segments to start on frames other than keyframes. This improves behavior on some players when the time between keyframes is inconsistent, but may make things worse on others, and can cause some oddities during seeking. Defaults to 0.
-
-	reset_timestamps 1|0
-	Reset timestamps at the beginning of each segment, so that each segment will start with near-zero timestamps. It is meant to ease the playback of the generated segments. May not work with some combinations of muxers/codecs. It is set to 0 by default.
-
-	initial_offset offset
-	Specify timestamp offset to apply to the output packet timestamps. The argument must be a time duration specification, and defaults to 0.
-
-	write_empty_segments 1|0
-	If enabled, write an empty segment if there are no packets during the period a segment would usually span. Otherwise, the segment will be filled with the next packet written. Defaults to 0.
-
-	Make sure to require a closed GOP when encoding and to set the GOP size to fit your segment time constraint.
-	"""
 
 	# @{file_short)_%03d.mp4 # filename = "c:\\downloads\\mytemp\\test.tst"; path_to_done = "c:\\downloads\\list\\"
 	try:
@@ -2220,7 +2504,9 @@ def calc_parts(
 		cmd = ";".join(["".join(["'", filename, "'"]), str(e)])
 	finally:
 		# scale(True=1, ffmpeg) / profile(True=1, ffmpeg) / level(True=1, ffmpeg) / "any"(True=0) # True(is_optimized)
-		if pr_le_sc.count(True) >= 0:
+		if (
+			pr_le_sc.count(True) >= 0
+		):
 			logging.info(
 				"@cmd command: %s" % cmd_whitespace.sub(" ", cmd)
 			)  # cmd -> cmd_whitespace.sub("", cmd) # debug
@@ -2241,374 +2527,6 @@ def calc_parts(
 	# @hls(any2m3u8) / @start_number / @hls_time! / @hls_list_size / @hls_segment_filename # muxer hls(m3u8)?!
 
 	# @"обычная" разрезка по hls_time(2)
-
-	"""
-	hls_init_time duration
-	Set the initial target segment length. Default value is 0.
-
-	duration must be a time duration specification, see (ffmpeg-utils)the Time duration section in the ffmpeg-utils(1) manual.
-
-	Segment will be cut on the next key frame after this time has passed on the first m3u8 list. After the initial playlist is filled, ffmpeg will cut segments at duration equal to hls_time.
-
-	%hls_time% duration
-	Set the target segment length. Default value is 2.
-
-	duration must be a time duration specification, see (ffmpeg-utils)the Time duration section in the ffmpeg-utils(1) manual. Segment will be cut on the next key frame after this time has passed.
-
-	%hls_list_size% size
-	Set the maximum number of playlist entries. If set to 0 the list file will contain all the segments. Default value is 5.
-
-	hls_delete_threshold size
-	Set the number of unreferenced segments to keep on disk before hls_flags delete_segments deletes them. Increase this to allow continue clients to download segments which were recently referenced in the playlist. Default value is 1, meaning segments older than hls_list_size+1 will be deleted.
-
-	hls_start_number_source source
-	Start the playlist sequence number (#EXT-X-MEDIA-SEQUENCE) according to the specified source. Unless hls_flags single_file is set, it also specifies source of starting sequence numbers of segment and subtitle filenames. In any case, if hls_flags append_list is set and read playlist sequence number is greater than the specified start sequence number, then that value will be used as start value.
-
-	It accepts the following values:
-
-	generic (default)
-	Set the start numbers according to the start_number option value.
-
-	epoch
-	Set the start number as the seconds since epoch (1970-01-01 00:00:00).
-
-	epoch_us
-	Set the start number as the microseconds since epoch (1970-01-01 00:00:00).
-
-	datetime
-	Set the start number based on the current date/time as YYYYmmddHHMMSS. e.g. 20161231235759.
-
-	%start_number% number
-	Start the playlist sequence number (#EXT-X-MEDIA-SEQUENCE) from the specified number when hls_start_number_source value is generic. (This is the default case.) Unless hls_flags single_file is set, it also specifies starting sequence numbers of segment and subtitle filenames. Default value is 0.
-
-	hls_allow_cache bool
-	Explicitly set whether the client MAY (1) or MUST NOT (0) cache media segments.
-
-	hls_base_url baseurl
-	Append baseurl to every entry in the playlist. Useful to generate playlists with absolute paths.
-
-	Note that the playlist sequence number must be unique for each segment and it is not to be confused with the segment filename sequence number which can be cyclic, for example if the wrap option is specified.
-
-	%hls_segment_filename% filename
-	Set the segment filename. Unless the hls_flags option is set with ‘single_file’, filename is used as a string format with the segment number appended.
-
-	For example:
-
-	ffmpeg -i in.nut -hls_segment_filename 'file%03d.ts' out.m3u8
-	will produce the playlist, out.m3u8, and segment files: file000.ts, file001.ts, file002.ts, etc.
-
-	filename may contain a full path or relative path specification, but only the file name part without any path will be contained in the m3u8 segment list. Should a relative path be specified, the path of the created segment files will be relative to the current working directory. When strftime_mkdir is set, the whole expanded value of filename will be written into the m3u8 segment list.
-
-	When var_stream_map is set with two or more variant streams, the filename pattern must contain the string "%v", and this string will be expanded to the position of variant stream index in the generated segment file names.
-
-	For example:
-
-	ffmpeg -i in.ts -b:v:0 1000k -b:v:1 256k -b:a:0 64k -b:a:1 32k \
-	  -map 0:v -map 0:a -map 0:v -map 0:a -f hls -var_stream_map "v:0,a:0 v:1,a:1" \
-	  -hls_segment_filename 'file_%v_%03d.ts' out_%v.m3u8
-	will produce the playlists segment file sets: file_0_000.ts, file_0_001.ts, file_0_002.ts, etc. and file_1_000.ts, file_1_001.ts, file_1_002.ts, etc.
-
-	The string "%v" may be present in the filename or in the last directory name containing the file, but only in one of them. (Additionally, %v may appear multiple times in the last sub-directory or filename.) If the string %v is present in the directory name, then sub-directories are created after expanding the directory name pattern. This enables creation of segments corresponding to different variant streams in subdirectories.
-
-	For example:
-
-	ffmpeg -i in.ts -b:v:0 1000k -b:v:1 256k -b:a:0 64k -b:a:1 32k \
-	  -map 0:v -map 0:a -map 0:v -map 0:a -f hls -var_stream_map "v:0,a:0 v:1,a:1" \
-	  -hls_segment_filename 'vs%v/file_%03d.ts' vs%v/out.m3u8
-	will produce the playlists segment file sets: vs0/file_000.ts, vs0/file_001.ts, vs0/file_002.ts, etc. and vs1/file_000.ts, vs1/file_001.ts, vs1/file_002.ts, etc.
-
-	strftime bool
-	Use strftime() on filename to expand the segment filename with localtime. The segment number is also available in this mode, but to use it, you need to set ‘second_level_segment_index’ in the hls_flag and %%d will be the specifier.
-
-	For example:
-
-	ffmpeg -i in.nut -strftime 1 -hls_segment_filename 'file-%Y%m%d-%s.ts' out.m3u8
-	will produce the playlist, out.m3u8, and segment files: file-20160215-1455569023.ts, file-20160215-1455569024.ts, etc. Note: On some systems/environments, the %s specifier is not available. See strftime() documentation.
-
-	For example:
-
-	ffmpeg -i in.nut -strftime 1 -hls_flags second_level_segment_index -hls_segment_filename 'file-%Y%m%d-%%04d.ts' out.m3u8
-	will produce the playlist, out.m3u8, and segment files: file-20160215-0001.ts, file-20160215-0002.ts, etc.
-
-	strftime_mkdir bool
-	Used together with strftime, it will create all subdirectories which are present in the expanded values of option hls_segment_filename.
-
-	For example:
-
-	ffmpeg -i in.nut -strftime 1 -strftime_mkdir 1 -hls_segment_filename '%Y%m%d/file-%Y%m%d-%s.ts' out.m3u8
-	will create a directory 201560215 (if it does not exist), and then produce the playlist, out.m3u8, and segment files: 20160215/file-20160215-1455569023.ts, 20160215/file-20160215-1455569024.ts, etc.
-
-	For example:
-
-	ffmpeg -i in.nut -strftime 1 -strftime_mkdir 1 -hls_segment_filename '%Y/%m/%d/file-%Y%m%d-%s.ts' out.m3u8
-	will create a directory hierarchy 2016/02/15 (if any of them do not exist), and then produce the playlist, out.m3u8, and segment files: 2016/02/15/file-20160215-1455569023.ts, 2016/02/15/file-20160215-1455569024.ts, etc.
-
-	hls_segment_options options_list
-	Set output format options using a :-separated list of key=value parameters. Values containing : special characters must be escaped.
-
-	hls_key_info_file key_info_file
-	Use the information in key_info_file for segment encryption. The first line of key_info_file specifies the key URI written to the playlist. The key URL is used to access the encryption key during playback. The second line specifies the path to the key file used to obtain the key during the encryption process. The key file is read as a single packed array of 16 octets in binary format. The optional third line specifies the initialization vector (IV) as a hexadecimal string to be used instead of the segment sequence number (default) for encryption. Changes to key_info_file will result in segment encryption with the new key/IV and an entry in the playlist for the new key URI/IV if hls_flags periodic_rekey is enabled.
-
-	Key info file format:
-
-	key URI
-	key file path
-	IV (optional)
-	Example key URIs:
-
-	http://server/file.key
-	/path/to/file.key
-	file.key
-	Example key file paths:
-
-	file.key
-	/path/to/file.key
-	Example IV:
-
-	0123456789ABCDEF0123456789ABCDEF
-	Key info file example:
-
-	http://server/file.key
-	/path/to/file.key
-	0123456789ABCDEF0123456789ABCDEF
-	Example shell script:
-
-	#!/bin/sh
-	BASE_URL=${1:-'.'}
-	openssl rand 16 > file.key
-	echo $BASE_URL/file.key > file.keyinfo
-	echo file.key >> file.keyinfo
-	echo $(openssl rand -hex 16) >> file.keyinfo
-	ffmpeg -f lavfi -re -i testsrc -c:v h264 -hls_flags delete_segments \
-	  -hls_key_info_file file.keyinfo out.m3u8
-	hls_enc bool
-	Enable (1) or disable (0) the AES128 encryption. When enabled every segment generated is encrypted and the encryption key is saved as playlist name.key.
-
-	hls_enc_key key
-	Specify a 16-octet key to encrypt the segments, by default it is randomly generated.
-
-	hls_enc_key_url keyurl
-	If set, keyurl is prepended instead of baseurl to the key filename in the playlist.
-
-	hls_enc_iv iv
-	Specify the 16-octet initialization vector for every segment instead of the autogenerated ones.
-
-	hls_segment_type flags
-	Possible values:
-
-	‘mpegts’
-	Output segment files in MPEG-2 Transport Stream format. This is compatible with all HLS versions.
-
-	‘fmp4’
-	Output segment files in fragmented MP4 format, similar to MPEG-DASH. fmp4 files may be used in HLS version 7 and above.
-
-	hls_fmp4_init_filename filename
-	Set filename for the fragment files header file, default filename is init.mp4.
-
-	When strftime is enabled, filename is expanded to the segment filename with localtime.
-
-	For example:
-
-	ffmpeg -i in.nut -hls_segment_type fmp4 -strftime 1 -hls_fmp4_init_filename "%s_init.mp4" out.m3u8
-	will produce init like this 1602678741_init.mp4.
-
-	hls_fmp4_init_resend bool
-	Resend init file after m3u8 file refresh every time, default is 0.
-
-	When var_stream_map is set with two or more variant streams, the filename pattern must contain the string "%v", this string specifies the position of variant stream index in the generated init file names. The string "%v" may be present in the filename or in the last directory name containing the file. If the string is present in the directory name, then sub-directories are created after expanding the directory name pattern. This enables creation of init files corresponding to different variant streams in subdirectories.
-
-	hls_flags flags
-	Possible values:
-
-	‘single_file’
-	If this flag is set, the muxer will store all segments in a single MPEG-TS file, and will use byte ranges in the playlist. HLS playlists generated with this way will have the version number 4.
-
-	For example:
-
-	ffmpeg -i in.nut -hls_flags single_file out.m3u8
-	will produce the playlist, out.m3u8, and a single segment file, out.ts.
-
-	‘delete_segments’
-	Segment files removed from the playlist are deleted after a period of time equal to the duration of the segment plus the duration of the playlist.
-
-	‘append_list’
-	Append new segments into the end of old segment list, and remove the #EXT-X-ENDLIST from the old segment list.
-
-	‘round_durations’
-	Round the duration info in the playlist file segment info to integer values, instead of using floating point. If there are no other features requiring higher HLS versions be used, then this will allow ffmpeg to output a HLS version 2 m3u8.
-
-	‘discont_start’
-	Add the #EXT-X-DISCONTINUITY tag to the playlist, before the first segment’s information.
-
-	‘omit_endlist’
-	Do not append the EXT-X-ENDLIST tag at the end of the playlist.
-
-	‘periodic_rekey’
-	The file specified by hls_key_info_file will be checked periodically and detect updates to the encryption info. Be sure to replace this file atomically, including the file containing the AES encryption key.
-
-	‘independent_segments’
-	Add the #EXT-X-INDEPENDENT-SEGMENTS tag to playlists that has video segments and when all the segments of that playlist are guaranteed to start with a key frame.
-
-	‘iframes_only’
-	Add the #EXT-X-I-FRAMES-ONLY tag to playlists that has video segments and can play only I-frames in the #EXT-X-BYTERANGE mode.
-
-	‘split_by_time’
-	Allow segments to start on frames other than key frames. This improves behavior on some players when the time between key frames is inconsistent, but may make things worse on others, and can cause some oddities during seeking. This flag should be used with the hls_time option.
-
-	‘program_date_time’
-	Generate EXT-X-PROGRAM-DATE-TIME tags.
-
-	‘second_level_segment_index’
-	Make it possible to use segment indexes as %%d in the hls_segment_filename option expression besides date/time values when strftime option is on. To get fixed width numbers with trailing zeroes, %%0xd format is available where x is the required width.
-
-	‘second_level_segment_size’
-	Make it possible to use segment sizes (counted in bytes) as %%s in hls_segment_filename option expression besides date/time values when strftime is on. To get fixed width numbers with trailing zeroes, %%0xs format is available where x is the required width.
-
-	‘second_level_segment_duration’
-	Make it possible to use segment duration (calculated in microseconds) as %%t in hls_segment_filename option expression besides date/time values when strftime is on. To get fixed width numbers with trailing zeroes, %%0xt format is available where x is the required width.
-
-	For example:
-
-	ffmpeg -i sample.mpeg \
-	   -f hls -hls_time 3 -hls_list_size 5 \
-	   -hls_flags second_level_segment_index+second_level_segment_size+second_level_segment_duration \
-	   -strftime 1 -strftime_mkdir 1 -hls_segment_filename "segment_%Y%m%d%H%M%S_%%04d_%%08s_%%013t.ts" stream.m3u8
-	will produce segments like this: segment_20170102194334_0003_00122200_0000003000000.ts, segment_20170102194334_0004_00120072_0000003000000.ts etc.
-
-	‘temp_file’
-	Write segment data to filename.tmp and rename to filename only once the segment is complete.
-
-	A webserver serving up segments can be configured to reject requests to *.tmp to prevent access to in-progress segments before they have been added to the m3u8 playlist.
-
-	This flag also affects how m3u8 playlist files are created. If this flag is set, all playlist files will be written into a temporary file and renamed after they are complete, similarly as segments are handled. But playlists with file protocol and with hls_playlist_type type other than ‘vod’ are always written into a temporary file regardless of this flag.
-
-	Master playlist files specified with master_pl_name, if any, with file protocol, are always written into temporary file regardless of this flag if master_pl_publish_rate value is other than zero.
-
-	hls_playlist_type type
-	If type is ‘event’, emit #EXT-X-PLAYLIST-TYPE:EVENT in the m3u8 header. This forces hls_list_size to 0; the playlist can only be appended to.
-
-	If type is ‘vod’, emit #EXT-X-PLAYLIST-TYPE:VOD in the m3u8 header. This forces hls_list_size to 0; the playlist must not change.
-
-	method method
-	Use the given HTTP method to create the hls files.
-
-	For example:
-
-	ffmpeg -re -i in.ts -f hls -method PUT http://example.com/live/out.m3u8
-	will upload all the mpegts segment files to the HTTP server using the HTTP PUT method, and update the m3u8 files every refresh times using the same method. Note that the HTTP server must support the given method for uploading files.
-
-	http_user_agent agent
-	Override User-Agent field in HTTP header. Applicable only for HTTP output.
-
-	var_stream_map stream_map
-	Specify a map string defining how to group the audio, video and subtitle streams into different variant streams. The variant stream groups are separated by space.
-
-	Expected string format is like this "a:0,v:0 a:1,v:1 ....". Here a:, v:, s: are the keys to specify audio, video and subtitle streams respectively. Allowed values are 0 to 9 (limited just based on practical usage).
-
-	When there are two or more variant streams, the output filename pattern must contain the string "%v": this string specifies the position of variant stream index in the output media playlist filenames. The string "%v" may be present in the filename or in the last directory name containing the file. If the string is present in the directory name, then sub-directories are created after expanding the directory name pattern. This enables creation of variant streams in subdirectories.
-
-	A few examples follow.
-
-	Create two hls variant streams. The first variant stream will contain video stream of bitrate 1000k and audio stream of bitrate 64k and the second variant stream will contain video stream of bitrate 256k and audio stream of bitrate 32k. Here, two media playlist with file names out_0.m3u8 and out_1.m3u8 will be created.
-	ffmpeg -re -i in.ts -b:v:0 1000k -b:v:1 256k -b:a:0 64k -b:a:1 32k \
-	  -map 0:v -map 0:a -map 0:v -map 0:a -f hls -var_stream_map "v:0,a:0 v:1,a:1" \
-	  http://example.com/live/out_%v.m3u8
-	If you want something meaningful text instead of indexes in result names, you may specify names for each or some of the variants. The following example will create two hls variant streams as in the previous one. But here, the two media playlist with file names out_my_hd.m3u8 and out_my_sd.m3u8 will be created.
-	ffmpeg -re -i in.ts -b:v:0 1000k -b:v:1 256k -b:a:0 64k -b:a:1 32k \
-	  -map 0:v -map 0:a -map 0:v -map 0:a -f hls -var_stream_map "v:0,a:0,name:my_hd v:1,a:1,name:my_sd" \
-	  http://example.com/live/out_%v.m3u8
-	Create three hls variant streams. The first variant stream will be a video only stream with video bitrate 1000k, the second variant stream will be an audio only stream with bitrate 64k and the third variant stream will be a video only stream with bitrate 256k. Here, three media playlist with file names out_0.m3u8, out_1.m3u8 and out_2.m3u8 will be created.
-	ffmpeg -re -i in.ts -b:v:0 1000k -b:v:1 256k -b:a:0 64k \
-	  -map 0:v -map 0:a -map 0:v -f hls -var_stream_map "v:0 a:0 v:1" \
-	  http://example.com/live/out_%v.m3u8
-	Create the variant streams in subdirectories. Here, the first media playlist is created at http://example.com/live/vs_0/out.m3u8 and the second one at http://example.com/live/vs_1/out.m3u8.
-	ffmpeg -re -i in.ts -b:v:0 1000k -b:v:1 256k -b:a:0 64k -b:a:1 32k \
-	  -map 0:v -map 0:a -map 0:v -map 0:a -f hls -var_stream_map "v:0,a:0 v:1,a:1" \
-	  http://example.com/live/vs_%v/out.m3u8
-	Create two audio only and two video only variant streams. In addition to the #EXT-X-STREAM-INF tag for each variant stream in the master playlist, the #EXT-X-MEDIA tag is also added for the two audio only variant streams and they are mapped to the two video only variant streams with audio group names ’aud_low’ and ’aud_high’. By default, a single hls variant containing all the encoded streams is created.
-	ffmpeg -re -i in.ts -b:a:0 32k -b:a:1 64k -b:v:0 1000k -b:v:1 3000k  \
-	  -map 0:a -map 0:a -map 0:v -map 0:v -f hls \
-	  -var_stream_map "a:0,agroup:aud_low a:1,agroup:aud_high v:0,agroup:aud_low v:1,agroup:aud_high" \
-	  -master_pl_name master.m3u8 \
-	  http://example.com/live/out_%v.m3u8
-	Create two audio only and one video only variant streams. In addition to the #EXT-X-STREAM-INF tag for each variant stream in the master playlist, the #EXT-X-MEDIA tag is also added for the two audio only variant streams and they are mapped to the one video only variant streams with audio group name ’aud_low’, and the audio group have default stat is NO or YES. By default, a single hls variant containing all the encoded streams is created.
-	ffmpeg -re -i in.ts -b:a:0 32k -b:a:1 64k -b:v:0 1000k \
-	  -map 0:a -map 0:a -map 0:v -f hls \
-	  -var_stream_map "a:0,agroup:aud_low,default:yes a:1,agroup:aud_low v:0,agroup:aud_low" \
-	  -master_pl_name master.m3u8 \
-	  http://example.com/live/out_%v.m3u8
-	Create two audio only and one video only variant streams. In addition to the #EXT-X-STREAM-INF tag for each variant stream in the master playlist, the #EXT-X-MEDIA tag is also added for the two audio only variant streams and they are mapped to the one video only variant streams with audio group name ’aud_low’, and the audio group have default stat is NO or YES, and one audio have and language is named ENG, the other audio language is named CHN. By default, a single hls variant containing all the encoded streams is created.
-	ffmpeg -re -i in.ts -b:a:0 32k -b:a:1 64k -b:v:0 1000k \
-	  -map 0:a -map 0:a -map 0:v -f hls \
-	  -var_stream_map "a:0,agroup:aud_low,default:yes,language:ENG a:1,agroup:aud_low,language:CHN v:0,agroup:aud_low" \
-	  -master_pl_name master.m3u8 \
-	  http://example.com/live/out_%v.m3u8
-	Create a single variant stream. Add the #EXT-X-MEDIA tag with TYPE=SUBTITLES in the master playlist with webvtt subtitle group name ’subtitle’. Make sure the input file has one text subtitle stream at least.
-	ffmpeg -y -i input_with_subtitle.mkv \
-	 -b:v:0 5250k -c:v h264 -pix_fmt yuv420p -profile:v main -level 4.1 \
-	 -b:a:0 256k \
-	 -c:s webvtt -c:a mp2 -ar 48000 -ac 2 -map 0:v -map 0:a:0 -map 0:s:0 \
-	 -f hls -var_stream_map "v:0,a:0,s:0,sgroup:subtitle" \
-	 -master_pl_name master.m3u8 -t 300 -hls_time 10 -hls_init_time 4 -hls_list_size \
-	 10 -master_pl_publish_rate 10 -hls_flags \
-	 delete_segments+discont_start+split_by_time ./tmp/video.m3u8
-	cc_stream_map cc_stream_map
-	Map string which specifies different closed captions groups and their attributes. The closed captions stream groups are separated by space.
-
-	Expected string format is like this "ccgroup:<group name>,instreamid:<INSTREAM-ID>,language:<language code> ....". ’ccgroup’ and ’instreamid’ are mandatory attributes. ’language’ is an optional attribute.
-
-	The closed captions groups configured using this option are mapped to different variant streams by providing the same ’ccgroup’ name in the var_stream_map string.
-
-	For example:
-
-	ffmpeg -re -i in.ts -b:v:0 1000k -b:v:1 256k -b:a:0 64k -b:a:1 32k \
-	  -a53cc:0 1 -a53cc:1 1 \
-	  -map 0:v -map 0:a -map 0:v -map 0:a -f hls \
-	  -cc_stream_map "ccgroup:cc,instreamid:CC1,language:en ccgroup:cc,instreamid:CC2,language:sp" \
-	  -var_stream_map "v:0,a:0,ccgroup:cc v:1,a:1,ccgroup:cc" \
-	  -master_pl_name master.m3u8 \
-	  http://example.com/live/out_%v.m3u8
-	will add two #EXT-X-MEDIA tags with TYPE=CLOSED-CAPTIONS in the master playlist for the INSTREAM-IDs ’CC1’ and ’CC2’. Also, it will add CLOSED-CAPTIONS attribute with group name ’cc’ for the two output variant streams.
-
-	If var_stream_map is not set, then the first available ccgroup in cc_stream_map is mapped to the output variant stream.
-
-	For example:
-
-	ffmpeg -re -i in.ts -b:v 1000k -b:a 64k -a53cc 1 -f hls \
-	  -cc_stream_map "ccgroup:cc,instreamid:CC1,language:en" \
-	  -master_pl_name master.m3u8 \
-	  http://example.com/live/out.m3u8
-	this will add #EXT-X-MEDIA tag with TYPE=CLOSED-CAPTIONS in the master playlist with group name ’cc’, language ’en’ (english) and INSTREAM-ID ’CC1’. Also, it will add CLOSED-CAPTIONS attribute with group name ’cc’ for the output variant stream.
-
-	master_pl_name name
-	Create HLS master playlist with the given name.
-
-	For example:
-
-	ffmpeg -re -i in.ts -f hls -master_pl_name master.m3u8 http://example.com/live/out.m3u8
-	creates an HLS master playlist with name master.m3u8 which is published at http://example.com/live/.
-
-	master_pl_publish_rate count
-	Publish master play list repeatedly every after specified number of segment intervals.
-
-	For example:
-
-	ffmpeg -re -i in.ts -f hls -master_pl_name master.m3u8 \
-	-hls_time 2 -master_pl_publish_rate 30 http://example.com/live/out.m3u8
-	creates an HLS master playlist with name master.m3u8 and keeps publishing it repeatedly every after 30 segments i.e. every after 60s.
-
-	http_persistent bool
-	Use persistent HTTP connections. Applicable only for HTTP output.
-
-	timeout timeout
-	Set timeout for socket I/O operations. Applicable only for HTTP output.
-
-	ignore_io_errors bool
-	Ignore IO errors during open, write and delete. Useful for long-duration runs with network output.
-
-	headers headers
-	Set custom HTTP headers, can override built in default headers. Applicable only for HTTP output.
-	"""
 
 	# Наименование;Разрешение;Ширина(width);Высота(height);Кадров в сек.(fps);Скорость (Мб/с)
 	"""
@@ -2955,7 +2873,9 @@ def calc_parts(
 			logging.info("@cmd3 %s" % cmd3)
 
 		# scale(True=1, ffmpeg) / profile(True=1, ffmpeg) / level(True=1, ffmpeg) / "any"(True=0) # True(is_optimized)
-		if pr_le_sc.count(True) >= 0:
+		if (
+			pr_le_sc.count(True) >= 0
+		):
 			logging.info(
 				"@cmd command: %s" % cmd_whitespace.sub(" ", cmd3)
 			)  # cmd3 -> cmd_whitespace.sub("", cmd3) # debug
@@ -3054,9 +2974,16 @@ def calc_parts(
 			)  # debug(ext)
 			short_file = only_short.split(".")[0]  # short
 			short_file_ext = ext.lower()  # short_ext
+
+			"""
 			part_file = f"{short_file}*p{short_file_ext}".replace(
 				"..", "."
-			)  # debug(ext) # 'hello_01s01e01p..mp4' -> 'hello_01s01e01p.mp4'
+			)  # debug(ext) # 'hello_01s01e01p..mp4' -> 'hello_01s01e01p.mp4' # old
+			"""
+			part_file = f"{short_file}_0*{short_file_ext}".replace(
+				"..", "."
+			)  # debug(new) / correct_run_from_project(cmd)
+
 			new_min = 60 * 5  # 300ms(5min)
 
 			# @job(optimize_run)
@@ -3101,7 +3028,7 @@ def calc_parts(
 
 			# (dir /r/b/s Short_AAsBBe*p.ext) > ext.lst
 			try:
-				line1 = f':(dir /r/b/s "{part_file}") > {merge_files_path}'  # is_ok
+				line1 = f':(dir /r/b/s "{part_file}") > {merge_files_path}'  # is_ok(debug)
 			except BaseException as e1:
 				line1 = ""
 				logging.error("@line1 file: %s, error: %s" % (filename, str(e1)))
@@ -3111,7 +3038,7 @@ def calc_parts(
 			# (for /f "delims=" %a in (ext.lst) do @echo file '%a') > concat.lst # cmd_line
 			# (for /f "delims=" %%a in (ext.lst) do @echo file '%%a') > concat.lst # cmd_file
 			try:
-				line2 = f"(for /f \"delims=\" %%a in ({merge_files_path}) do @echo file '%%a') > {concat_files_path}"  # is_ok
+				line2 = f":(for /f \"delims=\" %%a in ({merge_files_path}) do @echo file '%%a') > {concat_files_path}"  # is_ok
 			except BaseException as e2:
 				line2 = ""
 				logging.error("@line2 file: %s, error: %s" % (filename, str(e2)))
@@ -3120,7 +3047,7 @@ def calc_parts(
 
 			# ffmpeg -f concat -safe 0 -y -i concat.lst -c copy Short_AAsBBe.ext
 			try:
-				line3 = f'{init_ffmpeg} -f concat -safe 0 -y -i {concat_files_path} -c copy "{only_short}"'  # is_ok
+				line3 = f':{init_ffmpeg} -f concat -safe 0 -y -i {concat_files_path} -c copy "{only_short}"'  # is_ok
 			except BaseException as e3:
 				line3 = ""
 				logging.error("@line3 file: %s, error: %s" % (filename, str(e3)))
@@ -3138,7 +3065,7 @@ def calc_parts(
 
 			# cmd /c del /f {merge_files_path}
 			try:
-				line5 = f"cmd /c del /f {merge_files_path}"  # is_ok
+				line5 = f":cmd /c del /f {merge_files_path}"  # is_ok
 			except BaseException as e5:
 				line5 = ""
 				logging.error("@line5 file: %s, error: %s" % (filename, str(e5)))
@@ -3147,7 +3074,7 @@ def calc_parts(
 
 			# cmd /c del /f concat.lst
 			try:
-				line6 = f"cmd /c del /f {concat_files_path}"  # is_ok
+				line6 = f":cmd /c del /f {concat_files_path}"  # is_ok
 			except BaseException as e6:
 				line6 = ""
 				logging.error("@line6 file: %s, error: %s" % (filename, str(e6)))
@@ -3156,7 +3083,7 @@ def calc_parts(
 
 			# cmd /c del /f "Hello_01s01e*p.mp4"
 			try:
-				line7 = f':cmd /c del /f "{part_file}"'  # is_optimal_run(is_delete) / segment_run(no_delete) # *p(default) -> _0*(segment)
+				line7 = f':cmd /c del /f "{part_file}"'  # is_optimal_run(is_delete) / segment_run(no_delete) # *p(default) -> _0*(segment)  # debug(new)
 			except BaseException as e7:
 				line7 = ""
 				logging.error("@line7 file: %s, error: %s" % (filename, str(e7)))
@@ -3181,7 +3108,10 @@ def calc_parts(
 			)  # remove_old_parts # is_ok
 
 	if all(
-		(is_trim, pr_le_sc.count(False) > 0)
+		(
+			is_trim,
+			pr_le_sc.count(False) > 0
+		)
 	):  # is_trim / "skip_trim" / need_optimize
 		mx = len(str(len(dl))) + 1  # dl ~ parts
 
@@ -3270,7 +3200,12 @@ def calc_parts(
 				"@concat_short_to_original added 'new lines' in file: %s" % filename
 			)
 
-	elif all((not is_trim, pr_le_sc.count(False) > 0)):  # is_no_trim / need_optimize
+	elif all(
+		(
+			not is_trim,
+			pr_le_sc.count(False) > 0
+		)
+	):  # is_no_trim / need_optimize
 		parts = 0
 
 		ofilename = "".join(['"', path_to_done, "".join([short_name, ext]), '"'])
@@ -3365,14 +3300,27 @@ def calc_parts(
 			json.dump(ready_dict, rbf, ensure_ascii=False, indent=4, sort_keys=True)	# save_optimized # debug(is_not_null)
 	"""
 
-	# create_cmd_file_after_generate(filter)
+	k_skip = []
+
+	# create_cmd_file_after_generate(filter) # default_filter_job
 	for k, v in some_dict.items():
+		if os.path.exists(".".join([k, "bak"])):  # skip_backup
+			try:
+				os.remove(k.replace(sf.split(".")[-1], "cmd"))  # delete_from_src
+			except BaseException as e:
+				logging.error("@some_dict/@k/@error %s" % (k, str(e)))
+			else:
+				k_skip.append(k.split("\\")[-1])
+				logging.info("@some_dict/@k %s" % k)
+
+			continue
+
 		try:
 			assert os.path.exists(k), ""
 		except AssertionError:
 			logging.warning("@k no file %s exists" % k)
 		else:
-			logging.info("Файл %s найден и будет записано %d строк(и)" % (k, len(v)))
+			logging.info("Файл %s найден и будет записано %d строк(и)" % (k, len(v)))				
 
 			with open(
 				k.replace(k.split(".")[-1], "cmd"), "w", encoding="utf-8"
@@ -3407,7 +3355,7 @@ def calc_parts(
 					(fsize2, os.path.exists(k.replace(k.split(".")[-1], "cmd")))
 				), ""
 			except AssertionError:
-				continue
+				logging.warning("@fsize2/@cmd %s is null or not exists" % k)
 			else:
 				os.remove(
 					k.replace(k.split(".")[-1], "cmd")
@@ -3415,12 +3363,36 @@ def calc_parts(
 	else:
 		logging.info("end calc_parts %s" % str(datetime.now()))  # debug
 
+	# @trimmer_base; load / create(if_error)
+	try:
+		with open(trimer_base, encoding="utf-8") as tbf:
+			some_dict = json.load(tbf)
+	except BaseException:
+		some_dict = {}
+
+		with open(trimer_base, "w", encoding="utf-8") as tbf:
+			json.dump(some_dict, tbf, ensure_ascii=False, indent=4, sort_keys=False)
+
+	try:
+		assert some_dict, ""
+	except AssertionError:
+		logging.warning("@some_dict is null")
+	else:
+		some_dict: dict[str, list] = {
+			k2:v2 for k2, v2 in some_dict.items() if not k2.split("\\")[-1] in k_skip
+		}  # skip_files_not_included # python 3.9(-hide/debug)
+
+		with open(trimer_base, "w", encoding="utf-8") as tbf:
+			json.dump(some_dict, tbf, ensure_ascii=False, indent=4, sort_keys=False)		
+
 	try:
 		assert some_dict, ""
 	except:
 		some_dict = {}
 	else:
-		some_dict = {k: v for k, v in some_dict.items() if os.path.exists(k) and v}
+		some_dict = {
+			k: v for k, v in some_dict.items() if os.path.exists(k) and v
+		}
 
 	with open(trimer_base, "w", encoding="utf-8") as tbf:
 		json.dump(
@@ -3441,37 +3413,40 @@ async def scan_folder(
 
 	# generate_files_from_folder
 	try:
-		folders = [
+		folders: list[str] = [
 			os.path.join(a, cf)
 			for a, _, c in os.walk(fsf)
 			for cf in c
 			if os.path.isdir(a)
-		]  # in_folders
+		]  # in_folders # python 3.9(-hide/debug)
+
 		assert folders, ""
 	except AssertionError:
-		folders = [
+		folders: list[str] = [
 			os.path.isdir(a, bf)
 			for a, b, _ in os.walk(fsf)
 			for bf in b
 			if os.path.isdir(os.path.join(a, bf))
-		]  # in_subfodlers
+		]  # in_subfodlers # python 3.9(-hide/debug)
 	finally:
 		logging.info("@folders %s" % ";".join(folders))
 
 	folders = sorted([*folders], key=os.path.getctime) if folders else []  # getmtime -> debug(getctime/optimal)
 
-	files = [
+	files: list[str] = [
 		os.path.join(folders, f)
 		for f in os.listdir(folders)
 		if os.path.isfile(os.path.join(folders, f)) and video_regex.findall(f)
-	]
+	]  # python 3.9(-hide/debug)
 
 	return files
 
 
-def ms_to_time(ms: int = 0, mn: int = 60) -> int:
+def ms_to_time(ms: int = 0, mn: int = 60) -> int:  # hide # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
 	try:
-		h, m, s = ms // 3600, ms % 3600 // 60, ms % 3600 % 60
+		h, m, s = (
+			ms // 3600, ms % 3600 // 60, ms % 3600 % 60
+		)
 		h_m_s_str = (ms, str(h), str(m), str(s))
 		assert all((h, m, s)), (
 			"Первоначально %d, время %s:%s:%s" % h_m_s_str
@@ -3543,7 +3518,8 @@ D = C + (A * B) # new_time = datetime.now() - timedelta(seconds=60); print("%s:%
 """
 
 
-def speed_calc(filename, date1, date2) -> int:
+# speed_calc(filename, date1, date2, /) -> int:  # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
+def speed_calc(filename, date1, date2):
 	"""скорость обработки данных (v = s / t)"""
 	speed_file: float = 0
 
@@ -3562,9 +3538,8 @@ def speed_calc(filename, date1, date2) -> int:
 		logging.info("@fsize %d" % fsize)
 
 		try:
-			speed_file = (
-				fsize / abs(date1 - date2).seconds
-			)  # S = A / T # скорость передачи # V = S / T
+			speed_file = fsize / abs(date1 - date2).seconds  # S = A / T # скорость передачи # V = S / T
+
 			assert all(
 				(speed_file, abs(date1 - date2).seconds > 0)
 			), ""  # speed_file > 0, time > 0
@@ -3611,7 +3586,8 @@ def speed_calc(filename, date1, date2) -> int:
 	return speed_file
 
 
-def time_calc(filename, speed_file) -> int:
+# time_calc(filename, speed_file, /) -> int:  # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
+def time_calc(filename, speed_file):
 	"""время обработки файла ( t = s / v)"""
 	time_file = 0.0
 	time_list = []
@@ -3646,7 +3622,9 @@ def time_calc(filename, speed_file) -> int:
 		time_str = ""
 
 		try:
-			time_file = int(time_file) if not isinstance(time_file, int) else time_file
+			time_file = (
+				int(time_file) if not isinstance(time_file, int) else time_file
+			)
 		except:  # ValueError
 			time_file = 0
 
@@ -3686,7 +3664,9 @@ def time_calc(filename, speed_file) -> int:
 		)
 
 		try:
-			fl = {k: v for k, v in fl.items() if os.path.exists(k)}
+			fl = {
+				k: v for k, v in fl.items() if os.path.exists(k)
+			}
 
 			assert fl, ""
 		except AssertionError:
@@ -3709,7 +3689,8 @@ def time_calc(filename, speed_file) -> int:
 	return time_file
 
 
-def data_calc(filename, time_file, speed_file) -> int:
+# data_calc(filename, time_file, speed_file, /) -> int:  # *(pos_or_keyw), ... # ..., \(pos) # python 3.8
+def data_calc(filename, time_file, speed_file):
 	"""общий размер файла (s = t * v)"""
 	sizes_dict: dict = {}
 
@@ -3718,9 +3699,8 @@ def data_calc(filename, time_file, speed_file) -> int:
 	sizes_dict[3] = "Gb"
 
 	try:
-		data_file = (
-			time_file * speed_file
-		)  # A = T * S # сколько данных было передано # S = T * V
+		data_file = time_file * speed_file  # A = T * S # сколько данных было передано # S = T * V
+		
 		assert data_file, ""
 	except AssertionError:
 		logging.warning("@data_file is null, current: %s" % filename)
@@ -3729,7 +3709,9 @@ def data_calc(filename, time_file, speed_file) -> int:
 		logging.error("@data_file current: %s, error: %s" % date_file_err)
 
 	try:
-		data_file = int(data_file) if not isinstance(data_file, int) else data_file
+		data_file = (
+			int(data_file) if not isinstance(data_file, int) else data_file
+		)
 	except:  # ValueError
 		data_file = 0
 
@@ -3772,7 +3754,7 @@ def data_calc(filename, time_file, speed_file) -> int:
 	return data_file
 
 
-def fspace(src: str = "", dst: str = "") -> bool:  # 11
+def fspace(src: str = "", dst: str = "") -> bool:  # 11  # hide # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
 	try:
 		assert src and os.path.exists(
 			src
@@ -3799,7 +3781,11 @@ def fspace(src: str = "", dst: str = "") -> bool:  # 11
 
 	try:
 		fspace_status = all(
-			(fsize, dsize, int(fsize // (dsize / 100)) <= 100)
+			(
+				fsize,
+				dsize,
+				int(fsize // (dsize / 100)) <= 100
+			)
 		)  # fspace(ok-True,bad-False)
 	except:
 		fspace_status = False  # fspace(error-False)
@@ -3807,7 +3793,7 @@ def fspace(src: str = "", dst: str = "") -> bool:  # 11
 		return fspace_status
 
 
-def calcProcessTime(starttime, cur_iter, max_iter, filename):
+def calcProcessTime(starttime, cur_iter, max_iter, filename, /):  # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
 	telapsed = time() - starttime  # diff_time
 	testimated = (telapsed / cur_iter) * (max_iter)  # is in percent
 
@@ -3831,7 +3817,7 @@ def sec_to_time(sec: int = 0) -> str:
 			)
 
 
-def avg_calc(s, l):
+def avg_calc(s, l, /):  # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
 	try:
 		ag = lambda s, l: s // l
 		assert l, ""
@@ -3849,6 +3835,7 @@ def avg_calc(s, l):
 	return ag
 
 
+# sp ~ try automatic speed from ips(qos)
 def calc_download_time(
 	filename, fs: int = 0, sp: int = 10
 ):  # fs = real_fs // (1024 * 2), sp = (10/8) * 1024 # 10/8 mb/s(real_speed~10mb) * 1024 kb(is_convert~1280kb)
@@ -3879,13 +3866,18 @@ def calc_download_time(
 		except AssertionError:
 			sp = int(sp)
 
-	if any((not fs, not sp)):
+	if any(
+		(
+			not fs,
+			not sp
+		)
+	):
 		return (filename, 0, 0)
 
 	return (filename, (fs * 1024 / sp) // 60, (fs * 1024 / sp) % 60)  # mm:ss
 
 
-async def older_or_newbie(days, filename):  # filename(folder)
+async def older_or_newbie(days, filename):  # filename(folder) # hide # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
 	days_ago = datetime.now() - timedelta(days=days)
 	filetime = datetime.fromtimestamp(os.path.getctime(filename))
 
@@ -3904,7 +3896,7 @@ async def older_or_newbie(days, filename):  # filename(folder)
 # lanczos -> neighbor -> some? # need_best_quailiy # default(downscale), debug(upscale) # insert_in_cmd(debug/test)
 def upscale_video(
 	width: int = 640, height: int = 480, resolution: str = "1080"
-):  # r(resolution) # debug(need_test's)
+):  # r(resolution) # debug(need_test's) # hide # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
 	"""
 	# @outupt_%flags%_(width)i(height)p.%ext% / example: "Klon(2021)_lanczos_900i480p_.mp4"
 
@@ -3968,8 +3960,57 @@ def sound_notify(text: str = ""):  # 2
 			# write_log("debug soundnotify[ok]", "Текст [%s] успешно произнесён" % text)
 
 
-def find_percent(value: int = 0, percent: int = 0):
+def find_percent(value: int = 0, percent: int = 0):  # hide # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
+	# return value * (percent / 100)  # 20000 * (30 / 100) = 6000
 	return (value * percent) / 100  # (80 * 30) / 100 ~ 24 -> 8 * 3 = 24
+
+
+# python 3.9
+"""
+'farhad_python'.removeprefix('farhad_')
+
+#возвращает python
+
+'farhad_python'.removesuffix('_python')
+
+#возвращает farhad
+
+# merge_dict
+dict1 = {"a": 1, "b": 2, "c": 3}
+dict2 = {"d": 4, "a": 2}
+
+dict_new = dict1 | dict2 # look_like_merge_set
+dict1 |= dict2 # is_update_dict
+
+(List / Dict / Tuple) ~ no need import for use # is_sample # list[str] # dict[str, "str"] # tuple[int]
+
+def find_default(dct: dict[str, int]) -> int
+	return dct["test1"]
+
+items = {
+	"test1": 1,
+	"test2": 2,
+	"test3": 3,
+}
+
+print(find_default(items))
+
+alpha - new features, beta - no update prerelease, minor - ?
+"""
+
+# case(somekey(+func)+value)
+"""
+# --1--
+# result = {'a': lambda x: x * 5, 'b': lambda x: x + 7, 'c': lambda x: x - 2}.get(value, lambda x: x)(x)  # switch_statement(lambda_func/last_is_some_value)
+# result = {'a': lambda x: x * 5, 'b': lambda x: x + 7, 'c': lambda x: x - 2}.get(value, lambda x: x)(666)  # 3330 # switch_statement(lambda_func/last_is_some_value)
+result = {'a': lambda x: x * 5, 'b': lambda x: x + 7, 'c': lambda x: x - 2}["a"](666)  # 3330
+
+# --2--
+# choices = {'a': 1, 'b': 2}
+# result = choices.get(key, 'default')
+result = choices.get("a", 'default')  # 1
+result = choices.get("c", 'default')  # default
+"""
 
 
 if __name__ == "__main__":  # skip_main(debug)
@@ -4057,10 +4098,14 @@ if __name__ == "__main__":  # skip_main(debug)
 			logging.info("@two_periods equal: %s" % str(a))
 			pj_dict[a.strip()] = "%s" % a
 		elif len(a) != len(b):
-			logging.info("@two_periods/@a/@b diff: %s" % ";".join(map(str, [a, b])))
+			logging.info("@two_periods/@a/@b diff: %s" % ";".join(
+				map(str, [a, b]))
+			)
 			pj_dict[a.strip()] = "%s" % b
 
-	pj_dict = {k: k if k == v else v for k, v in pj_dict.items()}  # debug
+	pj_dict = {
+		k: v if k == v else v for k, v in pj_dict.items()
+	}  # debug
 
 	with open(period_json, "w", encoding="utf-8") as pjf:
 		json.dump(pj_dict, pjf, ensure_ascii=False, indent=4, sort_keys=True)
@@ -4096,7 +4141,9 @@ if __name__ == "__main__":  # skip_main(debug)
 	except:
 		some_dict = {}
 	else:
-		some_dict = {k: v for k, v in some_dict.items() if os.path.exists(k) and v}
+		some_dict = {
+			k: v for k, v in some_dict.items() if os.path.exists(k) and v
+		}
 
 	# @new_base
 	"""
@@ -4162,11 +4209,11 @@ if __name__ == "__main__":  # skip_main(debug)
 				except AssertionError:
 					continue
 				else:
-					files = [
+					files: list[str] = [
 						os.path.join(os.path.join(a, bf), f)
 						for f in os.listdir(os.path.join(a, bf))
 						if os.path.isfile(os.path.join(os.path.join(a, bf), f))
-					]  # subfolders
+					]  # subfolders # python 3.9(-hide/debug)
 
 					for f in filter(lambda x: os.path.isfile(x), tuple(files)):
 						try:
@@ -4225,34 +4272,6 @@ if __name__ == "__main__":  # skip_main(debug)
 
 			continue  # if_winerror
 
-		# hide_avg
-		"""
-		try:
-			days_ago = abs(today - ndate).days
-			assert bool(days_ago >= 0), ""
-		except AssertionError:  # if_none(today)
-			continue  # days_ago = 0
-		else:
-			sm += days_ago
-			ln += 1
-
-			try:
-				ag = sm // ln
-				assert bool(ag > 0), ""
-			except AssertionError:
-				logging.warning("@ag current day, file: %s" % sf)
-			else:
-				logging.info("@ag %d days ago, file: %s" % (ag, sf))
-
-				# max_ag = (
-					# ag if max_ag < ag else max_ag
-				# )
-		"""
-
-	# ag = (
-	# max_ag if max_ag else ag
-	# )
-
 	for sf in filter(
 		lambda x: video_regex.findall(x), tuple(some_files)
 	):  # pass_2_of_3
@@ -4300,26 +4319,30 @@ if __name__ == "__main__":  # skip_main(debug)
 		]  # newbie_folders(+avg_filter) # is_max_days
 		"""
 
+		days_count = (30, max_days_by_year)  # manual_days_setup(range_by_days_by_default/range_by_days2) # 
+
 		# @older_or_newbie # days=ag ~ avg(+time) # days=max_days_by_year ~ year(+time)
 		try:
 			oon = asyncio.run(
-				older_or_newbie(days=30, filename=sf)
-			)  # 30_days(+time/filter) # True(newbie) / False(older)
+				older_or_newbie(days=days_count[0], filename=sf)
+			)  # X_days(+time/filter) # True(newbie) / False(older)
 			assert oon, ""
 		except AssertionError:
+			# """
 			oon = asyncio.run(
-				older_or_newbie(days=90, filename=sf)
-			)  # 90_days(+time/filter) # True(newbie) / False(older) # debug(skip_older)
+				older_or_newbie(days=days_count[1], filename=sf)
+			)  # year(+time/filter) # True(newbie) / False(older) # debug(skip_older)
 			logging.warning(
-				"@oon try 30 to 90 days filter file, current: %s" % sf.split("\\")[-1]
+				"@oon try %d to %d days filter file, current: %s" % (days_count[0], days_count[1], sf.split("\\")[-1])
 			)  # debug(skip_older)
-			period_list_filter = [oon]  # filter(90_days)
+			# """
+			period_list_filter = [oon]  # [False]
 		except BaseException as e:
 			logging.error("@oon error: %s, current: %s" % (str(e), sf.split("\\")[-1]))
 			period_list_filter = [False]  # debug(is_error_by_older)
 		else:
-			logging.info("@oon 30 days filter file, current: %s" % sf.split("\\")[-1])
-			period_list_filter = [oon]  # filter(30_days)
+			logging.info("@oon %d days filter file, current: %s" % (days_count[0], sf.split("\\")[-1]))
+			period_list_filter = [oon]
 
 		oon_status = (
 			"@oon newbie file, current: %s" % sf.split("\\")[-1]
@@ -4363,10 +4386,13 @@ if __name__ == "__main__":  # skip_main(debug)
 
 	# '''
 	# short_files
+	
+	"""
 	short_list = list(
 		set([crop_filename_regex.sub("", sf.split("\\")[-1]) for sf in some_files])
 	)  # some_jobs
-	short_list.sort()
+	"""
+	short_list = [sf.split("\\")[-1].strip() for sf in filter(lambda x: os.path.getctime(x), tuple(some_files))]  # filter_by_date_create(use_short_filename)
 
 	# @fcd.txt
 	with open(combine_base, "w", encoding="utf-8") as cbf:  # fcd.txt
@@ -4442,7 +4468,7 @@ if __name__ == "__main__":  # skip_main(debug)
 			cinema_filter = True
 	else:
 		if cinema_filter:
-			sort_index = 1 # filesize
+			sort_index = 4 # date_create_file
 
 	for sf in filter(lambda x: seas_regex.findall(x), tuple(some_files)):
 		try:
@@ -4453,13 +4479,18 @@ if __name__ == "__main__":  # skip_main(debug)
 			tvseries_filter = True
 	else:
 		if tvseries_filter:
-			sort_index = 2 # short_filename(no_seas/no_year/no_ext)
+			sort_index = 2 # filesize
+
+	logging.info("@sort_index/cinema_filter/tvseries_filter %s" % ";".join(
+		map(str, (sort_index, cinema_filter, tvseries_filter)))
+	)
 
 	# """
 	try:
-		# short = [0] / fsize = [1] / short_no_seasyear [2] / mtime [-1] # debug(sort_type)
+		# fullname = [0], short = [1] / fsize = [2] / short_no_seasyear [3] / mtime [-1] # debug(sort_type)
 		file_and_time = [
 			(
+				sf.strip(),
 				sf.split("\\")[-1],
 				os.path.getsize(sf),
 				crop_filename_regex.sub("", sf.split("\\")[-1]),
@@ -4480,16 +4511,8 @@ if __name__ == "__main__":  # skip_main(debug)
 		file_and_time = fat_sort
 		# debug # @combine_base2
 		try:
-			short_list2 = list(
-				set(
-					[
-						sl_regex.sub("", f[0].strip())
-						if not "_Rus" in sl_regex.sub("", f[0].strip())
-						else sl_regex.sub("", f[0].strip()).replace("_Rus", "")
-						for *f, _ in file_and_time
-					]
-				)
-			)
+			short_list2 = [f[1].strip() for *f, _ in file_and_time if os.path.exists(f[0]) and f[1]] # if_exist_file_and_have_short_filename(sort_by_index)
+
 			assert short_list2, ""
 		except AssertionError:  # if_null
 			logging.warning(
@@ -4561,13 +4584,13 @@ if __name__ == "__main__":  # skip_main(debug)
 		cur_iter += 1  # -> cur_iter += os.path.getsize(sf) # debug
 
 		try:
-			cmd_str = calc_parts(
+			cmd_str: list[str] = calc_parts(
 				filename=sf.strip(),
 				is_update=True,
 				parts=10,
 				is_run=False,
 				save_last=[True],
-			)  # debug(save_last - only_last_line) # parts/at_last_key_calculate_to_end_framecount
+			)  # debug(save_last - only_last_line) # parts/at_last_key_calculate_to_end_framecount # python 3.9(-hide/debug)
 			assert cmd_str, ""
 		except AssertionError:  # if_null(ready)
 			print(
@@ -4705,12 +4728,12 @@ if __name__ == "__main__":  # skip_main(debug)
 	seas_regex = re.compile(r"_[\d+]{2}s[\d+]{2,4}e", re.I)
 	year_regex = re.compile(r"\([\d+]{4}\)", re.I)
 
-	type_check1 = [
+	type_check1: list[str] = [
 		sf.strip() for sf in some_files if seas_regex.findall(sf.split("\\")[-1])
-	]  # tv_series(filter)
-	type_check2 = [
+	]  # tv_series(filter) # python 3.9(-hide/debug)
+	type_check2: list[str] = [
 		sf.strip() for sf in some_files if year_regex.findall(sf.split("\\")[-1])
-	]  # cinema(filter)
+	]  # cinema(filter) # python 3.9(-hide/debug)
 
 	# @add_new_line_at_start_file(with_file)
 	"""
@@ -4751,9 +4774,35 @@ if __name__ == "__main__":  # skip_main(debug)
 	print(''.join(num))	 # +91956612345
 	"""
 
-	# after_add_segment_line_at_start(debug)
+	sf_skip = []
+
+	# after_add_segment_line_at_start(debug) # project_filter_job
 	# """
 	for sf in filter(lambda x: os.path.exists(x), tuple(some_files)): # any_exists / "filter(only_files)"
+		if os.path.exists(".".join([sf, "bak"])):  # skip_backup
+			try:
+				os.remove(sf.replace(sf.split(".")[-1], "cmd"))  # delete_from_src
+			except BaseException as e:
+				logging.error("@some_files/@sf/@error %s" % ";".join(
+					map(str, (sf, e)))
+				)  # some_files_err
+			else:
+				sf_skip.append(sf.split("\\")[-1])
+				logging.info("@some_files/@sf %s" % sf)
+
+			"""
+			try:
+				os.remove(os.path.join(path_to_done, sf.split("\\")[-1].replace(sf.split(".")[-1], "cmd")))  # delete_from_dst
+			except BaseException as e2:
+				logging.error("@some_files/@+sf/@error %s" % ";".join(
+					map(str, (os.path.join(path_to_done, sf.split("\\")[-1].replace(sf.split(".")[-1], "cmd")), str(e2))))
+				)   # some_files_err
+			else:
+				logging.info("@some_files/@+sf %s" % os.path.join(path_to_done, sf.split("\\")[-1].replace(sf.split(".")[-1], "cmd")))
+			"""
+
+			continue				
+		
 		try:
 			assert os.path.exists(
 				os.path.join(
@@ -4822,48 +4871,157 @@ if __name__ == "__main__":  # skip_main(debug)
 						cf.write(lines)  # last_lines
 	# """
 
+	# @trimmer_base; load / create(if_error)
+	try:
+		with open(trimer_base, encoding="utf-8") as tbf:
+			some_dict = json.load(tbf)
+	except BaseException:
+		some_dict = {}
+
+		with open(trimer_base, "w", encoding="utf-8") as tbf:
+			json.dump(some_dict, tbf, ensure_ascii=False, indent=4, sort_keys=False)				
+
+	try:
+		assert some_dict, ""
+	except AssertionError:
+		logging.warning("@some_dict is null")
+	else:
+		some_dict: dict[str, list] = {
+			k2:v2 for k2, v2 in some_dict.items() if not k2.split("\\")[-1] in sf_skip
+		}  # skip_files_not_included # python 3.9(-hide/debug)
+		
+		with open(trimer_base, "w", encoding="utf-8") as tbf:
+			json.dump(some_dict, tbf, ensure_ascii=False, indent=4, sort_keys=False)					
+
+	# @sf_skip # res = list(filter(lambda x: x[0] != x[1], zip(test_list1, test_list2)))
+
 	try:
 		with open(sequence_list, encoding="utf-8") as slf:
-			sl = slf.readlines()  # sort_by_index
+			sl = slf.readlines()  # sort_by_index(sf_skip)
 
 		assert sl, ""
 	except AssertionError:
 		logging.warning("@sequence_list no files")
 	else:
+		# pass_1_of_2
+		res = []
+		# res = list(set([j for i in sf_skip for j in sl if not i in j])) # unique_at_end
+
+		if all(
+			(
+				sf_skip,
+				len(sf_skip) <= len(sl2)
+			)
+		):
+			for i in sf_skip:
+				for j in sl:
+					if not i.split("\\")[-1] in j:
+						try:
+							assert bool(j in res), ""
+						except AssertionError:
+							res.append(j)  # unique_always
+
+			try:
+				assert res, ""
+			except AssertionError:
+				logging.warning("@sf_skip[1] is null")
+			else:
+				sl = res
+				logging.info("@sf_skip filter: %d, files: %d" % (len(sl), len(sf_skip)))
+
+		# pass_2_of_2 # filter(lambda x: x.split("\\")[-1] not in sl, sf_skip) # debug
 		with open(sequence_list, "w", encoding="utf-8") as slf:
 			slf.writelines(
-				"%s" % s for s in filter(lambda x: "copy" not in x, tuple(sl))
-			)  # skip_copy
+				"%s" % s for s in list(filter(lambda x: not "copy" in x, tuple(sl)))
+			)  # skip_copy(-skip_files) # not sf_skip in x # 'in <string>' requires string as left operand, not list
 
 		logging.info("@sequence_list %d files" % len(sl))
 
+	# @sf_skip # res = list(filter(lambda x: x[0] != x[1], zip(test_list1, test_list2)))		
+
 	try:
 		with open(sequence_list2, encoding="utf-8") as slf2:
-			sl2 = sorted(slf2.readlines(), reverse=False)  # abc_sort
+			sl2 = sorted(slf2.readlines(), reverse=False)  # abc_sort(sf_skip)
 
 		assert sl2, ""
 	except AssertionError:
 		logging.warning("@sequence_list2 no files")
 	else:
+		# pass_1_of_2
+		res2 = []
+		# res2 = list(set([j for i in sf_skip for j in sl2 if not i in j])) # unique_at_end
+
+		if all(
+			(
+				sf_skip,
+				len(sf_skip) <= len(sl2)
+			)
+		):
+			for i in sf_skip:
+				for j in sl2:
+					if not i.split("\\")[-1] in j:
+						try:
+							assert bool(j in res), ""
+						except AssertionError:
+							res2.append(j)  # unique_always
+
+			try:
+				assert res, ""
+			except AssertionError:
+				logging.warning("@sf_skip[2] is null")
+			else:
+				sl2 = res2
+				logging.info("@sf_skip filter: %d, files: %d" % (len(sl2), len(sf_skip)))
+
+		# pass_2_of_2 # filter(lambda x: x.split("\\")[-1] not in sl2, sf_skip) # debug
 		with open(sequence_list2, "w", encoding="utf-8") as slf2:
 			slf2.writelines(
-				"%s" % s2 for s2 in filter(lambda x: "copy" not in x, tuple(sl2))
-			)  # skip_copy
+				"%s" % s2 for s2 in list(filter(lambda x: not "copy" in x, tuple(sl2)))
+			)  # skip_copy(-skip_files) # not sf_skip in x # 'in <string>' requires string as left operand, not list
 
 		logging.info("@sequence_list2 %d files" % len(sl2))
 
+	# @sf_skip # res = list(filter(lambda x: x[0] != x[1], zip(test_list1, test_list2)))	
+
 	try:
 		with open(sequence_list3, encoding="utf-8") as slf3:
-			sl3 = sorted(slf3.readlines(), reverse=False)  # abc_sort
+			sl3 = sorted(slf3.readlines(), reverse=False)  # abc_sort(sf_skip)
 
 		assert sl3, ""
 	except AssertionError:
 		logging.warning("@sequence_list3 no files")
 	else:
+		# pass_1_of_2
+		res3 = []
+		# res3 = list(set([j for i in sf_skip for j in sl3 if not i in j])) # unique_at_end
+
+		if all(
+			(
+				sf_skip,
+				len(sf_skip) <= len(sl3)
+			)
+		):
+			for i in sf_skip:
+				for j in sl3:
+					if not i.split("\\")[-1] in j:
+						try:
+							assert bool(j in res), ""
+						except AssertionError:
+							res3.append(j)  # unique_always
+
+			try:
+				assert res, ""
+			except AssertionError:
+				logging.warning("@sf_skip[3] is null")
+			else:
+				sl3 = res3
+				logging.info("@sf_skip filter: %d, files: %d" % (len(sl3), len(sf_skip)))
+
+		# pass_2_of_2 # filter(lambda x: x.split("\\")[-1] not in sl3, sf_skip) # debug
 		with open(sequence_list3, "w", encoding="utf-8") as slf3:
 			slf3.writelines(
-				"%s" % s3 for s3 in filter(lambda x: "copy" not in x, tuple(sl3))
-			)  # skip_copy
+				"%s" % s3 for s3 in list(filter(lambda x: not "copy" in x, tuple(sl3)))
+			)  # skip_copy(-skip_files) # not sf_skip in x # 'in <string>' requires string as left operand, not list
 
 		logging.info("@sequence_list3 %d files" % len(sl3))
 
@@ -4914,7 +5072,9 @@ if __name__ == "__main__":  # skip_main(debug)
 			"@finish/@job_count %s" % ", ".join(map(str, (finish, job_count)))
 		)
 	else:
-		logging.info("@finish/@job_count %s" % ", ".join(map(str, (finish, job_count))))
+		logging.info("@finish/@job_count %s" % ", ".join(
+			map(str, (finish, job_count)))
+		)
 
 	sizes_dict = {}
 
@@ -4929,19 +5089,19 @@ if __name__ == "__main__":  # skip_main(debug)
 		logging.warning("@dsize null %s" % dletter)
 	else:
 		if os.path.exists(log_file) and os.path.getsize(log_file):
-			fsizes_lst = [
+			fsizes_lst: list[tuple] = [
 				(os.path.getsize(log_file) // (1024**i), sizes_dict[i])
 				for i in range(1, 4)
 				if os.path.getsize(log_file) // (1024**i) > 0
-			]
+			]  # python 3.9
 			logging.info("@dsize logging size: %s" % str(fsizes_lst))
 
 		if dsize:
-			fsizes_lst = [
+			fsizes_lst: list[tuple] = [
 				(dsize // (1024**i), sizes_dict[i])
 				for i in range(1, 4)
 				if dsize // (1024**i) > 0
-			]
+			]  # python 3.9
 			logging.info("@dsize logging dsize: %s" % str(fsizes_lst))
 
 	dt = datetime.now()
@@ -4952,7 +5112,13 @@ if __name__ == "__main__":  # skip_main(debug)
 	logging.info(f"@finish {no_ms}")
 
 	# '''
-	if dt.hour < mytime["sleeptime"][1]:
+	# dt.hour < mytime["sleeptime"][1] and dt.weekday() <= mytime["weekindex"] # midnight-7am
+	if any(
+		(
+			dt.hour >= mytime["dnd"][0],
+			all((dt.hour < mytime["dnd"][1], dt.weekday() >= 0))
+		)
+	):  # 10pm-7am
 		run(
 			[
 				"cmd",
@@ -4965,7 +5131,7 @@ if __name__ == "__main__":  # skip_main(debug)
 				"Чтобы отменить выключение, выполните в командной строке shutdown /a",
 			],
 			shell=False,
-		)  # shutdown(15min) (midnight - 7am) # start_after # if_updates
+		)  # shutdown(15min) (midnight - 7am) + filter_weekday # start_after # if_updates
 
 		sound_notify(
 			r"Чтобы отменить выключение, выполните в командной строке shutdown /a"

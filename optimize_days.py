@@ -10,15 +10,18 @@
 # from video_trimmer2 import *
 # import gevent.monkey # pip install --user gevent # is_async(debug)
 # import psutil
-from datetime import datetime, timedelta  # дата и время
-from shutil import (
-	disk_usage,
-)  # copy, move # файлы # usage(total=16388190208, used=16144154624, free=244035584)
-from subprocess import (
-	run,
-)  # TimeoutExpired, check_output, Popen, call, PIPE, STDOUT # Работа с процессами # console shell=["True", "False"]
-from time import time, sleep
-import asyncio
+# import tomllib # look like json - parsing TOML (Python 3.11)
+from datetime import (
+	datetime,
+	timedelta,
+) # дата и время
+from shutil import disk_usage  # copy, move # файлы # usage(total=16388190208, used=16144154624, free=244035584)
+from subprocess import run  # TimeoutExpired, check_output, Popen, call, PIPE, STDOUT # Работа с процессами # console shell=["True", "False"]
+from time import (
+	time,
+	sleep,
+)
+import asyncio  # TaskGroup(Python 3.11+)
 import json  # JSON (словарь)
 import logging  # журналирование и отладка
 import os  # система
@@ -31,7 +34,187 @@ import pyttsx3
 
 # Makes ANSI escape character sequences (for producing colored terminal text and cursor positioning) work under MS Windows.
 # Back, Cursor # Fore.color, Back.color # BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE # pip install --user colorama
-from colorama import Fore, Style, init
+from colorama import (
+	Fore,
+	Style,
+	init,
+)
+
+# from multiprocessing import Process # Process(target=compute_heavy).start() # join # Многопроцессорность: Применимо к вычислительно сложным задачам, позволяет всем менять ограничения GIL, используя несколько CPU 
+# from threading import Thread # Thread(target=disk_io_bound).start() # join # Многопоточность: Она оптимальна для задач, связанных с ожиданием I/O и возможностью параллельного выполнения, обусловленной освобождением GIL во время операций I/O. 
+# import asyncio # asyncio.run(async_io_operation()) # Asyncio: Лучший инструмент для асинхронных I/O-операций с эффективным переключением между задачами и снижением возможных проблем, связанных с многопоточностью.
+
+# python version requerments?
+"""
+# import tzdata # pip install --user -U tzdata
+import zoneinfo # pip install --user -U zoneinfo 
+from datetime import datetime
+
+# print(len(zoneinfo.available_timezones())) # >= 594
+
+timezone1 = zoneinfo.ZoneInfo("US/Pacific")
+print(datetime.now(tz=timezone1))
+"""
+
+# match case, python 3.10
+
+"""
+def switch():  # res(int)
+	res = 999
+
+	match res:
+		case 0 | 1 | 999:  # some_value_from_case
+			return "ok"
+		case _:
+			return "unknown"
+
+switch()  # ok <-> unknown
+
+point = [2, 5]  # [0, 3]
+
+def switch_list():  # point(list)
+	match point:
+		case 0, 3:
+			return ("No move")
+		case x, 3:
+			return (f"moved on x-axis - {x} points")
+		case 0, y:
+			return (f"moved on y-axis - {y} points")
+		case x, y:
+			return (f"moved along moth axes - {x}:{y} points")
+
+cmd = "quit"
+cmd2 = "menu start"
+cmd3 = "param go west"
+
+def switch_list2(cmd):
+	match cmd.split():
+		case ["quit"]:
+			print("we quited")
+		case ["menu", status]:
+			print(f"my status {status}")
+		case ["param", *two]:
+			print(f"params: {two}")
+		case _:
+			print("Unknown command")
+
+switch_list2(cmd)  # ?
+switch_list2(cmd2)  # ?
+switch_list2(cmd3)  # ?
+
+class Rectangle:
+	def __init__(self, width, height):
+		self.width = width
+		self.height = height
+
+class Circle:
+	def __init__(self, radius):
+		self.radius = radius
+
+def switch_class(shape):  # ?
+	match shape:
+		case Rectangle(width=w, height=h):
+			return w * h
+		case Circle(radius=r):
+			return 3.14 * r * r
+		case _:
+			return "Unknwon shape"
+
+result = swith_class(Circle(10))  # ?
+
+print(result)
+
+data = None
+data1 = ["bot"]
+data2 = ["user"]
+data3 = ["user", "Bob", 18]
+
+def switch_logic(data):
+	match data:
+		case [_, _, age] if age >= 18:
+			print("access granted")
+		case _:
+			print("access denied")
+
+# switch_logic(data1) # switch_logic(data2) # ? # bad
+switch_logic(data3) # ? # ok
+
+def switch_dict(dictionary):
+    # match case
+    match dictionary:
+        # pattern 1
+        case {"name": n, "age": a}:
+            print(f"Name:{n}, Age:{a}")
+        # pattern 2
+        case {"name": n, "salary": s}:
+            print(f"Name:{n}, Salary:{s}")
+        # default pattern
+        case _ :
+            print("Data does not exist")
+
+switch_dict({"name": "Jay", "age": 24})  # ?
+switch_dict({"name": "Ed", "salary": 25000})  # ?
+switch_dict({"name": "Al", "age": 27})  # ?
+switch_dict({})  # ?
+"""
+
+# try_except(note), python 3.11
+
+"""
+try:
+	raise ExceptionGroup("Description exception group", [ValueError("Some bad"), TypeError("Terrable"), ])
+exccept* ValueError as eg:  # TypeError, IndexError # Exception(all)
+	for exc in eg.exceptions:
+		print(f"{exc}")
+
+try:
+	var = val
+except Exception as e:
+	from datetime import datetime
+	# add_error_note(for_debug)
+	e.add_note(f"Script down at {datetime.now()}")
+	print(e.__notes__) # raise
+"""
+
+# TaskGroup, python 3.11
+
+"""
+import asyncio
+
+async def sleep(seconds: int) -> None:
+	await asyncio.sleep(seconds)
+	print(f"sleeped {second}s")
+
+async def old_main():
+	tasks = []
+	for seconds in (3, 1, 2):
+		tasks.append(asyncio.create_task(sleep(seconds)))
+	await asyncio.gather(*tasks)
+
+async def main():
+	async with asyncio.TaskGroup() as tg:
+		for seconds in (3, 1, 2):
+			tg.create_task(sleep(seconds))
+
+asyncio.run(main())
+"""
+
+# optimal_run_timer
+"""
+from time import time
+
+elapsed_list = []
+for i in range(10):
+	timer = time()
+	# func() # list / dict / str / sum / ...?
+	elapsed = time() - timer
+	elapsed_list.append(elapsed)
+
+avg_elapsed_time = sum(elapsed_list) // len(elapsed_list)
+print(f"%.3f second's" % avg_elapsed_time); sleep(avg_elapsed_time)
+"""
+
+# pip install --user bpython (interactive_color_terminal) # launch?
 
 # python -m trace --trace optimize_days.py
 
@@ -46,6 +229,8 @@ __author__ = "Sergey Ibragimov"
 # exit()
 
 # mklink /h optimizedays.py optimize_days.py
+
+# qos ~ 1 * 1024 = 1mb, speed ~ (5/8) * 1024 = 1280 kb/s
 
 """
 numbers = [1,2,3]
@@ -88,13 +273,17 @@ init(autoreset=True)
 # abspath_or_realpath
 basedir = os.path.dirname(os.path.abspath(__file__)).lower()  # folder_where_run_script
 script_path = os.path.dirname(os.path.realpath(__file__)).lower()  # is_system_older
-current_folder = "".join([
-	os.path.dirname(os.path.realpath(sys.argv[0])), "\\"
-])
+current_folder = "".join(
+	[
+		os.path.dirname(os.path.realpath(sys.argv[0])),
+		"\\"
+	])
 
 dletter = "".join(
-	[basedir.split("\\")[0], "\\"]
-)  # "".join(script_path[0:5]) if script_path else "".join(os.getcwd()[0:5])
+	[
+		basedir.split("\\")[0],
+		"\\"
+	])
 
 # logging(start)
 log_file = "%s\\debug.log" % script_path  # main_debug(logging
@@ -102,7 +291,11 @@ log_file = "%s\\debug.log" % script_path  # main_debug(logging
 # --- path's ---
 path_for_queue = r"d:\\downloads\\mytemp\\"
 path_to_done = "%sdownloads\\list\\" % dletter  # "c:\\downloads\\" # ready_folder
-path_for_folder1 = "".join([os.getcwd(), "\\"])  # "c:\\downloads\\new\\")
+path_for_folder1 = "".join(
+	[
+		os.getcwd(),
+		"\\"
+	])  # "c:\\downloads\\new\\")
 
 # list(json)_by_period
 all_period_base = "%s\\all_period.lst" % script_path
@@ -128,7 +321,9 @@ except BaseException: # AssertionError
 		level=logging.INFO,
 	)  # no_file
 else: # finally -> else
-	if dsize // (1024**2) > 0:  # any_Mb # debug
+	if (
+		dsize // (1024**2) > 0
+	):  # any_Mb # debug
 		logging.basicConfig(
 			handlers=[logging.FileHandler(log_file, "w", "cp1251")],
 			format="%(filename)s [ LINE:%(lineno)+5s ]# %(levelname)+8s [%(asctime)s]  %(message)s",
@@ -208,6 +403,14 @@ seasyear = re.compile(
 )  # MatchCase # season_and_year(findall) # +additional(_[\d+]{2}p)
 crop_filename_regex = re.compile(r"(?:(_[\d+]{2,4}s|\([\d+]{4}\)))(.*)", re.I)
 
+# a = "test|test2|test30|test40|test999"
+# a_regex = re.compile(r"test[\d+]{2,}?", re.M) # a_regex.findall(a) # ['test30', 'test40', 'test99']
+# a_regex = re.compile(r"test[\d+]{1,}", re.M) # a_regex.findall(a) # ['test2', 'test30', 'test40', 'test999']
+# a_regex = re.compile(r"test[\d+]??", re.M) # a_regex.findall(a) # ['test', 'test', 'test', 'test', 'test']
+# a_regex = re.compile(r"test[\d]?", re.M) # a_regex.findall(a) # ['test', 'test2', 'test3', 'test4', 'test9']
+# a_regex = re.compile(r"test[\d]", re.M) # a_regex.findall(a) # ['test2', 'test3', 'test4', 'test9']
+# a_regex = re.compile(r"test[\d+]{1,}", re.M) # list(set(a_regex.split(a))) # ['test|', '', '|']
+
 start = time()
 
 files_count = 0
@@ -216,9 +419,11 @@ folder_scan_full = []
 mytime = {
 	"jobtime": [9, 18, 5],
 	"dinnertime": [12, 14],
+	"dnd": [22, 8],
 	"sleeptime": [0, 8],
 	"anytime": [True],
-}  # sleep_time_less_hour # debug
+	"weekindex": 4,
+}  # sleep_time_less_hour # debug # weekindex (0 - 4, monday-friday)
 
 
 class Timer(object):
@@ -266,8 +471,10 @@ class Additional:
 		# noinspection PyBroadException # c:\folder\...\filename
 		try:
 			short_filename = "".join(
-				[self.filename[0], ":\\...\\", self.filename.split("\\")[-1]]
-			).strip()  # is_ok
+				[
+					self.filename[0], ":\\...\\",
+					self.filename.split("\\")[-1]
+				]).strip()  # is_ok
 		except:
 			short_filename = self.filename.strip()  # if_error_stay_old_filename
 
@@ -462,11 +669,21 @@ async def calc_number_of_day(
 	if is_default:
 		dt_calc = datetime.now()  # day / month / year
 
-		dt_str = ".".join(map(str, (dt_calc.day, dt_calc.month, dt_calc.year)))
+		dt_str = ".".join(
+			map(str, (dt_calc.day, dt_calc.month,	dt_calc.year))
+		)
 	elif not is_default:
-		dt_str = ".".join(map(str, (day, month, year)))
+		dt_str = ".".join(
+			map(str, (day, month,	year))
+		)
 
-	if all((sleep_if, dt_str == sleep_if, not is_default)):
+	if all(
+		(
+			sleep_if,
+			dt_str == sleep_if,
+			not is_default
+		)
+	):
 		sleep(2)
 
 	c1, c2, c3, c4 = 0, 0, 0, 0
@@ -529,7 +746,10 @@ async def calc_number_of_day(
 		and all((c4, find_c4 == c4))
 		and any((calc1, calc2, calc3, calc4))
 	):
-		print(";".join(map(str, (c1, c2, c3, c4, dt_str))), "from def")
+		print(";".join(
+			map(str, (c1, c2, c3, c4, dt_str))),
+			"from def"
+		)
 
 	return (int(c1), int(c2), int(c3), int(c4), dt_str)
 
@@ -697,13 +917,15 @@ else:
 
 clear_base_and_lists()
 
-logging.info("%s" % ";".join(map(str, (basedir, script_path))))
+logging.info("%s" % ";".join(
+	map(str, (basedir, script_path)))
+)
 
 try:
-	files_types = [
+	files_types: list[int] = [
 		0 if os.path.isfile(os.path.join(os.getcwd(), f)) else 1
 		for f in os.listdir(os.getcwd())
-	]
+	]  # python 3.9
 	assert files_types, ""
 except AssertionError:
 	logging.warning("@files_types no files or no folders")
@@ -720,8 +942,32 @@ dspace_another_drive = 0.0
 
 # dletter_and_dspace = {}
 
+# add_and_save_to_json(is_linux)
+"""
+import gio
+
+for mount in volume_monitor.get_mounts():
+    print(mount.get_name(), mount.get_icon())
+"""
+
+# is_for_portable_devices
+"""
+import win32api
+import win32file
+drives = win32api.GetLogicalDriveStrings()
+drives =  drives.split('\000')[:-1]
+
+for drive in drives:
+	if win32file.GetDriveType(drive)==win32file.DRIVE_REMOVABLE:
+		label,fs,serial,c,d = win32api.GetVolumeInformation(drive)
+		print(label)
+"""
+
 for dl in range(ord("c"), ord("z") + 1):
-	du = "".join([str(chr(dl)), ":\\"])
+	du = "".join([
+		str(chr(dl)),
+		":\\"
+	])
 
 	try:
 		optimal_total = int(disk_usage("%s" % du).total) // (1024 ** 3) # 10% free for faster (hdd/ssd)
@@ -739,7 +985,9 @@ for dl in range(ord("c"), ord("z") + 1):
 		logging.info(f"@optimal_total/@optimal_free/@optimal_used optimal space on {du}, free: {optimal_free}, used: {optimal_used}")  # "optimal space on du='c:\\\\', free: optimal_free=9, used: optimal_used=46"
 
 	# logging.info("@du %s" % ";".join(map(str, ("%s" % du, int(disk_usage(r"%s" % du).used))))
-	print(";".join(map(str, ("%s" % du, int(disk_usage("%s" % du).used)))))
+	print(";".join(
+		map(str, ("%s" % du, int(disk_usage("%s" % du).used))))
+	)
 
 	dspace_list.append(int(disk_usage(r"%s" % du).used))
 
@@ -807,10 +1055,17 @@ def unixtime_to_date(
 	return utd
 
 
-def ms_to_time(ms: int = 0, mn: int = 60) -> int:
+def ms_to_time(ms: int = 0, mn: int = 60) -> int:  # hide # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
 	try:
-		h, m, s = ms // 3600, ms % 3600 // 60, ms % 3600 % 60
-		h_m_s_str = (ms, str(h), str(m), str(s))
+		h, m, s = (
+			ms // 3600,
+			ms % 3600 // 60,
+			ms % 3600 % 60
+		)
+		h_m_s_str = (
+			ms, str(h), str(m), str(s)
+		)
+
 		assert all((h, m, s)), (
 			"Первоначально %d, время %s:%s:%s" % h_m_s_str
 		)  # is_assert_debug
@@ -818,7 +1073,12 @@ def ms_to_time(ms: int = 0, mn: int = 60) -> int:
 		logging.warning("Первоначально %d, время %s:%s:%s" % h_m_s_str)
 		# raise err
 	else:
-		h_m_s_str = (str(h), str(m), str(s))
+		h_m_s_str = (
+			str(h),
+			str(m),
+			str(s)
+		)
+
 		logging.info("Подсчет времени %s:%s:%s" % h_m_s_str)
 
 	h, m, s = map(int, (h, m, s))  # int(h), int(m), int(s)
@@ -835,7 +1095,7 @@ def ms_to_time(ms: int = 0, mn: int = 60) -> int:
 	return ms_time
 
 
-def fspace(src: str = "", dst: str = "") -> bool:  # 11
+def fspace(src: str = "", dst: str = "") -> bool:  # 11  # hide # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
 	try:
 		assert src and os.path.exists(
 			src
@@ -862,7 +1122,11 @@ def fspace(src: str = "", dst: str = "") -> bool:  # 11
 
 	try:
 		fspace_status = all(
-			(fsize, dsize, int(fsize // (dsize / 100)) <= 100)
+			(
+				fsize,
+				dsize,
+				int(fsize // (dsize / 100)) <= 100
+			)
 		)  # fspace(ok-True,bad-False)
 	except:
 		fspace_status = False  # fspace(error-False)
@@ -870,7 +1134,7 @@ def fspace(src: str = "", dst: str = "") -> bool:  # 11
 		return fspace_status
 
 
-def calcProcessTime(starttime, cur_iter, max_iter, filename):
+def calcProcessTime(starttime, cur_iter, max_iter, filename, /):  # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
 	telapsed = time() - starttime  # diff_time
 	testimated = (telapsed / cur_iter) * (max_iter)  # is in percent
 
@@ -894,7 +1158,7 @@ def sec_to_time(sec: int = 0) -> str:
 			)
 
 
-def avg_calc(s, l):
+def avg_calc(s, l, /):  # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
 	try:
 		ag = lambda s, l: s // l
 		assert l, ""
@@ -912,6 +1176,7 @@ def avg_calc(s, l):
 	return ag
 
 
+# sp ~ try automatic speed from ips(qos)
 def calc_download_time(
 	filename, fs: int = 0, sp: int = 10
 ):  # fs = real_fs // (1024*2), sp = (10/8)*1024
@@ -932,13 +1197,18 @@ def calc_download_time(
 	except:  # value_error
 		sp = 0
 
-	if any((not fs, not sp)):
+	if any(
+		(
+			not fs,
+			not sp
+		)
+	):
 		return (filename, 0, 0)
 
 	return (filename, (fs * 1024 / sp) // 60, (fs * 1024 / sp) % 60)  # mm:ss
 
 
-async def older_or_newbie(days, filename):  # filename(folder)
+async def older_or_newbie(days, filename):  # filename(folder) # hide # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
 	days_ago = datetime.now() - timedelta(days=days)
 	filetime = datetime.fromtimestamp(os.path.getctime(filename))
 
@@ -970,6 +1240,54 @@ def sound_notify(text: str = ""):  # 2
 		if text:
 			print(Style.BRIGHT + Fore.GREEN + "Текст [%s] успешно произнесён" % text)
 			# write_log("debug soundnotify[ok]", "Текст [%s] успешно произнесён" % text)
+
+
+# python 3.9
+"""
+'farhad_python'.removeprefix('farhad_')
+
+#возвращает python
+
+'farhad_python'.removesuffix('_python')
+
+#возвращает farhad
+
+# merge_dict
+dict1 = {"a": 1, "b": 2, "c": 3}
+dict2 = {"d": 4, "a": 2}
+
+dict_new = dict1 | dict2 # look_like_merge_set
+dict1 |= dict2 # is_update_dict
+
+(List / Dict / Tuple) ~ no need import for use # is_sample # list[str] # dict[str, "str"] # tuple[int]
+
+def find_default(dct: dict[str, int]) -> int
+	return dct["test1"]
+
+items = {
+	"test1": 1,
+	"test2": 2,
+	"test3": 3,
+}
+
+print(find_default(items))
+
+alpha - new features, beta - no update prerelease, minor - ?
+"""
+
+# case(somekey(+func)+value)
+"""
+# --1--
+# result = {'a': lambda x: x * 5, 'b': lambda x: x + 7, 'c': lambda x: x - 2}.get(value, lambda x: x)(x)  # switch_statement(lambda_func/last_is_some_value)
+# result = {'a': lambda x: x * 5, 'b': lambda x: x + 7, 'c': lambda x: x - 2}.get(value, lambda x: x)(666)  # 3330 # switch_statement(lambda_func/last_is_some_value)
+result = {'a': lambda x: x * 5, 'b': lambda x: x + 7, 'c': lambda x: x - 2}["a"](666)  # 3330
+
+# --2--
+# choices = {'a': 1, 'b': 2}
+# result = choices.get(key, 'default')
+result = choices.get("a", 'default')  # 1
+result = choices.get("c", 'default')  # default
+"""
 
 
 if __name__ == "__main__":
@@ -1009,7 +1327,8 @@ if __name__ == "__main__":
 		else:
 			file_and_filter = (f, seasyear.findall(f)[0])
 			faf.append(file_and_filter)
-			faf_sorted_tuple = sorted(faf, key=lambda faf: faf[1])
+	else:
+		faf_sorted_tuple = sorted(faf, key=lambda faf: faf[1])
 	"""
 
 	# need_read_subfolder_from_current_folder
@@ -1053,11 +1372,11 @@ if __name__ == "__main__":
 				except AssertionError:
 					continue
 				else:
-					files = [
+					files: list[str] = [
 						os.path.join(os.path.join(a, bf), f)
 						for f in os.listdir(os.path.join(a, bf))
 						if os.path.isfile(os.path.join(os.path.join(a, bf), f))
-					]  # subfolders
+					]  # subfolders # python 3.9
 
 					for f in filter(lambda x: os.path.isfile(x), tuple(files)):
 						try:
@@ -1082,16 +1401,11 @@ if __name__ == "__main__":
 	open(period_base, "w", encoding="utf-8").close()
 	open(all_period_base, "w", encoding="utf-8").close()
 
-	nt = 0
-	days = months = years = []
+	nt = mx1 = mx2 = mx3 = filter_max_iter = sm = ln = ag = 0
+	days = months = years = days = months = years = filter_some_folders = filter_null_folders = []
 	strt, cur_iter, max_iter = time(), 0, len(some_folders)
 	mx_set = te_set = set()
-	mx1 = mx2 = mx3 = 0
 	last_folder = ""
-	days = months = years = []
-	filter_max_iter = 0
-	filter_some_folders = filter_null_folders = []
-	sm = ln = ag = 0  # max_ag
 
 	for fsf in filter(
 		lambda x: os.path.isdir(x), tuple(some_subfolders)
@@ -1175,29 +1489,30 @@ if __name__ == "__main__":
 		]  # newbie_folders(+avg_filter) # is_max_days
 		"""
 
+		days_count = (30, max_days_by_year)  # manual_days_setup(range_by_days_by_default/range_by_days2) # 
+
 		# @older_or_newbie # days=ag ~ avg(+time) # days=max_days_by_year ~ year(+time)
 		try:
 			oon = asyncio.run(
-				older_or_newbie(days=30, filename=fsf)
-			)  # 30_days(+time/filter) # True(newbie) / False(older)
+				older_or_newbie(days=days_count[0], filename=fsf)
+			)  # X_days(+time/filter) # True(newbie) / False(older)
 			assert oon, ""
 		except AssertionError:
+			# """
 			oon = asyncio.run(
-				older_or_newbie(days=90, filename=fsf)
-			)  # 90_days(+time/filter) # True(newbie) / False(older) # debug(skip_older)
+				older_or_newbie(days=days_count[1], filename=fsf)
+			)  # year(+time/filter) # True(newbie) / False(older) # debug(skip_older)
 			logging.warning(
-				"@oon try 30 to 90 days filter folder, current: %s"
-				% fsf.split("\\")[-1]
+				"@oon try %d to %d days filter folder, current: %s" % (days_count[0], days_count[1], fsf.split("\\")[-1])
 			)  # debug(skip_older)
-			period_list_filter = [oon]  # filter(90_days)
+			# """
+			period_list_filter = [oon]  # [False]
 		except BaseException as e:
 			logging.error("@oon error: %s, current: %s" % (str(e), fsf.split("\\")[-1]))
 			period_list_filter = [False]  # debug(is_error_by_older)
 		else:
-			logging.info(
-				"@oon 30 days filter folder, current: %s" % fsf.split("\\")[-1]
-			)
-			period_list_filter = [oon]  # filter(30_days)
+			logging.info("@oon %d days filter folder, current: %s" % (days_count[0], fsf.split("\\")[-1]))
+			period_list_filter = [oon]
 
 		oon_status = (
 			"@oon newbie folder, current: %s" % fsf.split("\\")[-1]
@@ -1243,9 +1558,9 @@ if __name__ == "__main__":
 
 	# '''
 	# short_folders
-	short_list = list(
+	short_list: list[str] = list(
 		set([ss.split("\\")[-1].strip() for ss in some_subfolders])
-	)  # only_folders
+	)  # only_folders # python 3.9
 
 	# @fcd.txt
 	with open(combine_base, "w", encoding="utf-8") as cbf:  # fcd.txt
@@ -1284,7 +1599,12 @@ if __name__ == "__main__":
 
 		max_days_by_year = 366 if today.year % 4 == 0 else 365
 
-		if all((fsf, days_ago >= 0)):
+		if all(
+			(
+				fsf,
+				days_ago >= 0
+			)
+		):
 			job_count += 1
 
 			if days_ago % 7 <= 4:  # period_list_filter[0] # week
@@ -1338,7 +1658,13 @@ if __name__ == "__main__":
 					else mx3
 				)
 
-			if any((is_day, is_month, is_year)):  # some_period
+			if any(
+				(
+					is_day,
+					is_month,
+					is_year
+				)
+			):  # some_period
 				week_status = "%d дней назад" % days_ago
 				all_period_dict[week_status.strip()] = [
 					fsf.split("\\")[-1],
@@ -1376,11 +1702,11 @@ if __name__ == "__main__":
 		list_files = []  # list_files_old
 
 		try:
-			list_files = [
+			list_files: list[str] = [
 				os.path.join(fsf, f)
 				for f in os.listdir(fsf)
 				if os.path.isfile(os.path.join(fsf, f)) and video_regex.findall(f)
-			]
+			]  # python 3.9
 			assert list_files, ""
 		except AssertionError:  # is_null_jobs
 			logging.warning(
@@ -1444,13 +1770,21 @@ if __name__ == "__main__":
 					except AssertionError:  # if_null(date/project_file)
 						continue
 
-					if all((ctl, otl, ctl != otl)):  # if_diff_time
+					if all(
+						(
+							ctl,
+							otl,
+							ctl != otl
+						)
+					):  # if_diff_time
 						logging.info(
 							"@project_file[utime][description] %s"
 							% ";".join(
-								[unixtime_to_date(ctl), unixtime_to_date(otl), pf]
-							)
-						)
+								[
+									unixtime_to_date(ctl),
+									unixtime_to_date(otl),
+									pf
+								]))
 						os.utime(
 							pf, times=(otl, ctl)
 						)  # sort_and_update_some_date # old -> new
@@ -1543,7 +1877,11 @@ if __name__ == "__main__":
 				except AssertionError:
 					continue
 				else:
-					sf_calc_status = "".join([str(sf_calc), sizes_dict[i]])
+					sf_calc_status = "".join(
+						[
+							str(sf_calc),
+							sizes_dict[i]
+						])
 		except BaseException as e:
 			sf_calc, sf_calc_status = 0, ""
 			sf_calc_str = (fsf, str(e))
@@ -1557,14 +1895,17 @@ if __name__ == "__main__":
 	try:
 		# all_period_dict = {k:v for k, v in all_period_dict.items() if all((v[2], v[2] - cntfiles > 0))} # ?(is_small_classify)
 		# all_period_dict = {k:v for k, v in all_period_dict.items() if all((v[2], v[2] - cntfiles < 0))} # ?(is_big_classify)
-		all_period_dict = {
-			k: v for k, v in all_period_dict.items() if all((v[2], v[2] in range(ag)))
-		}  # all_jobs(+avg)
+		all_period_dict: dict[str, list] = {
+			k: v for k, v in all_period_dict.items() if all((
+				v[2],
+				v[2] in range(ag)))
+		}  # all_jobs(+avg) # python 3.9
+
 		assert all_period_dict, ""
 	except AssertionError:
-		all_period_dict = {
+		all_period_dict: dict[str, list] = {
 			k: v for k, v in all_period_copy_dict.items() if v[2]
-		}  # default_period(in_range)
+		}  # default_period(in_range) # python 3.9
 	finally:
 		# {"250 лет назад": ["Animal_Kingdom", "E:\\Multimedia\\Video\\Serials_conv\\Animal_Kingdom", 35]}
 		with open(all_period_json, "w", encoding="utf-8") as apjf:
@@ -1583,9 +1924,9 @@ if __name__ == "__main__":
 	periods = list(set(periods))
 	periods.sort(reverse=False)
 
-	split_periods = [
+	split_periods: list[str] = [
 		p.split("_")[0].strip() if len(p.split("_")) > 0 else p.strip() for p in periods
-	]  # choice_first_word
+	]  # choice_first_word # python 3.9
 
 	two_periods = zip(split_periods, periods)
 
@@ -1605,7 +1946,9 @@ if __name__ == "__main__":
 			logging.info("@two_periods/@a/@b diff: %s" % str((a, b)))
 			pj_dict[a.strip()] = "%s" % b
 
-	pj_dict = {k: k if k == v else v for k, v in pj_dict.items()}  # debug
+	pj_dict: dict[str, str] = {
+		k: v if k == v else v for k, v in pj_dict.items()
+	}  # python 3.9
 
 	with open(period_json, "w", encoding="utf-8") as pjf:
 		json.dump(pj_dict, pjf, ensure_ascii=False, indent=4, sort_keys=True)
@@ -1706,10 +2049,13 @@ if __name__ == "__main__":
 		logging.error("@job_count error: %s" % str(e))
 	except AssertionError:
 		logging.warning(
-			"@finish/@job_count %s" % ", ".join(map(str, (finish, job_count)))
+			"@finish/@job_count %s" % ", ".join(
+				map(str, (finish, job_count)))
 		)
 	else:
-		logging.info("@finish/@job_count %s" % ", ".join(map(str, (finish, job_count))))
+		logging.info("@finish/@job_count %s" % ", ".join(
+			map(str, (finish, job_count)))
+		)
 
 	sizes_dict = {}
 
@@ -1724,19 +2070,19 @@ if __name__ == "__main__":
 		logging.warning("@dsize null %s" % dletter)
 	else:
 		if os.path.exists(log_file) and os.path.getsize(log_file):
-			fsizes_lst = [
+			fsizes_lst: list[tuple] = [
 				(os.path.getsize(log_file) // (1024**i), sizes_dict[i])
 				for i in range(1, 4)
 				if os.path.getsize(log_file) // (1024**i) > 0
-			]
+			]  # python 3.9
 			logging.info("@dsize logging size: %s" % str(fsizes_lst))
 
 		if dsize:
-			fsizes_lst = [
+			fsizes_lst: list[tuple] = [
 				(dsize // (1024**i), sizes_dict[i])
 				for i in range(1, 4)
 				if dsize // (1024**i) > 0
-			]
+			]  # python 3.9
 			logging.info("@dsize logging dsize: %s" % str(fsizes_lst))
 
 	dt = datetime.now()
@@ -1747,7 +2093,13 @@ if __name__ == "__main__":
 	logging.info(f"@finish {no_ms}")
 
 	# '''
-	if dt.hour < mytime["sleeptime"][1]:
+	# dt.hour < mytime["sleeptime"][1] and dt.weekday() <= mytime["weekindex"] # midnight-7am
+	if any(
+		(
+			dt.hour >= mytime["dnd"][0],
+			all((dt.hour < mytime["dnd"][1], dt.weekday() >= 0)))
+	):  # 10pm-7am
+
 		run(
 			[
 				"cmd",
@@ -1760,7 +2112,7 @@ if __name__ == "__main__":
 				"Чтобы отменить выключение, выполните в командной строке shutdown /a",
 			],
 			shell=False,
-		)  # shutdown(15min) (midnight - 7am) # start_after # if_updates
+		)  # shutdown(15min) (midnight - 7am) + filter_weekday # start_after # if_updates
 
 		sound_notify(
 			r"Чтобы отменить выключение, выполните в командной строке shutdown /a"
@@ -1779,14 +2131,22 @@ if __name__ == "__main__":
 		logging.warning("@glob_dict empty")
 
 	try:
-		ext = "".join([".", __file__.split(".")[-1]])
+		ext = "".join(
+			[
+				".",
+				__file__.split(".")[-1]
+			])
 	except BaseException:
 		ext = ""
 
 	"""
 	try:
 		# script_path = os.path.dirname(os.path.realpath(__file__)).lower()
-		filename = "\\".join([script_path, __file__.replace(ext, ".glob")])  # ?
+		filename = "\\".join(
+			[
+				script_path,
+				__file__.replace(ext, ".glob")
+			])  # ?
 	except BaseException:
 		filename = ""
 	else:
