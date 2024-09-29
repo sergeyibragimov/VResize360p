@@ -25541,6 +25541,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				"""
 				continue  # skip_run # hide_if_auto_run
 
+				glf = None
+
 				# compare_filesizes
 				try:
 					glf = os.path.getsize(lastfile[-1])
@@ -25598,6 +25600,8 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						"debug stop_job[filecmdbase_dict]",
 						"Stop: at %s [%d]" % (k, cnt),
 					)
+
+					fdate = None
 
 					try:
 						fdate, status = asyncio.run(datetime_from_file(lastfile[-1]))
