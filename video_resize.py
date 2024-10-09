@@ -4,6 +4,7 @@
 
 # PyCharm/Spyder(anaconda) (Оптимизировать и уменьшить код, для анализа)
 # "удалить" лишние комментарии, чтобы был чистый код
+# почистить основые примеры, чтобы не было мусора в описании и коде
 
 # optimize_days.py / scprle.py / video_trimmer2.py
 
@@ -18,34 +19,17 @@
 # import argparse  # system # sys.argv -> argparse
 # import gevent.monkey # pip install --user gevent # is_async(debug)
 # import io
+# import jmespath #  search # compile  # pip install --user -U jmespath # debug/use
 # import multiprocessing
 # import tomllib # look like json - parsing TOML (Python 3.11)
-from PIL import (
-	Image,
-	ImageDraw,
-	ImageFont,
-)  # image, text_to_image, fontfamily # pip install --user Pillow
 from concurrent.futures import ThreadPoolExecutor  # Thread by pool # man+ / youtube
-from datetime import (
-	datetime,
-	timezone,
-) # datetime
 from functools import reduce
 from getmac import get_mac_address  # pip install --user getmac # mac_tools
 from infi.systray import SysTrayIcon  # systray(notify) for task bar # pip install --user infi.systray
 from mac_vendor_lookup import MacLookup  # pip install --user mac_vendor_lookup # MacLookup().lookup("cc:32:e5:59:ae:12")
 from psutil import cpu_count  # viirtual_memory # pip install --user psutil # psutil (process and system utilities)
-from shutil import (
-	disk_usage,
-	copy,
-	move,
-)  # файлы # usage(total=16388190208, used=16144154624, free=244035584)
 from subprocess import run  # TimeoutExpired, check_output, Popen, call, PIPE, STDOUT # Работа с процессами # console shell=["True", "False"]
 from threading import Semaphore  # Thread # Barrier # работа с потоками # mutli_async
-from time import (
-	time,
-	sleep,
-)  # ctime, perf_counter, strftime, localtime  # время-задержка
 from win10toast import ToastNotifier  # An easy-to-use Python library for displaying Windows 10 Toast Notifications
 import asyncio  # TaskGroup(Python 3.11+)
 import ctypes
@@ -63,6 +47,28 @@ import sys  # system
 import xml.etree.ElementTree as xml  # ?pip
 import zipfile  # zip archive # backup(job)/after(del/if_done) # UserWarning: Duplicate name
 
+from PIL import (
+	Image,
+	ImageDraw,
+	ImageFont,
+)  # image, text_to_image, fontfamily # pip install --user Pillow
+
+from datetime import (
+	datetime,
+	timezone,
+) # datetime
+
+from shutil import (
+	disk_usage,
+	copy,
+	move,
+)  # файлы # usage(total=16388190208, used=16144154624, free=244035584)
+
+from time import (
+	time,
+	sleep,
+)  # ctime, perf_counter, strftime, localtime  # время-задержка
+
 # Makes ANSI escape character sequences (for producing colored terminal text and cursor positioning) work under MS Windows.
 # Back, Cursor # Fore.color, Back.color # BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE # pip install --user colorama
 from colorama import (
@@ -71,201 +77,13 @@ from colorama import (
 	init,
 )
 
+# python -> exe(+ico) # pip install --user -U pyinstaller # +icon.ico
+# pyinstaller -F -i "icon\icon.ico" video_resize.py # dist\video_resize.exe
+
 # from multiprocessing import Process # Process(target=compute_heavy).start() # join # Многопроцессорность: Применимо к вычислительно сложным задачам, позволяет всем менять ограничения GIL, используя несколько CPU 
 # from threading import Thread # Thread(target=disk_io_bound).start() # join # Многопоточность: Она оптимальна для задач, связанных с ожиданием I/O и возможностью параллельного выполнения, обусловленной освобождением GIL во время операций I/O. 
 # import asyncio # asyncio.run(async_io_operation()) # Asyncio: Лучший инструмент для асинхронных I/O-операций с эффективным переключением между задачами и снижением возможных проблем, связанных с многопоточностью.
 
-# python version requerments?
-"""
-# import tzdata # pip install --user -U tzdata
-import zoneinfo # pip install --user -U zoneinfo 
-from datetime import datetime
-
-# print(len(zoneinfo.available_timezones())) # >= 594
-
-timezone1 = zoneinfo.ZoneInfo("US/Pacific")
-print(datetime.now(tz=timezone1))
-"""
-
-# case(somekey(+func)+value)
-"""
-# --1--
-# result = {'a': lambda x: x * 5, 'b': lambda x: x + 7, 'c': lambda x: x - 2}.get(value, lambda x: x)(x)  # switch_statement(lambda_func/last_is_some_value)
-# result = {'a': lambda x: x * 5, 'b': lambda x: x + 7, 'c': lambda x: x - 2}.get(value, lambda x: x)(666)  # 3330 # switch_statement(lambda_func/last_is_some_value)
-result = {'a': lambda x: x * 5, 'b': lambda x: x + 7, 'c': lambda x: x - 2}["a"](666)  # 3330
-
-# --2--
-# choices = {'a': 1, 'b': 2}
-# result = choices.get(key, 'default')
-result = choices.get("a", 'default')  # 1
-result = choices.get("c", 'default')  # default
-"""
-
-# match case, python 3.10
-
-"""
-def switch():  # res(int)
-	res = 999
-
-	match res:
-		case 0 | 1 | 999:  # some_value_from_case
-			return "ok"
-		case _:
-			return "unknown"
-
-switch()  # ok <-> unknown
-
-point = [2, 5]  # [0, 3]
-
-def switch_list():  # point(list)
-	match point:
-		case 0, 3:
-			return ("No move")
-		case x, 3:
-			return (f"moved on x-axis - {x} points")
-		case 0, y:
-			return (f"moved on y-axis - {y} points")
-		case x, y:
-			return (f"moved along moth axes - {x}:{y} points")
-
-cmd = "quit"
-cmd2 = "menu start"
-cmd3 = "param go west"
-
-def switch_list2(cmd):
-	match cmd.split():
-		case ["quit"]:
-			print("we quited")
-		case ["menu", status]:
-			print(f"my status {status}")
-		case ["param", *two]:
-			print(f"params: {two}")
-		case _:
-			print("Unknown command")
-
-switch_list2(cmd)  # ?
-switch_list2(cmd2)  # ?
-switch_list2(cmd3)  # ?
-
-class Rectangle:
-	def __init__(self, width, height):
-		self.width = width
-		self.height = height
-
-class Circle:
-	def __init__(self, radius):
-		self.radius = radius
-
-def switch_class(shape):  # ?
-	match shape:
-		case Rectangle(width=w, height=h):
-			return w * h
-		case Circle(radius=r):
-			return 3.14 * r * r
-		case _:
-			return "Unknwon shape"
-
-result = swith_class(Circle(10))  # ?
-
-print(result)
-
-data = None
-data1 = ["bot"]
-data2 = ["user"]
-data3 = ["user", "Bob", 18]
-
-def switch_logic(data):
-	match data:
-		case [_, _, age] if age >= 18:
-			print("access granted")
-		case _:
-			print("access denied")
-
-# switch_logic(data1) # switch_logic(data2) # ? # bad
-switch_logic(data3) # ? # ok
-
-def switch_dict(dictionary):
-    # match case
-    match dictionary:
-        # pattern 1
-        case {"name": n, "age": a}:
-            print(f"Name:{n}, Age:{a}")
-        # pattern 2
-        case {"name": n, "salary": s}:
-            print(f"Name:{n}, Salary:{s}")
-        # default pattern
-        case _ :
-            print("Data does not exist")
-
-switch_dict({"name": "Jay", "age": 24})  # ?
-switch_dict({"name": "Ed", "salary": 25000})  # ?
-switch_dict({"name": "Al", "age": 27})  # ?
-switch_dict({})  # ?
-"""
-
-# try_except(note), python 3.11
-
-"""
-try:
-	raise ExceptionGroup("Description exception group", [ValueError("Some bad"), TypeError("Terrable"), ])
-exccept* ValueError as eg:  # TypeError, IndexError # Exception(all)
-	for exc in eg.exceptions:
-		print(f"{exc}")
-
-try:
-	var = val
-except Exception as e:
-	from datetime import datetime
-	# add_error_note(for_debug)
-	e.add_note(f"Script down at {datetime.now()}")
-	print(e.__notes__) # raise
-"""
-
-# TaskGroup, python 3.11
-
-"""
-import asyncio
-
-async def sleep(seconds: int) -> None:
-	await asyncio.sleep(seconds)
-	print(f"sleeped {second}s")
-
-async def old_main():
-	tasks = []
-	for seconds in (3, 1, 2):
-		tasks.append(asyncio.create_task(sleep(seconds)))
-	await asyncio.gather(*tasks)
-
-async def main():
-	async with asyncio.TaskGroup() as tg:
-		for seconds in (3, 1, 2):
-			tg.create_task(sleep(seconds))
-
-asyncio.run(main())
-"""
-
-# optimal_run_timer
-"""
-from time import time
-
-elapsed_list = []
-for i in range(10):
-	timer = time()
-	# func() # list / dict / str / sum / ...?
-	elapsed = time() - timer
-	elapsed_list.append(elapsed)
-
-avg_elapsed_time = sum(elapsed_list) // len(elapsed_list)
-print(f"%.3f second's" % avg_elapsed_time); sleep(avg_elapsed_time)
-"""
-
-# teranar value
-"""
-status = True
-
-some_value = ("1.0", "2.0")[not status] # 1.0
-some_value = ("1.0", "2.0")[status] # 2.0
-"""
 # pip install --user bpython (interactive_color_terminal) # launch?
 
 # python -m trace --trace video_resize.py
@@ -281,38 +99,6 @@ exit()
 # abcdef, ghijkl, mnopqr, stuvxy, wz
 
 init(autoreset=True)  # init text color's
-
-"""
-numbers = [1,2,3]
-another_numbers = numbers[:]  # diff_lists(copy)
-another_numbers.append(100)
-print(another_numbers, numbers) # [1, 2, 3, 100] [1, 2, 3]
-"""
-
-"""
-# equal_arguments_by_class
-class User:
-		def __init__(self, group):
-			self.group = group
-
-user = User(group="admin")
-
-group_to_process_method = {
-	"admin": process_admin_requests,
-	"manager": process_manager_requests,
-	"client": process_client_requests,
-	"anon": process_anon_requests
-}
-
-group_to_process_method[user.group](user, request)
-"""
-
-# @share local web-service to internet
-# python -m http.server
-# ngrok http http://localhost:8000 # ngrok http --domain wow-my-server.ngrok-free.app http://localhost:8000 # https
-# @github(localtunnel) # lt --port 8000 --subdomain wow-my-server # need_share_password # https
-# serveo.net # ssh -R 80:localhost:8000 serveo.net # ssh -R wow-my-server:80:localhost:8000 serveo.net # github/google
-# @github(expose) # ?
 
 # def / async def # docstring
 
@@ -1654,6 +1440,11 @@ async def gcd_from_numbers(lst: list = []) -> list:
 						(lst[l1] % i == 0, lst[l2] % i == 0, lst[l1] < lst[l2])
 					):
 						equal_mod.append({"l1": lst[l1], "l2": lst[l2], "i": i})
+
+	# equals = {"equal_mod": equal_mod}
+	# res = search('equal_mod[*].l1', equals); print(res)
+	# res = search('equal_mod[*].l2', equals); print(res)
+	# res = search('equal_mod[*].i', equals); print(res)
 
 	return equal_mod  # result(divmod_in_list/null_list)
 
@@ -5208,7 +4999,7 @@ async def ntp_to_utc():
 utc = asyncio.run(utc_time())
 
 
-async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
+async def shutdown_if_time(utcnow: int = utc, no_date: str = "", sleep_mode: bool = False):
 	global ctme
 
 	# mytime: dict = {"jobtime": [9, 18, 5], "dinnertime": [12, 14], "sleeptime": [0, 8], "anytime": [True]} # sleep_time_less_hour # debug
@@ -5218,8 +5009,27 @@ async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 	# if all((no_date in str(datetime.today()).split(" ")[0], no_date)):
 	# return None
 
+	# RUNDLL32.EXE powrprof.dll,SetSuspendState 0,1,0 # sleep mode(windows)
+
+	sleep_mode = bool(ctme.weekday() > 4)
+
+	if any((ctme.hour >= mytime["dnd"][0], ctme.hour < mytime["dnd"][1])) and sleep_mode:
+		run(
+			[
+				"cmd",
+				"/c",
+				"RUNDLL32.EXE",
+				"powrprof.dll,SetSuspendState",
+				"0,1,0"
+			]
+		) # sleep mode(windows)"])
+		exit()
+
 	if (
-		any((ctme.hour >= mytime["dnd"][0], ctme.hour < mytime["dnd"][1])) and ctme.weekday() >= 0
+		any((
+			ctme.hour >= mytime["dnd"][0],
+			ctme.hour < mytime["dnd"][1]
+		)) and not sleep_mode
 	):  # utcnow <= ctme.hour < mytime["sleeptime"][1] # shutdown_after_8am
 		run(
 			[
@@ -5234,7 +5044,7 @@ async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 			],
 			shell=False,
 		)  # shutdown(15min) (midnight - 7am) # start_after # if_updates
-		# run(["cmd", "/c", "shutdown", "/g", "/t", "600", "/c", "Чтобы отменить выключение, выполните в командной строке shutdown /a"], shell=False) # shutdown(10min) (midnight - 7am) # start_after # if_updates
+		# run(["cmd", "/c", "shutdown", "/g", "/f", "/t", "600", "/c", "Чтобы отменить выключение, выполните в командной строке shutdown /a"], shell=False) # shutdown(10min) (midnight - 7am) # start_after # if_updates(force)
 
 		# """
 		try:
@@ -5266,7 +5076,6 @@ async def shutdown_if_time(utcnow: int = utc, no_date: str = ""):
 				)
 
 	# if_equal_time(mytime["sleeptime"][1])_pass
-
 
 # min_2status
 # dspace's / no_download_files / no_sleep_time(backup_time) / is_skip_overload_cpu_more_80("85")
@@ -25548,8 +25357,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 				"""
 				continue  # skip_run # hide_if_auto_run
 
-				glf = None
-
 				# compare_filesizes
 				try:
 					glf = os.path.getsize(lastfile[-1])
@@ -25607,8 +25414,6 @@ if __name__ == "__main__":  # debug/test(need_pool/thread/multiprocessing/queue)
 						"debug stop_job[filecmdbase_dict]",
 						"Stop: at %s [%d]" % (k, cnt),
 					)
-
-					fdate = None
 
 					try:
 						fdate, status = asyncio.run(datetime_from_file(lastfile[-1]))

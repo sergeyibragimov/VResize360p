@@ -4,35 +4,41 @@
 
 # Полуавтоматическое форматрирование файлов с метаданными(scale/profile/level)
 # Целый файл без разрезов(скрыть если не нужно)
+# почистить основые примеры, чтобы не было мусора в описании и коде
 
+# from itertools import product  # use_more_1for
 # from os import getcwd # cpu_count  # текущая папка # cpu_count
 # from psutil import cpu_count  # viirtual_memory # pip install --user psutil
 # import gevent.monkey # pip install --user gevent # is_async(debug)
 # import psutil
 # import tomllib # look like json - parsing TOML (Python 3.11)
+import asyncio  # TaskGroup(Python 3.11+)
+import jmespath #  search # compile  # pip install --user -U jmespath # debug/use
+import json  # JSON (словарь)
+import logging  # журналирование и отладка
+import os  # система
+import pyttsx3
+import re  # реуглярные выражения/regular expression # .*(\?|$)
+import sys
+
+# pip install --user bpython (interactive_color_terminal) # launch?
+# pip install --user youtube-dl # youtube-dl --hls-prefer-native "http://host/folder/file.m3u8" # youtube-dl -o "%%(title)s.%%(resolution)s.%%(ext)s" --all-formats "https://v.redd.it/8f063bzbdx621/HLSPlaylist.m3u8"
+
 from datetime import (
 	datetime,
 	timedelta,
 )  # дата и время
+
 from shutil import (
 	disk_usage,
 	move,
 )  # copy # файлы # usage(total=16388190208, used=16144154624, free=244035584)
+
 from subprocess import run  # TimeoutExpired, check_output, Popen, call, PIPE, STDOUT # Работа с процессами # console shell=["True", "False"]
 from time import (
 	time,
 	sleep,
 )
-import asyncio  # TaskGroup(Python 3.11+)
-import json  # JSON (словарь)
-import logging  # журналирование и отладка
-import os  # система
-import re  # реуглярные выражения/regular expression # .*(\?|$)
-import sys
-import pyttsx3
-
-# pip install --user bpython (interactive_color_terminal) # launch?
-# pip install --user youtube-dl # youtube-dl --hls-prefer-native "http://host/folder/file.m3u8" # youtube-dl -o "%%(title)s.%%(resolution)s.%%(ext)s" --all-formats "https://v.redd.it/8f063bzbdx621/HLSPlaylist.m3u8"
 
 # Makes ANSI escape character sequences (for producing colored terminal text and cursor positioning) work under MS Windows.
 # Back, Cursor # Fore.color, Back.color # BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE # pip install --user colorama
@@ -42,187 +48,8 @@ from colorama import (
 	init,
 )
 
-# from multiprocessing import Process # Process(target=compute_heavy).start() # join # Многопроцессорность: Применимо к вычислительно сложным задачам, позволяет всем менять ограничения GIL, используя несколько CPU 
-# from threading import Thread # Thread(target=disk_io_bound).start() # join # Многопоточность: Она оптимальна для задач, связанных с ожиданием I/O и возможностью параллельного выполнения, обусловленной освобождением GIL во время операций I/O. 
-# import asyncio # asyncio.run(async_io_operation()) # Asyncio: Лучший инструмент для асинхронных I/O-операций с эффективным переключением между задачами и снижением возможных проблем, связанных с многопоточностью.
-
-# python version requerments?
-"""
-# import tzdata # pip install --user -U tzdata
-import zoneinfo # pip install --user -U zoneinfo 
-from datetime import datetime
-
-# print(len(zoneinfo.available_timezones())) # >= 594
-
-timezone1 = zoneinfo.ZoneInfo("US/Pacific")
-print(datetime.now(tz=timezone1))
-"""
-
-# match case, python 3.10
-
-"""
-def switch():  # res(int)
-	res = 999
-
-	match res:
-		case 0 | 1 | 999:  # some_value_from_case
-			return "ok"
-		case _:
-			return "unknown"
-
-switch()  # ok <-> unknown
-
-point = [2, 5]  # [0, 3]
-
-def switch_list():  # point(list)
-	match point:
-		case 0, 3:
-			return ("No move")
-		case x, 3:
-			return (f"moved on x-axis - {x} points")
-		case 0, y:
-			return (f"moved on y-axis - {y} points")
-		case x, y:
-			return (f"moved along moth axes - {x}:{y} points")
-
-cmd = "quit"
-cmd2 = "menu start"
-cmd3 = "param go west"
-
-def switch_list2(cmd):
-	match cmd.split():
-		case ["quit"]:
-			print("we quited")
-		case ["menu", status]:
-			print(f"my status {status}")
-		case ["param", *two]:
-			print(f"params: {two}")
-		case _:
-			print("Unknown command")
-
-switch_list2(cmd)  # ?
-switch_list2(cmd2)  # ?
-switch_list2(cmd3)  # ?
-
-class Rectangle:
-	def __init__(self, width, height):
-		self.width = width
-		self.height = height
-
-class Circle:
-	def __init__(self, radius):
-		self.radius = radius
-
-def switch_class(shape):  # ?
-	match shape:
-		case Rectangle(width=w, height=h):
-			return w * h
-		case Circle(radius=r):
-			return 3.14 * r * r
-		case _:
-			return "Unknwon shape"
-
-result = swith_class(Circle(10))  # ?
-
-print(result)
-
-data = None
-data1 = ["bot"]
-data2 = ["user"]
-data3 = ["user", "Bob", 18]
-
-def switch_logic(data):
-	match data:
-		case [_, _, age] if age >= 18:
-			print("access granted")
-		case _:
-			print("access denied")
-
-# switch_logic(data1) # switch_logic(data2) # ? # bad
-switch_logic(data3) # ? # ok
-
-def switch_dict(dictionary):
-    # match case
-    match dictionary:
-        # pattern 1
-        case {"name": n, "age": a}:
-            print(f"Name:{n}, Age:{a}")
-        # pattern 2
-        case {"name": n, "salary": s}:
-            print(f"Name:{n}, Salary:{s}")
-        # default pattern
-        case _ :
-            print("Data does not exist")
-
-switch_dict({"name": "Jay", "age": 24})  # ?
-switch_dict({"name": "Ed", "salary": 25000})  # ?
-switch_dict({"name": "Al", "age": 27})  # ?
-switch_dict({})  # ?
-"""
-
-# try_except(note), python 3.11
-
-"""
-try:
-	raise ExceptionGroup("Description exception group", [ValueError("Some bad"), TypeError("Terrable"), ])
-exccept* ValueError as eg:  # TypeError, IndexError # Exception(all)
-	for exc in eg.exceptions:
-		print(f"{exc}")
-
-try:
-	var = val
-except Exception as e:
-	from datetime import datetime
-	# add_error_note(for_debug)
-	e.add_note(f"Script down at {datetime.now()}")
-	print(e.__notes__) # raise
-"""
-
-# TaskGroup, python 3.11
-
-"""
-import asyncio
-
-async def sleep(seconds: int) -> None:
-	await asyncio.sleep(seconds)
-	print(f"sleeped {second}s")
-
-async def old_main():
-	tasks = []
-	for seconds in (3, 1, 2):
-		tasks.append(asyncio.create_task(sleep(seconds)))
-	await asyncio.gather(*tasks)
-
-async def main():
-	async with asyncio.TaskGroup() as tg:
-		for seconds in (3, 1, 2):
-			tg.create_task(sleep(seconds))
-
-asyncio.run(main())
-"""
-
-# optimal_run_timer
-"""
-from time import time
-
-elapsed_list = []
-for i in range(10):
-	timer = time()
-	# func() # list / dict / str / sum / ...?
-	elapsed = time() - timer
-	elapsed_list.append(elapsed)
-
-avg_elapsed_time = sum(elapsed_list) // len(elapsed_list)
-print(f"%.3f second's" % avg_elapsed_time); sleep(avg_elapsed_time)
-"""
-
-# teranar value
-"""
-status = True
-
-some_value = ("1.0", "2.0")[not status] # 1.0
-some_value = ("1.0", "2.0")[status] # 2.0
-"""
+# python -> exe(+ico) # pip install --user -U pyinstaller # +icon.ico
+# pyinstaller -F -i "icon\icon.ico" scprle.py # dist\scprle.exe
 
 # pip install --user bpython (interactive_color_terminal) # launch?
 
@@ -241,38 +68,6 @@ __author__ = "Sergey Ibragimov"
 # mklink /h scale_profile_level.py scprle.py
 
 # qos ~ 1 * 1024 = 1mb, speed ~ (5/8) * 1024 = 1280 kb/s
-
-"""
-numbers = [1,2,3]
-another_numbers = numbers[:]  # diff_lists(copy)
-another_numbers.append(100)
-print(another_numbers, numbers) # [1, 2, 3, 100] [1, 2, 3]
-"""
-
-"""
-# equal_arguments_by_class
-class User:
-		def __init__(self, group):
-			self.group = group
-
-user = User(group="admin")
-
-group_to_process_method = {
-	"admin": process_admin_requests,
-	"manager": process_manager_requests,
-	"client": process_client_requests,
-	"anon": process_anon_requests
-}
-
-group_to_process_method[user.group](user, request)
-"""
-
-# @share local web-service to internet
-# python -m http.server
-# ngrok http http://localhost:8000 # ngrok http --domain domain-name.ngrok-free.app http://localhost:8000 # https
-# @github(localtunnel) # lt --port 8000 --subdomain domain-name # need_share_password # https
-# serveo.net # ssh -R 80:localhost:8000 serveo.net # ssh -R wow-my-server:80:localhost:8000 serveo.net # github/google
-# @github(expose) # ?
 
 # def / async def # docstring
 
@@ -786,7 +581,6 @@ try:
 	dtw = asyncio.run(date_to_week())
 except BaseException as e:
 	logging.error("Ошибка даты [%s]" % str(e))
-	# write_log("debug dtw[error]", "Ошибка даты [%s]" % str(e), is_error=True)
 else:
 	d_w_s_n_d_str = (
 		dtw["date"],
@@ -799,9 +593,6 @@ else:
 		"@dtw[ok] Today is: %s, weekday is: %s, season(days): %s, number_of_day: %s, days_to_ny: %s"
 		% d_w_s_n_d_str
 	)
-	# write_log(
-	# "debug dtw[ok]",
-	# "Today is: %s, weekday is: %s, season(days): %s, number_of_day: %s, days_to_ny: %s" % d_w_s_n_d_str)
 
 # clear_base_and_lists()
 
@@ -835,27 +626,11 @@ dspace_list = []
 dspace_another_drive = 0.0
 
 # dletter_and_dspace = {}
-
-# add_and_save_to_json(is_linux)
-"""
-import gio
-
-for mount in volume_monitor.get_mounts():
-    print(mount.get_name(), mount.get_icon())
-"""
-
-# is_for_portable_devices
-"""
-import win32api
-import win32file
-drives = win32api.GetLogicalDriveStrings()
-drives =  drives.split('\000')[:-1]
-
-for drive in drives:
-	if win32file.GetDriveType(drive)==win32file.DRIVE_REMOVABLE:
-		label,fs,serial,c,d = win32api.GetVolumeInformation(drive)
-		print(label)
-"""
+# free_dspace = []
+# for i in range(10, 26):
+	# free_dspace.append(i/100)
+# av = 0
+# av = sum(free_dspace) / len(free_dspace)
 
 for dl in range(ord("c"), ord("z") + 1):
 	du = "".join(
@@ -866,7 +641,7 @@ for dl in range(ord("c"), ord("z") + 1):
 
 	try:
 		optimal_total = int(disk_usage("%s" % du).total) // (1024 ** 3) # 10% free for faster (hdd/ssd)
-		optimal_free = int(optimal_total * 0.10)
+		optimal_free = int(optimal_total * 0.15)  # 0.10 - 0.20 # 0.15
 		optimal_used = int(disk_usage("%s" % du).used) // (1024 ** 3)
 
 		# assert bool(optimal_used > optimal_free), ""
@@ -1092,14 +867,6 @@ class VideoProject:
 			return ("", "")
 		else:
 			if is_have:
-				# write_log(
-				# "debug profilelevel", ";".join(
-				# [
-				# pl_list[0].split("=")[-1].lower().strip(), pl_list[1].split("=")[-1].lower().strip(),
-				# filename
-				# ]
-				# ))
-
 				job_count += 1  # need_profile(debug)
 
 				return (
@@ -1390,6 +1157,11 @@ def width_height_profile_level(filename: str = "", ffmpeg: bool = True):
 
 	# is_optimal.append({"scale": is_scale, "profile": is_profile, "level": is_level}) # status
 
+	# optimal = {"is_optimal": is_optimal}
+	# res = jmespath.search('is_optimal[*].scale', optimal); print(res)
+	# res = jmespath.search('is_optimal[*].profile', optimal); print(res)
+	# res = jmespath.search('is_optimal[*].level', optimal); print(res)
+
 	pr_le_sc: list[bool] = [
 		is_profile,
 		is_level,
@@ -1451,8 +1223,19 @@ def width_height_profile_level(filename: str = "", ffmpeg: bool = True):
 	w1 - новая ширина в пикселях, # 640
 	h1 - новая высота в пикселях. # 360
 
-	w1 = (w0 * h1) / h0 # формула для вычисления новой ширины, если задана новая высота
-	h1 = (h0 * w1) / w0 # формула для вычисления новой высоты, если задана новая ширина
+	try:
+		assert all((h1, h0, h1 != h0)), ""
+	except AssertionError:
+		logging.warning("optimal height set to default")
+	else:
+		w1 = (w0 * h1) / h0 # формула для вычисления новой ширины, если задана новая высота
+
+	try:
+		assert all((w1, w0, w1 != w0)), ""
+	except AssertionError:
+		logging.warning("optimal width set to default")
+	else:
+		h1 = (h0 * w1) / w0 # формула для вычисления новой высоты, если задана новая ширина
 	"""
 
 	def ar_calc(h, w, nw=640) -> tuple:  # hide # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
@@ -1560,6 +1343,10 @@ def width_height_profile_level(filename: str = "", ffmpeg: bool = True):
 				is_optimal.append(
 					{"width": [nw, w], "height": [nh, h]}
 				)  # is_optimal.append({"width": [640, w], "height": [second, h]})
+
+				# optimal = {"is_optimal": is_optimal}
+				# res = jmespath.search('is_optimal[*].width', optimal); print(res)
+				# res = jmespath.search('is_optimal[*].height', optimal); print(res)
 
 		if changed:
 			cmd_line.append('-vf "scale=%s:%s"' % (nw, nh))
@@ -1916,62 +1703,66 @@ def sound_notify(text: str = ""):  # 2
 			engine.runAndWait()
 	except BaseException as e:
 		print(Style.BRIGHT + Fore.RED + "Не смог произнести текст! [%s]" % str(e))
-		# write_log("debug soundnotify[error]",	"Не смог произнести текст! [%s]" % str(e),	is_error=True, )
+		# logging.error(";".join(["debug soundnotify[error]",	"Не смог произнести текст! [%s]" % str(e)]))
 	else:
 		if text:
 			print(Style.BRIGHT + Fore.GREEN + "Текст [%s] успешно произнесён" % text)
-			# write_log("debug soundnotify[ok]", "Текст [%s] успешно произнесён" % text)
+			# logging.info(";".join(["debug soundnotify[ok]", "Текст [%s] успешно произнесён" % text]))
 
 
-# python 3.9
+def find_percent(value: int = 0, percent: int = 0):  # hide # *(pos_or_keyw), ... # ..., /(pos) # python 3.8
+	# return value * (percent / 100)  # 20000 * (30 / 100) = 6000
+	return (value * percent) / 100  # (80 * 30) / 100 ~ 24 -> 8 * 3 = 24			
+
+
+# debug(for_use)
 """
-'farhad_python'.removeprefix('farhad_')
-
-#возвращает python
-
-'farhad_python'.removesuffix('_python')
-
-#возвращает farhad
-
-# merge_dict
-dict1 = {"a": 1, "b": 2, "c": 3}
-dict2 = {"d": 4, "a": 2}
-
-dict_new = dict1 | dict2 # look_like_merge_set
-dict1 |= dict2 # is_update_dict
-
-(List / Dict / Tuple) ~ no need import for use # is_sample # list[str] # dict[str, "str"] # tuple[int]
-
-def find_default(dct: dict[str, int]) -> int
-	return dct["test1"]
-
-items = {
-	"test1": 1,
-	"test2": 2,
-	"test3": 3,
-}
-
-print(find_default(items))
-
-alpha - new features, beta - no update prerelease, minor - ?
+The method "utcnow" in class "datetime" is deprecated
+  Use timezone-aware objects to represent datetimes in UTC; e.g. by calling .now(datetime.timezone.utc)Pylance
+(method) def utcnow() -> datetime
+Construct a UTC datetime from time.time().
 """
-
-# case(somekey(+func)+value)
 """
-# --1--
-# result = {'a': lambda x: x * 5, 'b': lambda x: x + 7, 'c': lambda x: x - 2}.get(value, lambda x: x)(x)  # switch_statement(lambda_func/last_is_some_value)
-# result = {'a': lambda x: x * 5, 'b': lambda x: x + 7, 'c': lambda x: x - 2}.get(value, lambda x: x)(666)  # 3330 # switch_statement(lambda_func/last_is_some_value)
-result = {'a': lambda x: x * 5, 'b': lambda x: x + 7, 'c': lambda x: x - 2}["a"](666)  # 3330
+async def utc_time(dt=datetime.now()):
+	gmt = datetime.utcnow()  # datetime.datetime(2023, 2, 23, 3, 47, 36, 326713)
+	cur_gmt = datetime.now()  # ?
 
-# --2--
-# choices = {'a': 1, 'b': 2}
-# result = choices.get(key, 'default')
-result = choices.get("a", 'default')  # 1
-result = choices.get("c", 'default')  # default
+	try:
+		gmt = abs(cur_gmt - gmt).seconds // 3600  # 5
+
+		assert gmt in range(
+			-12, 13
+		), f"Ошибка часового пояса или отрицательный часовой пояс @utc_time/{gmt}"  # is_assert_debug
+	except AssertionError as err:  # if_null
+		gmt = 999
+		logging.warning(
+			f"Ошибка часового пояса или отрицательный часовой пояс @utc_time/{gmt}"
+		)
+		raise err
+	except BaseException as e:  # if_error
+		gmt = 999
+		logging.error(
+			"Ошибка часового пояса или отрицательный часовой пояс @utc_time/gmt [%s]"
+			% str(e)
+		)
+
+	return gmt
 """
 
 
 if __name__ == "__main__":  # skip_main(debug)
+
+	all_period_dict = {}
+
+	folders_filter = []
+
+	try:
+		with open(all_period_json, encoding="utf-8") as apjf:
+			all_period_dict = json.load(apjf)
+	except:
+		all_period_dict = {}
+
+	folders_filter = [v[0].strip() for k, v in all_period_dict.items() if os.path.exists(v[1])] if all_period_dict else []		
 
 	dt = datetime.now()
 
@@ -2084,7 +1875,6 @@ if __name__ == "__main__":  # skip_main(debug)
 	files_count = 0
 
 	sm = ln = ag = cntfiles = sf = files_count = len_files = 0  # int
-	all_period_dict = folders_filter = {}  # dict
 	files = (
 		files2
 	) = (
@@ -2097,22 +1887,6 @@ if __name__ == "__main__":  # skip_main(debug)
 	) = some_subfolders = some_files = set()  # ("", "", 0) / folders / files # set
 
 	seasyear_count = {}
-
-	# @sorted_by_filter
-	"""
-	file_and_filter = ()
-	faf = faf_sorted_tuple = []
-
-	for f in os.listdir(path_to_done):
-		try:
-			assert seasyear.findall(f), ""
-		except AssertionError:
-			continue
-		else:
-			file_and_filter = (f, seasyear.findall(f)[0])
-			faf.append(file_and_filter)
-			faf_sorted_tuple = sorted(faf, key=lambda faf: faf[1])
-	"""
 
 	# need_read_subfolder_from_current_folder
 	try:
@@ -2128,12 +1902,17 @@ if __name__ == "__main__":  # skip_main(debug)
 	# filter_files = []
 
 	for a, b, c in fileparam:  # (folder)str / (subfolder)list / (files)list
+		# """
 		try:
 			assert bool(os.path.isdir(a) and a in some_subfolders), ""
 		except AssertionError:
 			some_subfolders.add(a)
 			folders.append(a)
-			logging.info("@folders %s" % a)
+			logging.warning("@folders_filter folders %s is filtred" % a)
+			# continue  # skip_null_folders
+		else:
+			logging.info("@folders_filter %s" % a)
+		# """
 
 		try:
 			assert bool(os.path.isdir(a) and len(b) > 0), ""
@@ -2171,6 +1950,36 @@ if __name__ == "__main__":  # skip_main(debug)
 							):  # files_by_format
 								files.append(f)
 								logging.info("@files %s" % f)
+
+	# """
+	filter_folder = []
+	all_period_dict_filter = {}
+
+	try:
+		for ff, f in zip(folders_filter, folders):  # debug(product -> zip)
+			if all((ff, f, ff in f)):
+				filter_folder.append({"short": ff, "full": f})
+
+		try:
+			ff_data = {"filter_folder": filter_folder}
+			short_ff = jmespath.search("filter_folder[*].short", ff_data)
+			full_f = jmespath.search("filter_folder[*].full", ff_data)
+
+			assert all((short_ff, len(short_ff) == len(full_f))), ""
+		except AssertionError:
+			logging.warning("@short_ff/@full_f some null %s" % "..".join(map(str, (short_ff, full_f))))
+		else:
+			logging.info("@short_ff/@full_f some null %s" % "..".join(map(str, (short_ff, full_f))))
+
+			for a, b in zip(short_ff, full_f):  # debug(product -> zip)
+				if all((a in b, a in sf.strip())):  # b - folder
+					all_period_dict_filter[sf.strip()] = a  # sf - file
+	except:
+		all_period_dict_filter = {sf.strip(): os.path.getctime(sf) for sf in filter(lambda x: os.path.exists(x), tuple(some_files)) for _, v in all_period_dict.items() if all((v, v[0] in sf.strip()))}
+		logging.warning("@all_period_dict_filter %d [2]" % len(all_period_dict_filter))
+	else:
+		logging.warning("@all_period_dict_filter %d [1]" % len(all_period_dict_filter))
+	# """
 
 	"""
 	try:
@@ -2323,9 +2132,68 @@ if __name__ == "__main__":  # skip_main(debug)
 	# debug
 	# exit()
 
+	# all_period_dict[week_status.strip()] = [fsf.split("\\")[-1], fsf, len_files, week_status, ]
+
+	def_some_files = some_files
+
+	# find_files_by_folder
+	all_period_list = sorted([*all_period_dict_filter], key=os.path.getctime)  # sort_by_create_time_file # reverse=False(abc_jobs)
+	some_files = all_period_list if all_period_list else def_some_files  # (def_some_files, all_period_list)[len(all_period_list) > 0]	
+
+	# """
+	n = 100
+	some_filesizes = [os.path.getsize(sf) for sf in filter(lambda x: os.path.exists(x), tuple(some_files))]
+
+	try:	
+		ag = sum(some_filesizes) // len(some_filesizes)
+	except:
+		ag = 0
+	else:
+		logging.info(f"Количество обучений: {n}")
+
+		even_count1 = sum(1 for sf in some_filesizes if sf - ag >= 0)
+		probability_even1 = round((even_count1 / n) * 100) # ?
+
+		probability1 = (True if probability_even1 > 50 else False)
+
+		logging.info(f"Количество чисел по классификации: {even_count1}")
+		logging.info(f"Вероятность классификации числа: {probability_even1:.2f}")	
+
+		even_count2 = sum(1 for sf in some_filesizes if sf - ag < 0)
+		probability_even2 = round((even_count2 / n) * 100) # ?
+
+		probability2 = (True if probability_even2 > 50 else False)
+
+		logging.info(f"Количество чисел по классификации: {even_count2}")
+		logging.info(f"Вероятность классификации числа: {probability_even2:.2f}")
+
+		# v - avg >= 0 # more
+		try:
+			some_filesizes_filter = [sf.strip() for sf in filter(lambda x: os.path.exists(x), tuple(some_files)) if probability1 and os.path.getsize(sf) - ag >= 0]  # classify_1
+			assert some_filesizes_filter, ""
+		except AssertionError:
+			some_filesizes_filter = [sf.strip() for sf in filter(lambda x: os.path.exists(x), tuple(some_files)) if not probability1 and os.path.getsize(sf) - ag >= 0] # classify_2
+			logging.warning("@some_filesizes_filter/@classify_2 %d files filter" % len(some_filesizes_filter))
+		else:
+			logging.info("@some_filesizes_filter/@classify_1 %d files filter" % len(some_filesizes_filter))
+
+		if not some_filesizes_filter:
+			# v - avg < 0 # less
+			try:
+				some_filesizes_filter = [sf.strip() for sf in filter(lambda x: os.path.exists(x), tuple(some_files)) if probability2 and os.path.getsize(sf) - ag < 0]  # classify_3
+				assert some_filesizes_filter, ""
+			except AssertionError:
+				some_filesizes_filter = [sf.strip() for sf in filter(lambda x: os.path.exists(x), tuple(some_files)) if not probability2 and os.path.getsize(sf) - ag < 0]  # classify_4
+				logging.warning("@some_filesizes_filter/@classify_4 %d files filter" % len(some_filesizes_filter))
+			else:
+				logging.info("@some_filesizes_filter/@classify_3 %d files filter" % len(some_filesizes_filter))
+
+		some_files = sorted(some_filesizes_filter, key=os.path.getctime)  # classify(+date_create_file)
+	# """	
+
 	for f in filter(lambda x: os.path.exists(x), tuple(some_files)):
 
-		logging.info("start %s file" % f)  # debug(print)
+		logging.info("start %s file" % f)
 
 		# fn, w, h, p, l, length, codecs, i_o, c = width_height_profile_level(filename=f)
 
@@ -2419,7 +2287,7 @@ if __name__ == "__main__":  # skip_main(debug)
 					param = (f, w, h, length, codecs, c)
 					logging.info("@fcd %s [no_cmd]" % str(param))
 
-		logging.info("end %s file" % f)  # debug(print)
+		logging.info("end %s file" % f)
 
 	fcd_time = []
 
@@ -2486,13 +2354,14 @@ if __name__ == "__main__":  # skip_main(debug)
 
 		date1 = datetime.now()
 
-		# '''
 		# short_files
+		# '''
+		"""
 		short_list: list[str] = list(
-			set(
-				[crop_filename_regex.sub("", k.split("\\")[-1]).strip() for k, _ in fcd.items()]
-			)
-		)  # some_jobs # python 3.9
+			set([crop_filename_regex.sub("", k.split("\\")[-1]) for k, _ in fcd.items()])  # short_filename(template)
+		)  # some_jobs
+		"""
+		short_list: list[str] = [k.split("\\")[-1].strip() for k, _ in fcd.items() if os.path.getctime(k)]  # short_filename(no_path)
 		short_list.sort()
 
 		# @fcd.txt
@@ -2659,10 +2528,6 @@ if __name__ == "__main__":  # skip_main(debug)
 
 	logging.info("@fcd_list lines: %s" % ";".join(fcd_list))  # merge_records
 
-	# seg_filter = list(set(seg2) ^ set(seg1)) # different(two_list) # [1, 3, 4, 6] # type1
-	# seg_filter = list(set(seg2) & set(seg1)) # unique(two_list) # [2] # type2
-	# seg_filter = list(set(seg1) - set(seg2)) # stay_different(only_first/clear_unique/one_list) # [1, 3] # type3
-
 	# logging.info("string1: %s, string2: %s" % (";".join(ready_list), ";".join(new_list)))
 
 	# @fcd.lst
@@ -2753,6 +2618,12 @@ if __name__ == "__main__":  # skip_main(debug)
 	sound_notify(f"@finish {no_ms}")
 	logging.info(f"@finish {no_ms}")
 
+	'''
+	# RUNDLL32.EXE powrprof.dll,SetSuspendState 0,1,0 # sleep mode(windows)
+
+	utc = asyncio.run(utc_time()) #; mytime["dnd"][1] = utc
+	'''
+
 	# '''
 	# dt.hour < mytime["sleeptime"][1] and dt.weekday() <= mytime["weekindex"] # midnight-7am
 	if any(
@@ -2774,6 +2645,7 @@ if __name__ == "__main__":  # skip_main(debug)
 			],
 			shell=False,
 		)  # shutdown(15min) (midnight - 7am) + filter_weekday # start_after # if_updates
+		# run(["cmd", "/c", "shutdown", "/s", "/f", "/t", "600", "/c", "Чтобы отменить выключение, выполните в командной строке shutdown /a"], shell=False) # shutdown(10min) (midnight - 7am) # start_after # if_updates(force)
 
 		sound_notify(
 			r"Чтобы отменить выключение, выполните в командной строке shutdown /a"
